@@ -120,7 +120,7 @@ class ClientHeart:
 
         :return:
         """
-        return Redis.conn().exists(settings.REDIS_KEY_STOP)
+        return bool(Redis.conn().exists(settings.REDIS_KEY_STOP))
 
     @staticmethod
     def remove_stop_status():
@@ -130,7 +130,7 @@ class ClientHeart:
         :return:
         """
         while True:
-            if Redis.conn().llen(settings.REDIS_KEY_HEARTBEAT) == 0:
+            if not Redis.conn().exists(settings.REDIS_KEY_HEARTBEAT):
                 Redis.conn().delete(settings.REDIS_KEY_STOP)
                 break
 

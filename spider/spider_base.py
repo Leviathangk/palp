@@ -247,7 +247,8 @@ class BaseSpider(Thread):
             self.wait_parser_done()
 
             # 等待 item buffer 执行完毕
-            self.wait_item_buffer_done()
+            if settings.SPIDER_TYPE == 1 or (settings.SPIDER_TYPE == 2 and self.spider_master):
+                self.wait_item_buffer_done()
 
             logger.debug("无任务，爬虫结束")
 
