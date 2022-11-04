@@ -2,8 +2,8 @@
     redis 队列
     使用了 pickle 并使用 zlib 压缩
 """
-import pickle
 import zlib
+import pickle
 from palp import settings
 from palp.conn.conn_redis import Redis
 from palp.network.request import Request

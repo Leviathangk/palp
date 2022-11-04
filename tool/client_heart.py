@@ -4,8 +4,8 @@
 import json
 import time
 import uuid
-import threading
 import datetime
+import threading
 from loguru import logger
 from palp import settings
 from palp.conn.conn_redis import RedisLockNoWait, Redis, RedisLock

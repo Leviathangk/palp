@@ -1,8 +1,8 @@
 """
     请求的处理
 """
-import requests
 import urllib3
+import requests
 from palp import settings
 from typing import Callable
 from palp.tool.user_agent import random_ua

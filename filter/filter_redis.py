@@ -5,9 +5,9 @@
     print(BloomFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
 """
 from palp import settings
-from palp.conn.conn_redis import Redis, RedisLock
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter
+from palp.conn.conn_redis import Redis, RedisLock
 
 
 class RequestRedisFilter(BaseFilter):
