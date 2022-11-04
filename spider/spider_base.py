@@ -16,8 +16,8 @@ from palp.network.request import Request
 from palp.network.response import Response
 from palp.tool.short_module import import_module
 from palp.exception.exception_error import NotGeneratorFunctionError
-from palp.sequence.sequence_redis import FIFOSequence as FIFOSequenceRedis
 from palp.sequence.sequence_memory import FIFOSequence as FIFOSequenceMemory
+from palp.sequence.sequence_redis_item import FIFOSequence as FIFOSequenceRedis
 
 
 class BaseSpider(Thread):
@@ -36,8 +36,6 @@ class BaseSpider(Thread):
             setattr(settings, 'REQUEST_FILTER', request_filter)
         if item_filter:
             setattr(settings, 'ITEM_FILTER', item_filter)
-
-        self._thread_count = thread_count or settings.SPIDER_THREAD_COUNT  # 线程数
 
         # 获取队列
         queue_module = settings.REQUEST_QUEUE[settings.SPIDER_TYPE][settings.REQUEST_MODE]
@@ -233,7 +231,7 @@ class BaseSpider(Thread):
 
             # 启动对应的线程
             Parser.from_settings()
-            for i in range(self._thread_count):
+            for i in range(settings.SPIDER_THREAD_COUNT):
                 parser = Parser(q=self._queue, q_item=self._queue_item, spider=self)
                 self._parser_list.append(parser)
                 parser.start()

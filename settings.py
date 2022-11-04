@@ -24,6 +24,7 @@ REDIS_KEY_LOCK = '{redis_key}:lock'  # redis 锁
 REDIS_KEY_STOP = '{redis_key}:stop'  # 停止所有机器运行（分布式时）
 REDIS_KEY_QUEUE_REQUEST = '{redis_key}:request'  # request 队列
 REDIS_KEY_QUEUE_FILTER_REQUEST = '{redis_key}:filter:request'  # request 过滤队列
+REDIS_KEY_QUEUE_ITEM = '{redis_key}:item'  # item 队列
 REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列
 REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器
@@ -32,6 +33,7 @@ REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的�
 PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 REQUEST_FILTER = False  # 去重请求，开启了请求时的 filter_repeat 才有用
 REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
+REQUEST_DELAY = 0  # 请求间隔
 REQUEST_TIMEOUT = 10  # 请求超时时间，也可以是元组 (connect timeout, read timeout)
 RANDOM_USERAGENT = True  # 如果请求头不含 UA 将会设置，但是自己设置了 UA 则不会设置（默认是 computer，指定则开启下面的选项）
 RANDOM_USERAGENT_TYPE = 'computer'  # UA 类型：电脑（computer 代表电脑内随便选，后面代表指定浏览器 chrome、opera、firefox、ie、safari）手机：mobile
@@ -51,14 +53,14 @@ REQUEST_QUEUE = {
         3: 'palp.sequence.sequence_memory.PrioritySequence',  # 本地：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
     },
     2: {
-        1: 'palp.sequence.sequence_redis.FIFOSequence',  # redis：先进先出队列
-        2: 'palp.sequence.sequence_redis.LIFOSequence',  # redis：后进先出队列
-        3: 'palp.sequence.sequence_redis.PrioritySequence',  # redis：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
+        1: 'palp.sequence.sequence_redis_request.FIFOSequence',  # redis：先进先出队列
+        2: 'palp.sequence.sequence_redis_request.LIFOSequence',  # redis：后进先出队列
+        3: 'palp.sequence.sequence_redis_request.PrioritySequence',  # redis：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
     }
 }
 
 # 下载中间件：请求前的处理
-PIPELINE_ITEM_BUFFER = 100  # item buffer，只有当 item 达到一定数量才会入库，0 为进行缓存
+PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
 PIPELINE = [
     "palp.pipeline.pipeline_base.BasePipeline",

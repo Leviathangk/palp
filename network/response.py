@@ -3,8 +3,10 @@
 """
 
 import re
+import time
 import requests
 from typing import Any
+from palp import settings
 from parsel import Selector
 from requests.models import Response as RequestResponse
 
@@ -92,6 +94,8 @@ class ResponseDownloader:
         self.session = session
 
     def response(self, **kwargs) -> Response:
+        time.sleep(settings.REQUEST_DELAY)  # 请求等待延迟
+
         if self.keep_session:
             resp = self.session.request(**kwargs)
         else:

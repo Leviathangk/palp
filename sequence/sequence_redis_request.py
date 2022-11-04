@@ -6,7 +6,6 @@ import zlib
 import pickle
 from palp import settings
 from palp.conn.conn_redis import Redis
-from palp.network.request import Request
 from palp.sequence.sequence_base import BaseSequence
 
 
@@ -72,12 +71,7 @@ class PrioritySequence(BaseSequence):
         :param timeout:
         :return:
         """
-        if isinstance(obj, Request):
-            level = obj.level
-        else:
-            level = 10
-
-        Redis.conn().zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): level})
+        Redis.conn().zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): obj.level})
 
     def get(self, timeout: int = None):
         """

@@ -24,6 +24,7 @@ class DistributiveSpider(BaseSpider, Thread):
         self.redis_key = redis_key or self.name
 
         # 根据 spider 的名字设置前缀
+        setattr(settings, 'REDIS_KEY_QUEUE_ITEM', settings.REDIS_KEY_QUEUE_ITEM.format(redis_key=self.redis_key))
         setattr(settings, 'REDIS_KEY_MASTER', settings.REDIS_KEY_MASTER.format(redis_key=self.redis_key))
         setattr(settings, 'REDIS_KEY_STOP', settings.REDIS_KEY_STOP.format(redis_key=self.redis_key))
         setattr(settings, 'REDIS_KEY_LOCK', settings.REDIS_KEY_LOCK.format(redis_key=self.redis_key))
