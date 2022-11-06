@@ -100,7 +100,7 @@ class Parser(Thread):
         """
         # 自动拼接 url（根据上一个请求的域名）
         if not new_request.url.startswith('http'):
-            new_request.url = new_request.url.rstrip('/')
+            new_request.url = new_request.url.lstrip('/')
             prefix = urlparse(old_request.url)
             new_request.url = prefix.scheme + '//' + prefix.netloc, '/' + new_request.url
 
