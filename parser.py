@@ -100,9 +100,14 @@ class Parser(Thread):
         """
         # 自动拼接 url（根据上一个请求的域名）
         if not new_request.url.startswith('http'):
-            new_request.url = new_request.url.lstrip('/')
             prefix = urlparse(old_request.url)
-            new_request.url = prefix.scheme + '://' + prefix.netloc + '/' + new_request.url
+
+            if new_request.url.startswith('//'):
+                new_request.url = new_request.url.lstrip('/')
+                new_request.url = prefix.scheme + '://' + new_request.url
+            else:
+                new_request.url = new_request.url.lstrip('/')
+                new_request.url = prefix.scheme + '://' + prefix.netloc + '/' + new_request.url
 
         new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
         new_request.session = old_request.session  # 续上上一个的 session
