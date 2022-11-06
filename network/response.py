@@ -102,7 +102,8 @@ class ResponseDownloader:
             resp = requests.request(**kwargs)
 
             # 更新请求的 cookie、响应的 cookie
-            self.session.cookies.update(kwargs['cookies'])
+            if kwargs['cookies']:
+                self.session.cookies.update(kwargs['cookies'])
             self.session.cookies.update(resp.cookies.get_dict())
 
         return Response(resp)

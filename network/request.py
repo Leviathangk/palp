@@ -96,10 +96,10 @@ class Request:
         # requests 请求参数
         self.url = url
         self.method = method
-        self.params = params or {}
-        self.data = data or {}
-        self.headers = headers or {}
-        self.cookies = cookies or {}
+        self.params = params
+        self.data = data
+        self.headers = headers
+        self.cookies = cookies
         self.files = files
         self.auth = auth
         self.timeout = timeout or settings.REQUEST_TIMEOUT or 60
@@ -111,7 +111,7 @@ class Request:
         self.stream = stream or False
         self.verify = verify or False
         self.cert = cert
-        self.json = json or {}
+        self.json = json
 
         # 传递参数更新一下
         for key, value in kwargs.items():
@@ -130,6 +130,7 @@ class Request:
         # 添加 headers
         if settings.RANDOM_USERAGENT or not self.headers:
             if not self.headers:
+                self.headers = {}
                 self.headers.update({'User-Agent': random_ua()})
             elif self.headers.get('User-Agent'):
                 self.headers.update({'User-Agent': random_ua()})
@@ -158,6 +159,7 @@ class Request:
     def __setattr__(self, key, value):
         """
         实现 requests.xxx 设置参数（只有 self.xxx 才会进入该函数）
+
         @param key:
         @param value:
         @return:
