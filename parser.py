@@ -3,6 +3,8 @@
 """
 import inspect
 import traceback
+from urllib.parse import urlparse
+
 from loguru import logger
 from palp import settings
 from threading import Thread
@@ -96,6 +98,12 @@ class Parser(Thread):
         :param old_request:
         :return:
         """
+        # 自动拼接 url（根据上一个请求的域名）
+        if not new_request.url.startswith('http'):
+            new_request.url = new_request.url.rstrip('/')
+            prefix = urlparse(old_request.url)
+            new_request.url = prefix.scheme + '//' + prefix.netloc, '/' + new_request.url
+
         new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
         new_request.session = old_request.session  # 续上上一个的 session
         self.queue.put(new_request)
