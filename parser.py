@@ -109,8 +109,7 @@ class Parser(Thread):
                 new_request.url = new_request.url.lstrip('/')
                 new_request.url = prefix.scheme + '://' + prefix.netloc + '/' + new_request.url
 
-        if new_request.callback:
-            new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
+        new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
         new_request.session = old_request.session  # 续上上一个的 session
         new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
         self.queue.put(new_request)
