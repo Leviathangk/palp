@@ -137,7 +137,7 @@ class BaseSpider(Thread):
             # 先改成名字，不然后续无法序列化
             request.callback = request.callback.__name__
 
-            # 为每一个起始函数添加一个 session
+            # 为每一个起始函数添加一个 session、cookie_jar
             request.session = requests.session()
             request.cookie_jar = RequestsCookieJar()
 
