@@ -51,7 +51,7 @@ class Parser(Thread):
         :return:
         """
         while not self.stop:
-            task = self.queue.get(timeout=5)
+            task = self.queue.get()
 
             try:
                 if task is None:
