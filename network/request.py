@@ -108,8 +108,8 @@ class Request:
             proxies = {'http': settings.REQUEST_PROXIES_TUNNEL_URL, 'https': settings.REQUEST_PROXIES_TUNNEL_URL}
         self.proxies = proxies
         self.hooks = hooks
-        self.stream = stream or False
-        self.verify = verify or False
+        self.stream = stream
+        self.verify = verify
         self.cert = cert
         self.json = json
 
