@@ -102,7 +102,7 @@ class Parser(Thread):
         if not new_request.url.startswith('http'):
             new_request.url = new_request.url.lstrip('/')
             prefix = urlparse(old_request.url)
-            new_request.url = prefix.scheme + '//' + prefix.netloc + '/' + new_request.url
+            new_request.url = prefix.scheme + '://' + prefix.netloc + '/' + new_request.url
 
         new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
         new_request.session = old_request.session  # 续上上一个的 session
