@@ -78,7 +78,7 @@ class Request:
         :param level: 启用优先级队列时的优先级，分数越大，优先级约低
 
         Palp 参数（非用户设置）
-        :param session: session 的索引，类似 scrapy 传递 cookiejar，保证每个线程的 cookie 都是独立的
+        :param session: session 保证每个线程都是独立的
         :param cookie_jar: cookie_jar，存储 cookie
 
         传递的参数
