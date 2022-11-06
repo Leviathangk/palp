@@ -8,6 +8,7 @@ import requests
 from typing import Any
 from palp import settings
 from parsel import Selector
+from requests.cookies import RequestsCookieJar
 from requests.models import Response as RequestResponse
 
 
@@ -84,26 +85,30 @@ class Response(RequestResponse):
 # 发起请求，返回响应，含有 session 功能
 class ResponseDownloader:
 
-    def __init__(self, keep_session: bool, session: requests.Session):
+    def __init__(self, keep_session: bool, session: requests.Session, cookie_jar: RequestsCookieJar):
         """
 
         :param keep_session: 是否需要保持 session
         :param session: session
+        :param cookie_jar: cookie_jar
         """
         self.keep_session = keep_session
         self.session = session
+        self.cookie_jar = cookie_jar
 
     def response(self, **kwargs) -> Response:
         time.sleep(settings.REQUEST_DELAY)  # 请求等待延迟
 
-        if self.keep_session:
-            resp = self.session.request(**kwargs)
-        else:
-            resp = requests.request(**kwargs)
+        if kwargs.get('cookies'):
+            self.cookie_jar.update(kwargs['cookies'])
 
-            # 更新请求的 cookie、响应的 cookie
-            if kwargs['cookies']:
-                self.session.cookies.update(kwargs['cookies'])
-            self.session.cookies.update(resp.cookies.get_dict())
+        if self.keep_session:
+            kwargs.update({'cookies': self.cookie_jar})
+
+        resp = self.session.request(**kwargs)
+
+        # 更新请求的 cookie、响应的 cookie
+        self.cookie_jar.update(resp.cookies.get_dict())
+        self.session.cookies.clear()
 
         return Response(resp)

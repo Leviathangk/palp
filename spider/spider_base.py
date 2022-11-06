@@ -14,6 +14,7 @@ from palp.parser import Parser
 from typing import List, Union
 from palp.network.request import Request
 from palp.network.response import Response
+from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from palp.exception.exception_error import NotGeneratorFunctionError
 from palp.sequence.sequence_memory import FIFOSequence as FIFOSequenceMemory
@@ -138,6 +139,7 @@ class BaseSpider(Thread):
 
             # 为每一个起始函数添加一个 session
             request.session = requests.session()
+            request.cookie_jar = RequestsCookieJar()
 
             self._queue.put(request)
 

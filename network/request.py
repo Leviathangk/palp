@@ -6,6 +6,7 @@ import requests
 from palp import settings
 from typing import Callable
 from palp.tool.user_agent import random_ua
+from requests.cookies import RequestsCookieJar
 from palp.network.response import ResponseDownloader
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -41,14 +42,15 @@ class Request:
         'callback',
         'render',
         'render_time',
-        'session'
+        'session',
+        'cookie_jar'
     ]
 
     def __init__(self, url: str = None, method: str = None, params=None, data=None, headers=None, cookies=None,
                  files=None, auth=None, timeout=None, allow_redirects=True, proxies=None, hooks=None, stream=None,
                  verify=None, cert=None, json=None, filter_repeat: bool = None, keep_session: bool = None,
                  callback: Callable = None, render: bool = None, render_time: int = None, level: int = None,
-                 session: requests.Session = None, **kwargs):
+                 session: requests.Session = None, cookie_jar: RequestsCookieJar = None, **kwargs):
         """
         requests 参数
         :param url: 请求链接
@@ -67,7 +69,7 @@ class Request:
         :param cert: ssl 证书路径
         :param json: json：也可以使用 data = json.dumps(data)
 
-        Titan 参数
+        Palp 参数
         :param filter_repeat: 是否过滤请求
         :param keep_session: 是否保持 session
         :param callback: 回调函数
@@ -75,8 +77,9 @@ class Request:
         :param render_time: 等待页面加载最大时间
         :param level: 启用优先级队列时的优先级，分数越大，优先级约低
 
-        Titan 参数（非用户设置）
+        Palp 参数（非用户设置）
         :param session: session 的索引，类似 scrapy 传递 cookiejar，保证每个线程的 cookie 都是独立的
+        :param cookie_jar: cookie_jar，存储 cookie
 
         传递的参数
         :param kwargs: 其余需要传递的参数，若参数名不存在则返回 None
@@ -92,6 +95,7 @@ class Request:
         self.render_time = render_time or 60
         self.session = session or requests.session()
         self.level = level or 10
+        self.cookie_jar = cookie_jar or RequestsCookieJar()
 
         # requests 请求参数
         self.url = url
@@ -144,7 +148,8 @@ class Request:
         """
         response = ResponseDownloader(
             keep_session=self.keep_session,
-            session=self.session
+            session=self.session,
+            cookie_jar=self.cookie_jar
         ).response(**self._requests_params)
 
         # 给响应体携带上请求原数据（非纯原）
