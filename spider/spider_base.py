@@ -151,6 +151,7 @@ class BaseSpider(Thread):
         """
         while True:
             if self.all_parser_is_waiting():
+                logger.debug("所有线程都已挂起，即将停止")
                 self.stop_all_parser()
                 break
             elif self.all_parser_is_done():
