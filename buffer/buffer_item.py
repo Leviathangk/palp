@@ -44,7 +44,7 @@ class ItemBuffer(BaseItemBuffer):
                             self.pipeline_save()
                         break
 
-                    task = self.queue.get()
+                    task = self.queue.get(timeout=1)
                     if not task:
                         continue
 
