@@ -3,11 +3,10 @@
 """
 import inspect
 import traceback
-from urllib.parse import urlparse
-
 from loguru import logger
-from palp import settings
 from threading import Thread
+from urllib.parse import urlparse
+from palp import settings, Response
 from palp.network.request import Request
 from palp.item.item_base import BaseItem
 from palp.exception import exception_drop
@@ -71,18 +70,19 @@ class Parser(Thread):
                 for middleware in self.spider.SPIDER_MIDDLEWARE:
                     middleware.spider_error(self.spider, e.__class__.__name__, traceback.format_exc())
 
-    def parse_task(self, task, request: Request = None):
+    def parse_task(self, task, request: Request = None, response: Response = None):
         """
         解析处理任务
 
         :param task: 任务
         :param request: 上一个的请求
+        :param response:
         :return:
         """
         # 判断 yield 的类型
         if isinstance(task, Request):
             if request:
-                self.add_new_request(task, request)
+                self.add_new_request(task, request, response)
             else:
                 self.run_requests(task)
         elif isinstance(task, BaseItem):
@@ -90,24 +90,18 @@ class Parser(Thread):
         else:
             logger.warning(f"捕获到非法 yield：{task}")
 
-    def add_new_request(self, new_request: Request, old_request: Request):
+    def add_new_request(self, new_request: Request, old_request: Request, response: Response):
         """
         添加新的请求到队列中
 
         :param new_request:
         :param old_request:
+        :param response:
         :return:
         """
-        # 自动拼接 url（根据上一个请求的域名）
-        if not new_request.url.startswith('http'):
-            prefix = urlparse(old_request.url)
-
-            if new_request.url.startswith('//'):
-                new_request.url = new_request.url.lstrip('/')
-                new_request.url = prefix.scheme + '://' + new_request.url
-            else:
-                new_request.url = new_request.url.lstrip('/')
-                new_request.url = prefix.scheme + '://' + prefix.netloc + '/' + new_request.url
+        # 自动拼接 url
+        if not new_request.url.startswith('http') and response:
+            new_request.url = response.urljoin(new_request.url)
 
         new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
         new_request.session = old_request.session  # 续上上一个的 session
@@ -145,7 +139,7 @@ class Parser(Thread):
                     if new_request is None:
                         pass
                     elif isinstance(new_request, Request):
-                        self.add_new_request(new_request=new_request, old_request=request)
+                        self.add_new_request(new_request=new_request, old_request=request, response=response)
                         raise exception_drop.DropRequestException()
                     else:
                         logger.warning("request_error 仅支持 Request 返回值！")
@@ -162,7 +156,7 @@ class Parser(Thread):
             if new_request is None:
                 pass
             elif isinstance(new_request, Request):
-                self.add_new_request(new_request=new_request, old_request=request)
+                self.add_new_request(new_request=new_request, old_request=request, response=response)
                 raise exception_drop.DropRequestException()
             else:
                 logger.warning("request_close 仅支持 Request 返回值！")
@@ -171,6 +165,6 @@ class Parser(Thread):
         if callback is not None:
             if inspect.isgeneratorfunction(callback):  # 很好用的库，判断是否是 yield 函数
                 for task in callback(request, response):
-                    self.parse_task(task=task, request=request)
+                    self.parse_task(task=task, request=request, response=response)
             else:
                 callback(request, response)

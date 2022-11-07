@@ -4,6 +4,8 @@
 
 import re
 import time
+from urllib.parse import urljoin
+
 import requests
 from typing import Any
 from palp import settings
@@ -74,6 +76,14 @@ class Response(RequestResponse):
         result = self.re(pattern=pattern, flags=flags)
         if result:
             return result[0]
+
+    def urljoin(self, url: str):
+        """
+        合并 url
+
+        :return:
+        """
+        return urljoin(self._resp.url, url)
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
