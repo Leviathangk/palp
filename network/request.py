@@ -102,7 +102,7 @@ class Request:
         self.method = method
         self.params = params
         self.data = data
-        self.headers = headers
+        self.headers = headers or {}
         self.cookies = cookies
         self.files = files
         self.auth = auth
@@ -131,15 +131,18 @@ class Request:
         else:
             self.method = 'GET'
 
-        # 添加 headers
+        # 添加 ua
         if settings.RANDOM_USERAGENT:
-            if not self.headers:
-                self.headers = {}
-                self.headers.update({'User-Agent': random_ua()})
-            elif self.headers.get('User-Agent'):
-                self.headers.update({'User-Agent': random_ua()})
-            elif self.headers.get('user-agent'):
-                self.headers.update({'user-agent': random_ua()})
+            ua = random_ua()
+        else:
+            ua = settings.DEFAULT_USER_AGENT
+
+        if not self.headers:
+            self.headers.update({'User-Agent': ua})
+        elif self.headers.get('User-Agent'):
+            self.headers.update({'User-Agent': ua})
+        elif self.headers.get('user-agent'):
+            self.headers.update({'user-agent': ua})
 
     def send(self):
         """

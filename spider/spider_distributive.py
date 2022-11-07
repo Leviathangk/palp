@@ -49,6 +49,16 @@ class DistributiveSpider(BaseSpider, Thread):
         """
         pass
 
+    def parse(self, request, response) -> None:
+        """
+        解析
+
+        :param request:
+        :param response:
+        :return:
+        """
+        pass
+
     def competition_for_master(self) -> None:
         """
         竞争为 master

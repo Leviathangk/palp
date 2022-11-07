@@ -35,8 +35,9 @@ REQUEST_FILTER = False  # 去重请求，开启了请求时的 filter_repeat 才
 REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
 REQUEST_DELAY = 0  # 请求间隔
 REQUEST_TIMEOUT = 10  # 请求超时时间，也可以是元组 (connect timeout, read timeout)
-RANDOM_USERAGENT = True  # 如果请求头不含 UA 将会设置，但是自己设置了 UA 则不会设置（默认是 computer，指定则开启下面的选项）
+RANDOM_USERAGENT = False  # 如果请求头不含 UA 将会设置，但是自己设置了 UA 则不会设置（默认是 computer，指定则开启下面的选项）
 RANDOM_USERAGENT_TYPE = 'computer'  # UA 类型：电脑（computer 代表电脑内随便选，后面代表指定浏览器 chrome、opera、firefox、ie、safari）手机：mobile
+DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.35'
 REQUEST_PROXIES_TUNNEL_URL = None  # 隧道代理 url
 
 # 请求中间件：处理请求中的各种情况
@@ -55,7 +56,8 @@ REQUEST_QUEUE = {
     2: {
         1: 'palp.sequence.sequence_redis_request.FIFOSequence',  # redis：先进先出队列
         2: 'palp.sequence.sequence_redis_request.LIFOSequence',  # redis：后进先出队列
-        3: 'palp.sequence.sequence_redis_request.PrioritySequence',  # redis：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
+        3: 'palp.sequence.sequence_redis_request.PrioritySequence',
+        # redis：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
     }
 }
 

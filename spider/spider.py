@@ -28,6 +28,16 @@ class Spider(BaseSpider, Thread):
         """
         pass
 
+    def parse(self, request, response) -> None:
+        """
+        解析
+
+        :param request:
+        :param response:
+        :return:
+        """
+        pass
+
     def spider_logic(self):
         """
         spider 处理逻辑
