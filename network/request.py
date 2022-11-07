@@ -132,7 +132,7 @@ class Request:
             self.method = 'GET'
 
         # 添加 headers
-        if settings.RANDOM_USERAGENT or not self.headers:
+        if settings.RANDOM_USERAGENT:
             if not self.headers:
                 self.headers = {}
                 self.headers.update({'User-Agent': random_ua()})
