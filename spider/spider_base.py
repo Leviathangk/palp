@@ -2,6 +2,7 @@
     spider 基类
 """
 import sys
+import time
 import types
 import inspect
 import requests
@@ -156,6 +157,8 @@ class BaseSpider(Thread):
                 break
             elif self.all_parser_is_done():
                 break
+            else:
+                time.sleep(1)  # 不加延迟将会导致性能问题
 
         self.spider_done = True
 
@@ -168,6 +171,8 @@ class BaseSpider(Thread):
         while True:
             if not self._item_buffer.is_alive():
                 break
+            else:
+                time.sleep(1)
 
     def stop_all_parser(self):
         """
