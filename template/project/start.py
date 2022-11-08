@@ -3,4 +3,10 @@
 """
 from palp import start_spider
 
-start_spider.execute(spider_name='xxx')
+
+def main():
+    start_spider.execute(spider_name='xxx')
+
+
+if __name__ == '__main__':
+    main()
