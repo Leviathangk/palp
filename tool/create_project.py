@@ -24,7 +24,7 @@ class CreateProject:
         """
         self.check_name()
 
-        parent_path = self.path.joinpath(self.project_name.lower())
+        parent_path = self.path.joinpath(self.project_name.title())
 
         shutil.copytree(self.path_template, parent_path)
 

@@ -1,5 +1,7 @@
 """
     shell 交互生成文件
+
+    测试 python shell.py xxx
 """
 import sys
 import argparse
