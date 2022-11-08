@@ -1,3 +1,4 @@
+from palp.tool import start_spider
 from palp.item.item_base import Item
 from palp.network.request import Request
 from palp.network.response import Response
