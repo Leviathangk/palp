@@ -41,3 +41,9 @@ class BaseItem:
 
     def __str__(self):
         return f"<{self.__class__.__name__} table:{self.__class__.__table_name__} item:{self.to_dict()}>"
+
+
+class Item(BaseItem):
+    """
+    外部引用使用
+    """

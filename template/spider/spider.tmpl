@@ -1,0 +1,36 @@
+"""
+Create on ${DATE}
+----------
+@summary:
+----------
+@author:
+"""
+import palp
+
+
+class ${SPIDER_NAME}Spider(palp.Spider):
+    spider_name = "${SPIDER_NAME_LOWER}"   # 自定义的名字
+    spider_settings = None  # 字典形式或导入形式的设置
+
+    def start_requests(self) -> None:
+        """
+        起始函数
+
+        :return:
+        """
+        yield palp.RequestGet("https://www.baidu.com")
+
+    def parse(self, request, response) -> None:
+        """
+        解析函数
+
+        :param request:
+        :param response:
+        :return:
+        """
+        print(response.text)
+        print(response)
+
+
+if __name__ == '__main__':
+    ${SPIDER_NAME}Spider().start()

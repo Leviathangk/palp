@@ -8,7 +8,7 @@ from pathlib import Path
 SPIDER_TYPE = 1  # 爬虫的类型（1 airspider 2 分布式 spider）（非用户设置）
 BASE_PATH = Path(__file__).absolute().parent
 
-# REDIS
+'''REDIS'''
 REDIS_DB = 0
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
@@ -30,15 +30,15 @@ REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器
 
 '''请求相关'''
-PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
-REQUEST_FILTER = False  # 去重请求，开启了请求时的 filter_repeat 才有用
-REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
+REQUEST_FILTER = False  # 去重请求，开启了，请求时的 filter_repeat 才有用（不然分布式时使用分布式锁，会极大的降低速度）
 REQUEST_DELAY = 0  # 请求间隔
+REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
 REQUEST_TIMEOUT = 10  # 请求超时时间，也可以是元组 (connect timeout, read timeout)
 RANDOM_USERAGENT = False  # 如果请求头不含 UA 将会设置，但是自己设置了 UA 则不会设置（默认是 computer，指定则开启下面的选项）
 RANDOM_USERAGENT_TYPE = 'computer'  # UA 类型：电脑（computer 代表电脑内随便选，后面代表指定浏览器 chrome、opera、firefox、ie、safari）手机：mobile
 DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.35'
 REQUEST_PROXIES_TUNNEL_URL = None  # 隧道代理 url
+PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 
 # 请求中间件：处理请求中的各种情况
 REQUEST_MIDDLEWARE = [
@@ -61,6 +61,19 @@ REQUEST_QUEUE = {
     }
 }
 
+# 请求过滤中间件（1、本地，2、云端分布式）
+REQUEST_FILTER_MIDDLEWARE = {
+    1: {
+        1: 'palp.middleware.middleware_request_filter.RequestMemoryFilterMiddleware',  # 本地：set 过滤
+        2: 'palp.middleware.middleware_request_filter.RequestBloomFilterMiddleware',  # 本地：布隆过滤
+    },
+    2: {
+        1: 'palp.middleware.middleware_request_filter.RequestRedisFilterMiddleware',  # redis：set 过滤
+        2: 'palp.middleware.middleware_request_filter.RequestRedisBloomFilterMiddleware'  # redis：布隆过滤
+    }
+}
+
+'''item'''
 # 下载中间件：请求前的处理
 PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
@@ -68,10 +81,9 @@ PIPELINE = [
     "palp.pipeline.pipeline_base.BasePipeline",
 ]
 
-'''过滤去重'''
+# 过滤去重
 BLOOMFILTER_BIT = 6
 BLOOMFILTER_HASH_NUMBER = 30
-FILTERING_MODE = 2  # 去重方式：1 为 set 集合，2 为 bloom 过滤
 ITEM_FILTER = False  # 是否去重 item 默认不去重
 PERSISTENCE_ITEM_FILTER = False  # 是否持久化 item 过滤（分布式时才有效，否则每次结束都会清除）
 
@@ -87,17 +99,8 @@ ITEM_FILTER_PIPELINE = {
     }
 }
 
-# 请求过滤中间件（1、本地，2、云端分布式）
-REQUEST_FILTER_MIDDLEWARE = {
-    1: {
-        1: 'palp.middleware.middleware_request_filter.RequestMemoryFilterMiddleware',  # 本地：set 过滤
-        2: 'palp.middleware.middleware_request_filter.RequestBloomFilterMiddleware',  # 本地：布隆过滤
-    },
-    2: {
-        1: 'palp.middleware.middleware_request_filter.RequestRedisFilterMiddleware',  # redis：set 过滤
-        2: 'palp.middleware.middleware_request_filter.RequestRedisBloomFilterMiddleware'  # redis：布隆过滤
-    }
-}
+'''other'''
+FILTERING_MODE = 2  # 去重方式：1 为 set 集合，2 为 bloom 过滤（默认）
 
 # spider 中间件
 SPIDER_MIDDLEWARE = [

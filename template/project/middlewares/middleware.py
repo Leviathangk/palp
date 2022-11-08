@@ -1,64 +1,47 @@
 """
-    请求中间件
+    中间件
+    SpiderMiddleware：爬虫中间件
+    RequestMiddleware：请求中间件
+
+    参数全部可直接原地修改
 """
-from typing import Union
+import palp
 from loguru import logger
-from palp.network.request import Request
-from palp.network.response import Response
-from palp.spider.spider_base import BaseSpider
 
 
-class BaseRequestMiddleware:
-    def request_in(self, spider: BaseSpider, request: Request) -> None:
+class SpiderMiddleware(palp.SpiderMiddleware):
+    def spider_start(self, spider) -> None:
         """
-        请求进入时的操作
+        spider 开始时的操作
 
         :param spider:
-        :param request:
         :return:
         """
         pass
 
-    def request_close(self, spider: BaseSpider, request: Request, response: Response) -> Union[Request, None]:
+    def spider_close(self, spider) -> None:
         """
-        请求结束时的操作
+        spider 结束的操作
 
         :param spider:
-        :param request: 该参数可返回（用于放弃当前请求，并发起新请求）
-        :param response:
-        :return: [Request, None]
+        :return:
         """
-        return
+        pass
 
-    def request_error(self, spider: BaseSpider, request: Request, exception_type: str, exception: str) -> Union[
-        Request, None]:
+    def spider_error(self, spider, exception_type: str, exception: str) -> None:
         """
-        请求出错时的操作
+        spider 出错时的操作
 
         :param spider:
-        :param request: 该参数可返回（用于放弃当前请求，并发起新请求）
         :param exception_type: 错误的类型
         :param exception: 错误的详细信息
-        :return: [Request, None]
+        :return:
         """
 
         logger.error(exception)
 
-        return
 
-    def request_failed(self, spider: BaseSpider, request: Request) -> None:
-        """
-        超过最大重试次数时的操作
-
-        :param spider:
-        :param request:
-        :return:
-        """
-        pass
-
-
-# 用于外部引用，避免写类型
-class RequestMiddleware:
+class RequestMiddleware(palp.RequestMiddleware):
     def request_in(self, spider, request) -> None:
         """
         请求进入时的操作

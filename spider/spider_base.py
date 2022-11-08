@@ -23,7 +23,8 @@ from palp.sequence.sequence_redis_item import FIFOSequence as FIFOSequenceRedis
 
 
 class BaseSpider(Thread):
-    SETTINGS: Union[types.ModuleType, dict] = None  # 用来指定爬虫单独的配置，可以是一个引入的 settings.py 模块 或 字典
+    spider_name = None  # 用户输入的名字
+    spider_settings: Union[types.ModuleType, dict] = None  # 用来指定爬虫单独的配置，可以是一个引入的 settings.py 模块 或 字典
     SPIDER_MIDDLEWARE: List[types.ModuleType] = []
 
     def __init__(self, thread_count: int = None, request_filter: bool = False, item_filter: bool = False):
@@ -81,14 +82,14 @@ class BaseSpider(Thread):
                 logger.add(sys.stdout, level=settings.LOG_LEVEL)
 
         # 处理每个爬虫单独的设置
-        if isinstance(cls.SETTINGS, types.ModuleType):
-            for key, value in cls.SETTINGS.__dict__.items():
+        if isinstance(cls.spider_settings, types.ModuleType):
+            for key, value in cls.spider_settings.__dict__.items():
                 if not key.startswith('__'):
                     setattr(settings, key, value)
-        elif isinstance(cls.SETTINGS, dict):
-            for key, value in cls.SETTINGS.items():
+        elif isinstance(cls.spider_settings, dict):
+            for key, value in cls.spider_settings.items():
                 setattr(settings, key, value)
-        elif cls.SETTINGS is None:
+        elif cls.spider_settings is None:
             pass
         else:
             logger.warning("不受支持的设置格式，仅支持模块或者字典！")
@@ -272,4 +273,4 @@ class BaseSpider(Thread):
         :return:
         """
 
-        return self.__class__.__name__
+        return self.__class__.spider_name or self.__class__.__name__
