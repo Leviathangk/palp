@@ -43,7 +43,7 @@ def load_spider() -> dict:
     # 获取到 spider 的目录
     spider_dir = None
     for i in path.iterdir():
-        if i.is_dir() and i.name.lower().startswith('spider'):
+        if i.is_dir() and i.name == 'spiders':
             spider_dir = i
             break
 

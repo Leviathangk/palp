@@ -37,7 +37,11 @@ class CreateSpider:
         content = content.replace('${SPIDER_NAME_LOWER}', self.spider_name.lower())
         content = content.replace('${DATE}', str(datetime.datetime.now()))
 
-        with open(self.path.joinpath(self.spider_name.lower() + '.py'), 'w', encoding='utf-8') as f:
+        spider_dir = self.find_path(path=self.path)
+        if not spider_dir:
+            spider_dir = self.path
+
+        with open(spider_dir.joinpath(self.spider_name.lower() + '.py'), 'w', encoding='utf-8') as f:
             f.write(content)
 
     def check_name(self):
@@ -52,6 +56,22 @@ class CreateSpider:
             return True
 
         raise NameError('Spider 名字请以字母开头，并仅含有数字字母下划线！')
+
+    def find_path(self, path: Path) -> Path:
+        """
+        寻找 spiders 文件夹的位置
+
+        :param path:
+        :return:
+        """
+        if path.is_dir() and path.name == 'spiders':
+            return path
+
+        for spider_dir in path.iterdir():
+            if spider_dir.is_dir():
+                spider_dir = self.find_path(spider_dir)
+                if spider_dir:
+                    return spider_dir
 
 
 if __name__ == '__main__':
