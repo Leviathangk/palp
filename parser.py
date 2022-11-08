@@ -103,7 +103,13 @@ class Parser(Thread):
         if not new_request.url.startswith('http') and response:
             new_request.url = response.urljoin(new_request.url)
 
-        new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
+        # 添加 callback
+        if new_request.callback:
+            new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
+        else:
+            new_request.callback = 'parse'
+
+        # 添加请求必须参数
         new_request.session = old_request.session  # 续上上一个的 session
         new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
         self.queue.put(new_request)
