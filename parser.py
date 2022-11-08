@@ -4,12 +4,12 @@
 import inspect
 import traceback
 from loguru import logger
+from palp import settings
 from threading import Thread
-from urllib.parse import urlparse
-from palp import settings, Response
 from palp.network.request import Request
 from palp.item.item_base import BaseItem
 from palp.exception import exception_drop
+from palp.network.response import Response
 from palp.tool.short_module import import_module
 from palp.sequence.sequence_base import BaseSequence
 
