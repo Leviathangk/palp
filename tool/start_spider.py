@@ -38,7 +38,7 @@ def load_spider() -> dict:
 
     :return:
     """
-    path = Path('.').absolute().parent
+    path = Path('.').absolute()
 
     # 获取到 spider 的目录
     spider_dir = None
