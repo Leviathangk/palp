@@ -97,8 +97,13 @@ class BaseSpider(Thread):
         # 引入中间件
         cls.SPIDER_MIDDLEWARE = import_module(settings.SPIDER_MIDDLEWARE)
 
-        # 导入一次连接，使得连接创建
+        # 导入一次连接，防止连接不可用
         from palp import conn
+        if settings.SPIDER_TYPE == 2:
+            if conn.redis_conn is None:
+                raise ConnectionError('redis 未连接！')
+            else:
+                conn.redis_conn.info()
 
     def start_requests(self) -> None:
         """
