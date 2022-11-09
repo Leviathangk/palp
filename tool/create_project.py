@@ -26,6 +26,9 @@ class CreateProject:
 
         parent_path = self.path.joinpath(self.project_name.title())
 
+        if parent_path.exists():
+            raise FileExistsError(f'{parent_path} 已存在！')
+
         shutil.copytree(self.path_template, parent_path)
 
     def check_name(self):
