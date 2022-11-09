@@ -7,6 +7,7 @@ from pathlib import Path
 
 SPIDER_TYPE = 1  # 爬虫的类型（1 airspider 2 分布式 spider）（非用户设置）
 BASE_PATH = Path(__file__).absolute().parent
+STRICT_FILTER = False  # 严格去重，会加锁，影响性能但精准
 
 '''MYSQL'''
 MYSQL_HOST = None

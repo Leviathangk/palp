@@ -4,6 +4,7 @@
     print(MemoryFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
     print(MemoryFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
 """
+from palp import settings
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter, FilterLock
 
@@ -21,17 +22,30 @@ class RequestMemoryFilter(BaseFilter):
         :param kwargs:
         :return:
         """
-        fingerprint_md5 = self.fingerprint(obj=obj)
+        fingerprint = self.fingerprint(obj=obj)
 
         if isinstance(obj, Request):
             memory_filter = self.memory_filter_request
         else:
             memory_filter = self.memory_filter_item
 
-        with FilterLock():
-            if fingerprint_md5 in memory_filter:
-                return True
+        if settings.STRICT_FILTER:
+            with FilterLock():
+                return self.judge(fingerprint, memory_filter)
+        else:
+            return self.judge(fingerprint, memory_filter)
 
-            memory_filter.add(fingerprint_md5)
+    def judge(self, fingerprint, f) -> bool:
+        """
+        进行判断
 
-            return False
+        :param fingerprint:
+        :param f:
+        :return:
+        """
+        if fingerprint in f:
+            return True
+
+        f.add(fingerprint)
+
+        return False

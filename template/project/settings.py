@@ -9,6 +9,8 @@
 from pathlib import Path
 
 BASE_PATH = Path(__file__).absolute().parent
+# STRICT_FILTER = False  # 严格去重，会加锁，影响性能但精准
+
 
 '''MYSQL'''
 # MYSQL_HOST = None

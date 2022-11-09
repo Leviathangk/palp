@@ -4,6 +4,7 @@
     print(BloomFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
     print(BloomFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
 """
+from palp import settings
 from palp.network.request import Request
 from pybloom_live import ScalableBloomFilter
 from palp.filter.filter_base import BaseFilter, FilterLock
@@ -22,10 +23,25 @@ class BloomFilter(BaseFilter):
         :param kwargs:
         :return:
         """
+        fingerprint = self.fingerprint(obj=obj)
+
         if isinstance(obj, Request):
             bloom_filter = self.bloom_filter_request
         else:
             bloom_filter = self.bloom_filter_item
 
-        with FilterLock():
-            return bloom_filter.add(self.fingerprint(obj=obj))
+        if settings.STRICT_FILTER:
+            with FilterLock():
+                return self.judge(fingerprint, bloom_filter)
+        else:
+            return self.judge(fingerprint, bloom_filter)
+
+    def judge(self, fingerprint, f) -> bool:
+        """
+        进行判断
+
+        :param fingerprint:
+        :param f:
+        :return:
+        """
+        return f.add(fingerprint)

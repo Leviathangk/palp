@@ -34,13 +34,11 @@ class RequestRedisBloomFilter(BaseFilter):
         else:
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_ITEM
 
-        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
-            if self.exists(fingerprint=fingerprint, redis_key_filter=redis_key_filter):
-                return True
-
-            self.insert(fingerprint=fingerprint, redis_key_filter=redis_key_filter)
-
-            return False
+        if settings.STRICT_FILTER:
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
+                return self.judge(fingerprint, redis_key_filter)
+        else:
+            return self.judge(fingerprint, redis_key_filter)
 
     def exists(self, fingerprint: str, redis_key_filter: str):
         """
@@ -80,3 +78,18 @@ class RequestRedisBloomFilter(BaseFilter):
         for i in range(len(value)):
             ret += seed * ret + ord(value[i])
         return (self.m - 1) & ret
+
+    def judge(self, fingerprint, f) -> bool:
+        """
+        进行判断
+
+        :param fingerprint:
+        :param f:
+        :return:
+        """
+        if self.exists(fingerprint=fingerprint, redis_key_filter=f):
+            return True
+
+        self.insert(fingerprint=fingerprint, redis_key_filter=f)
+
+        return False

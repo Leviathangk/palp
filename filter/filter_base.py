@@ -21,6 +21,17 @@ class BaseFilter:
         """
         pass
 
+    @abstractmethod
+    def judge(self, fingerprint, f) -> bool:
+        """
+        进行判断
+
+        :param fingerprint: 指纹
+        :param f: 判断条件或方法之类
+        :return:
+        """
+        pass
+
     @staticmethod
     def fingerprint(obj: Union[Request, BaseItem]) -> str:
         """

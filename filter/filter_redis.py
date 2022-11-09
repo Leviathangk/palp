@@ -23,17 +23,32 @@ class RequestRedisFilter(BaseFilter):
         """
         from palp.conn import redis_conn
 
-        fingerprint_md5 = self.fingerprint(obj=obj)
+        fingerprint = self.fingerprint(obj=obj)
 
         if isinstance(obj, Request):
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_REQUEST
         else:
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_ITEM
 
-        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
-            if redis_conn.sismember(redis_key_filter, fingerprint_md5):
-                return True
+        if settings.STRICT_FILTER:
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
+                return self.judge(fingerprint, redis_key_filter)
+        else:
+            return self.judge(fingerprint, redis_key_filter)
 
-            redis_conn.sadd(redis_key_filter, fingerprint_md5)
+    def judge(self, fingerprint, f) -> bool:
+        """
+        进行判断
 
-            return False
+        :param fingerprint:
+        :param f:
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        if redis_conn.sismember(f, fingerprint):
+            return True
+
+        redis_conn.sadd(f, fingerprint)
+
+        return False
