@@ -17,23 +17,26 @@ from quickdb import MysqlSQLAlchemyEngine, MysqlSQLAlchemyMethods
 from quickdb import PostgreSQLAlchemyEngine, PostgreSQLAlchemyMethods
 
 # redis 连接
-if settings.REDIS_CLUSTER_NODES:
-    redis_conn = RedisClusterConn(
-        startup_nodes=settings.REDIS_CLUSTER_NODES,
-        pwd=settings.REDIS_PWD,
-        max_connections=settings.REDIS_MAX_CONNECTIONS,
-        pool_kwargs=settings.REDIS_POOL_CONFIG,
-        conn_kwargs=settings.REDIS_CONFIG
-    )
+if settings.SPIDER_TYPE == 2:
+    if settings.REDIS_CLUSTER_NODES:
+        redis_conn = RedisClusterConn(
+            startup_nodes=settings.REDIS_CLUSTER_NODES,
+            pwd=settings.REDIS_PWD,
+            max_connections=settings.REDIS_MAX_CONNECTIONS,
+            pool_kwargs=settings.REDIS_POOL_CONFIG,
+            conn_kwargs=settings.REDIS_CONFIG
+        )
+    else:
+        redis_conn = RedisConn(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            pwd=settings.REDIS_PWD,
+            db=settings.REDIS_DB,
+            pool_kwargs=settings.REDIS_POOL_CONFIG,
+            conn_kwargs=settings.REDIS_CONFIG
+        )
 else:
-    redis_conn = RedisConn(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        pwd=settings.REDIS_PWD,
-        db=settings.REDIS_DB,
-        pool_kwargs=settings.REDIS_POOL_CONFIG,
-        conn_kwargs=settings.REDIS_CONFIG
-    )
+    redis_conn = None
 
 # mysql 连接
 if settings.MYSQL_HOST:
