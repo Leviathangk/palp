@@ -5,7 +5,6 @@
 import zlib
 import pickle
 from palp import settings
-from palp.conn import redis_conn
 from palp.sequence.sequence_base import BaseSequence
 
 
@@ -22,6 +21,8 @@ class FIFOSequence(BaseSequence):
         :param timeout:
         :return:
         """
+        from palp.conn import redis_conn
+
         redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST, zlib.compress(pickle.dumps(obj)))
 
     def get(self, timeout: int = None):
@@ -30,6 +31,8 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         result = redis_conn.blpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))  # 这里不需要 decode 因为是对象
@@ -40,6 +43,8 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         return redis_conn.llen(settings.REDIS_KEY_QUEUE_REQUEST) == 0
 
 
@@ -53,6 +58,8 @@ class LIFOSequence(FIFOSequence):
         获取任务
         :return:
         """
+        from palp.conn import redis_conn
+
         result = redis_conn.brpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))
@@ -71,6 +78,8 @@ class PrioritySequence(BaseSequence):
         :param timeout:
         :return:
         """
+        from palp.conn import redis_conn
+
         redis_conn.zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): obj.level})
 
     def get(self, timeout: int = None):
@@ -79,6 +88,8 @@ class PrioritySequence(BaseSequence):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         result = redis_conn.bzpopmin(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[1]))
@@ -89,4 +100,6 @@ class PrioritySequence(BaseSequence):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         return redis_conn.zcard(settings.REDIS_KEY_QUEUE_REQUEST) == 0

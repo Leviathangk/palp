@@ -4,7 +4,6 @@
 """
 from palp import settings
 from quickdb import RedisLock
-from palp.conn import redis_conn
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter
 
@@ -26,6 +25,7 @@ class RequestRedisBloomFilter(BaseFilter):
         :param kwargs:
         :return:
         """
+        from palp.conn import redis_conn
 
         fingerprint = self.fingerprint(obj)
 
@@ -48,6 +48,8 @@ class RequestRedisBloomFilter(BaseFilter):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         if not fingerprint:
             return False
         exist = 1
@@ -62,6 +64,8 @@ class RequestRedisBloomFilter(BaseFilter):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         for seed in self.seeds:
             offset = self.hash(seed, fingerprint)
             redis_conn.setbit(redis_key_filter, offset, 1)

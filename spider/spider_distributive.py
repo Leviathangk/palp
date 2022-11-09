@@ -5,7 +5,6 @@ import time
 from palp import settings
 from threading import Thread
 from abc import abstractmethod
-from palp.conn import redis_conn
 from quickdb import RedisLockNoWait
 from palp.buffer.buffer_item import ItemBuffer
 from palp.spider.spider_base import BaseSpider
@@ -66,6 +65,8 @@ class DistributiveSpider(BaseSpider, Thread):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         if redis_conn.exists(settings.REDIS_KEY_MASTER):
             return
 
@@ -80,6 +81,8 @@ class DistributiveSpider(BaseSpider, Thread):
 
         :return:
         """
+        from palp.conn import redis_conn
+
         # master 竞争
         self.competition_for_master()
 

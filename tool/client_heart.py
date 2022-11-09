@@ -8,7 +8,6 @@ import datetime
 import threading
 from loguru import logger
 from palp import settings
-from palp.conn import redis_conn
 from quickdb import RedisLockNoWait, RedisLock
 
 
@@ -39,6 +38,8 @@ class ClientHeart:
         注意：因为不是需要每个都运行，而是同时有一个去运行，所以使用了 RedisLockNoWait
         :return:
         """
+        from palp.conn import redis_conn
+
         while not self.all_client_is_waiting:
 
             all_client_is_waiting = True
@@ -86,6 +87,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         while not self.all_client_is_waiting:
             redis_conn.hset(
                 settings.REDIS_KEY_HEARTBEAT,
@@ -103,6 +106,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
 
     @staticmethod
@@ -112,6 +117,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         redis_conn.set(settings.REDIS_KEY_STOP, '停止时间：' + str(datetime.datetime.now()))
 
     @property
@@ -121,6 +128,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         return bool(redis_conn.exists(settings.REDIS_KEY_STOP))
 
     @staticmethod
@@ -130,6 +139,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         while True:
             if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
                 redis_conn.delete(settings.REDIS_KEY_STOP)
@@ -144,6 +155,8 @@ class ClientHeart:
 
         :return:
         """
+        from palp.conn import redis_conn
+
         while True:
             name = str(uuid.uuid1())
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=10):

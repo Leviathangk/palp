@@ -7,7 +7,6 @@
 
 from palp import settings
 from quickdb import RedisLock
-from palp.conn import redis_conn
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter
 
@@ -22,6 +21,8 @@ class RequestRedisFilter(BaseFilter):
         :param kwargs:
         :return:
         """
+        from palp.conn import redis_conn
+
         fingerprint_md5 = self.fingerprint(obj=obj)
 
         if isinstance(obj, Request):

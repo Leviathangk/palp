@@ -97,13 +97,17 @@ class BaseSpider(Thread):
         # 引入中间件
         cls.SPIDER_MIDDLEWARE = import_module(settings.SPIDER_MIDDLEWARE)
 
-        # 导入一次连接，防止连接不可用
+        # 创建连接，检查连接，防止连接不可用
         from palp import conn
         if settings.SPIDER_TYPE == 2:
             if conn.redis_conn is None:
                 raise ConnectionError('redis 未连接！')
             else:
                 conn.redis_conn.info()
+        if settings.MYSQL_HOST:
+            conn.mysql_conn.connect()
+        if settings.PG_HOST:
+            conn.pg_conn.connect()
 
     def start_requests(self) -> None:
         """
