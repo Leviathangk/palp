@@ -43,10 +43,10 @@ else:
 if settings.MYSQL_HOST:
     mysql_conn = MysqlSQLAlchemyEngine(
         host=settings.MYSQL_HOST,
-        port=settings.MYSQL_HOST,
-        db=settings.MYSQL_HOST,
-        user=settings.MYSQL_HOST,
-        pwd=settings.MYSQL_HOST,
+        port=settings.MYSQL_PORT,
+        db=settings.MYSQL_DB,
+        user=settings.MYSQL_USER,
+        pwd=settings.MYSQL_PWD,
         **settings.MYSQL_CONFIG
     )
     mysql_method = MysqlSQLAlchemyMethods(engine=mysql_conn)
@@ -58,10 +58,10 @@ else:
 if settings.PG_HOST:
     pg_conn = PostgreSQLAlchemyEngine(
         host=settings.PG_HOST,
-        port=settings.PG_HOST,
-        db=settings.PG_HOST,
-        user=settings.PG_HOST,
-        pwd=settings.PG_HOST,
+        port=settings.PG_PORT,
+        db=settings.PG_DB,
+        user=settings.PG_USER,
+        pwd=settings.PG_PWD,
         **settings.PG_CONFIG
     )
     pg_method = PostgreSQLAlchemyMethods(engine=pg_conn)
