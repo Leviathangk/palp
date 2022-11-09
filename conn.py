@@ -25,7 +25,7 @@ if settings.SPIDER_TYPE == 2:
             max_connections=settings.REDIS_MAX_CONNECTIONS,
             pool_kwargs=settings.REDIS_POOL_CONFIG,
             conn_kwargs=settings.REDIS_CONFIG
-        )
+        ).conn
     else:
         redis_conn = RedisConn(
             host=settings.REDIS_HOST,
@@ -34,7 +34,7 @@ if settings.SPIDER_TYPE == 2:
             db=settings.REDIS_DB,
             pool_kwargs=settings.REDIS_POOL_CONFIG,
             conn_kwargs=settings.REDIS_CONFIG
-        )
+        ).conn
 else:
     redis_conn = None
 
