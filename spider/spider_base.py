@@ -97,9 +97,8 @@ class BaseSpider(Thread):
         # 引入中间件
         cls.SPIDER_MIDDLEWARE = import_module(settings.SPIDER_MIDDLEWARE)
 
-        # 判断是否使用了连接，检查连接
-        if settings.SPIDER_TYPE == 2:
-            from palp import conn
+        # 导入一次连接，使得连接创建
+        from palp import conn
 
     def start_requests(self) -> None:
         """
