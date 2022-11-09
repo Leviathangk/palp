@@ -63,7 +63,7 @@ if settings.PG_HOST:
         pwd=settings.PG_HOST,
         **settings.PG_CONFIG
     )
-    mysql_method = PostgreSQLAlchemyMethods(engine=pg_conn)
+    pg_method = PostgreSQLAlchemyMethods(engine=pg_conn)
 else:
     pg_conn = None
-    mysql_method = None
+    pg_method = None
