@@ -5,7 +5,7 @@
 import zlib
 import pickle
 from palp import settings
-from palp.conn.conn_redis import Redis
+from palp.conn import redis_conn
 from palp.sequence.sequence_base import BaseSequence
 
 
@@ -22,7 +22,7 @@ class FIFOSequence(BaseSequence):
         :param timeout:
         :return:
         """
-        Redis.conn().rpush(settings.REDIS_KEY_QUEUE_ITEM, zlib.compress(pickle.dumps(obj)))
+        redis_conn.rpush(settings.REDIS_KEY_QUEUE_ITEM, zlib.compress(pickle.dumps(obj)))
 
     def get(self, timeout: int = None):
         """
@@ -30,7 +30,7 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
-        result = Redis.conn().blpop(settings.REDIS_KEY_QUEUE_ITEM, timeout=timeout)
+        result = redis_conn.blpop(settings.REDIS_KEY_QUEUE_ITEM, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))  # 这里不需要 decode 因为是对象
 
@@ -40,4 +40,4 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
-        return Redis.conn().llen(settings.REDIS_KEY_QUEUE_ITEM) == 0
+        return redis_conn.llen(settings.REDIS_KEY_QUEUE_ITEM) == 0

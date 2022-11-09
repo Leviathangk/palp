@@ -3,9 +3,10 @@
     学习链接：https://cuiqingcai.com/8472.html
 """
 from palp import settings
+from quickdb import RedisLock
+from palp.conn import redis_conn
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter
-from palp.conn.conn_redis import Redis, RedisLock
 
 
 class RequestRedisBloomFilter(BaseFilter):
@@ -33,7 +34,7 @@ class RequestRedisBloomFilter(BaseFilter):
         else:
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_ITEM
 
-        with RedisLock(lock_name=settings.REDIS_KEY_LOCK):
+        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
             if self.exists(fingerprint=fingerprint, redis_key_filter=redis_key_filter):
                 return True
 
@@ -52,7 +53,7 @@ class RequestRedisBloomFilter(BaseFilter):
         exist = 1
         for seed in self.seeds:
             offset = self.hash(seed, fingerprint)
-            exist = exist & Redis.conn().getbit(redis_key_filter, offset)
+            exist = exist & redis_conn.getbit(redis_key_filter, offset)
         return exist
 
     def insert(self, fingerprint: str, redis_key_filter: str):
@@ -63,7 +64,7 @@ class RequestRedisBloomFilter(BaseFilter):
         """
         for seed in self.seeds:
             offset = self.hash(seed, fingerprint)
-            Redis.conn().setbit(redis_key_filter, offset, 1)
+            redis_conn.setbit(redis_key_filter, offset, 1)
 
     def hash(self, seed: int, value: str):
         """

@@ -8,6 +8,22 @@ from pathlib import Path
 SPIDER_TYPE = 1  # 爬虫的类型（1 airspider 2 分布式 spider）（非用户设置）
 BASE_PATH = Path(__file__).absolute().parent
 
+'''MYSQL'''
+MYSQL_HOST = None
+MYSQL_PORT = None
+MYSQL_DB = None
+MYSQL_USER = None
+MYSQL_PWD = None
+MYSQL_CONFIG = {}  # 字典形式
+
+'''POSTGRESQL'''
+PG_HOST = None
+PG_PORT = None
+PG_DB = None
+PG_USER = None
+PG_PWD = None
+PG_CONFIG = {}  # 字典形式
+
 '''REDIS'''
 REDIS_DB = 0
 REDIS_HOST = '127.0.0.1'

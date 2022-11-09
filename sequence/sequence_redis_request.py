@@ -5,7 +5,7 @@
 import zlib
 import pickle
 from palp import settings
-from palp.conn.conn_redis import Redis
+from palp.conn import redis_conn
 from palp.sequence.sequence_base import BaseSequence
 
 
@@ -22,7 +22,7 @@ class FIFOSequence(BaseSequence):
         :param timeout:
         :return:
         """
-        Redis.conn().rpush(settings.REDIS_KEY_QUEUE_REQUEST, zlib.compress(pickle.dumps(obj)))
+        redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST, zlib.compress(pickle.dumps(obj)))
 
     def get(self, timeout: int = None):
         """
@@ -30,7 +30,7 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
-        result = Redis.conn().blpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.blpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))  # 这里不需要 decode 因为是对象
 
@@ -40,7 +40,7 @@ class FIFOSequence(BaseSequence):
 
         :return:
         """
-        return Redis.conn().llen(settings.REDIS_KEY_QUEUE_REQUEST) == 0
+        return redis_conn.llen(settings.REDIS_KEY_QUEUE_REQUEST) == 0
 
 
 # 后进先出队列
@@ -53,7 +53,7 @@ class LIFOSequence(FIFOSequence):
         获取任务
         :return:
         """
-        result = Redis.conn().brpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.brpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))
 
@@ -71,7 +71,7 @@ class PrioritySequence(BaseSequence):
         :param timeout:
         :return:
         """
-        Redis.conn().zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): obj.level})
+        redis_conn.zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): obj.level})
 
     def get(self, timeout: int = None):
         """
@@ -79,7 +79,7 @@ class PrioritySequence(BaseSequence):
 
         :return:
         """
-        result = Redis.conn().bzpopmin(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.bzpopmin(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[1]))
 
@@ -89,4 +89,4 @@ class PrioritySequence(BaseSequence):
 
         :return:
         """
-        return Redis.conn().zcard(settings.REDIS_KEY_QUEUE_REQUEST) == 0
+        return redis_conn.zcard(settings.REDIS_KEY_QUEUE_REQUEST) == 0

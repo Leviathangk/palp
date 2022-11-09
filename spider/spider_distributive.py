@@ -5,10 +5,11 @@ import time
 from palp import settings
 from threading import Thread
 from abc import abstractmethod
+from palp.conn import redis_conn
+from quickdb import RedisLockNoWait
 from palp.buffer.buffer_item import ItemBuffer
 from palp.spider.spider_base import BaseSpider
 from palp.tool.client_heart import ClientHeart
-from palp.conn.conn_redis import RedisLockNoWait, Redis
 
 
 class DistributiveSpider(BaseSpider, Thread):
@@ -65,13 +66,13 @@ class DistributiveSpider(BaseSpider, Thread):
 
         :return:
         """
-        if Redis.conn().exists(settings.REDIS_KEY_MASTER):
+        if redis_conn.exists(settings.REDIS_KEY_MASTER):
             return
 
-        with RedisLockNoWait(lock_name=settings.REDIS_KEY_LOCK) as lock:
+        with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK) as lock:
             if lock.lock_success:
                 self.spider_master = True
-                Redis.conn().set(settings.REDIS_KEY_MASTER, '')
+                redis_conn.set(settings.REDIS_KEY_MASTER, '')
 
     def spider_logic(self):
         """
@@ -85,9 +86,9 @@ class DistributiveSpider(BaseSpider, Thread):
         # master 机器处理的事情
         if self.spider_master:
             # 删除停止标志
-            Redis.conn().delete(settings.REDIS_KEY_STOP)
+            redis_conn.delete(settings.REDIS_KEY_STOP)
             # 清空心跳
-            Redis.conn().delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
+            redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
 
             # 处理 item
             ItemBuffer.from_settings()
@@ -105,11 +106,11 @@ class DistributiveSpider(BaseSpider, Thread):
         # master 机器处理的事情
         if self.spider_master:
             # 删除 master 的标志
-            Redis.conn().delete(settings.REDIS_KEY_MASTER)
+            redis_conn.delete(settings.REDIS_KEY_MASTER)
             # 删除 stop 标志
             ClientHeart.remove_stop_status()
             # 判断是否移除 filter
             if not settings.PERSISTENCE_REQUEST_FILTER:
-                Redis.conn().delete(settings.REDIS_KEY_QUEUE_FILTER_REQUEST)
+                redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_REQUEST)
             if not settings.PERSISTENCE_ITEM_FILTER:
-                Redis.conn().delete(settings.REDIS_KEY_QUEUE_FILTER_ITEM)
+                redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_ITEM)

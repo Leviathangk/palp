@@ -97,9 +97,9 @@ class BaseSpider(Thread):
         # 引入中间件
         cls.SPIDER_MIDDLEWARE = import_module(settings.SPIDER_MIDDLEWARE)
 
-        # 判断是否使用了连接，预先导入
+        # 判断是否使用了连接，检查连接
         if settings.SPIDER_TYPE == 2:
-            from palp.conn.conn_redis import Redis
+            from palp import conn
 
     def start_requests(self) -> None:
         """

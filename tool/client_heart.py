@@ -8,7 +8,8 @@ import datetime
 import threading
 from loguru import logger
 from palp import settings
-from palp.conn.conn_redis import RedisLockNoWait, Redis, RedisLock
+from palp.conn import redis_conn
+from quickdb import RedisLockNoWait, RedisLock
 
 
 class ClientHeart:
@@ -42,28 +43,28 @@ class ClientHeart:
 
             all_client_is_waiting = True
 
-            with RedisLockNoWait(lock_name=settings.REDIS_KEY_LOCK, block_timeout=10) as lock:
+            with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=10) as lock:
                 # 判断是否上锁成功
                 if not lock.lock_success:
                     continue
 
                 # 上锁成功则判断客户端运行情况
-                for client_name, detail in Redis.conn().hgetall(settings.REDIS_KEY_HEARTBEAT).items():
+                for client_name, detail in redis_conn.hgetall(settings.REDIS_KEY_HEARTBEAT).items():
                     client_name = client_name.decode()
                     detail = json.loads(detail.decode())
 
                     # 校验 2 次失败则为客户端关闭
                     if int(time.time()) - detail['time'] - self.beating_time > 1:
-                        if Redis.conn().sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
+                        if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
                             logger.warning(f"该客户端异常关闭：{client_name}")
-                            Redis.conn().srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
-                            Redis.conn().hdel(settings.REDIS_KEY_HEARTBEAT, client_name)
+                            redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
+                            redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, client_name)
                         else:
                             logger.warning(f"该客户端可能异常关闭：{client_name}")
-                            Redis.conn().sadd(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
+                            redis_conn.sadd(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
                     else:
-                        if Redis.conn().sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
-                            Redis.conn().srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
+                        if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
+                            redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
 
                         if detail['waiting'] is False:
                             all_client_is_waiting = False
@@ -86,7 +87,7 @@ class ClientHeart:
         :return:
         """
         while not self.all_client_is_waiting:
-            Redis.conn().hset(
+            redis_conn.hset(
                 settings.REDIS_KEY_HEARTBEAT,
                 self.client_name,
                 json.dumps({
@@ -102,7 +103,7 @@ class ClientHeart:
 
         :return:
         """
-        Redis.conn().hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
+        redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
 
     @staticmethod
     def stop_all_client():
@@ -111,7 +112,7 @@ class ClientHeart:
 
         :return:
         """
-        Redis.conn().set(settings.REDIS_KEY_STOP, '停止时间：' + str(datetime.datetime.now()))
+        redis_conn.set(settings.REDIS_KEY_STOP, '停止时间：' + str(datetime.datetime.now()))
 
     @property
     def all_client_is_waiting(self) -> bool:
@@ -120,7 +121,7 @@ class ClientHeart:
 
         :return:
         """
-        return bool(Redis.conn().exists(settings.REDIS_KEY_STOP))
+        return bool(redis_conn.exists(settings.REDIS_KEY_STOP))
 
     @staticmethod
     def remove_stop_status():
@@ -130,8 +131,8 @@ class ClientHeart:
         :return:
         """
         while True:
-            if not Redis.conn().exists(settings.REDIS_KEY_HEARTBEAT):
-                Redis.conn().delete(settings.REDIS_KEY_STOP)
+            if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
+                redis_conn.delete(settings.REDIS_KEY_STOP)
                 break
 
             time.sleep(0.1)
@@ -145,11 +146,11 @@ class ClientHeart:
         """
         while True:
             name = str(uuid.uuid1())
-            with RedisLock(lock_name=settings.REDIS_KEY_LOCK, block_timeout=10):
-                if Redis.conn().hget(settings.REDIS_KEY_HEARTBEAT, name):
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=10):
+                if redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, name):
                     continue
                 else:
-                    Redis.conn().hset(settings.REDIS_KEY_HEARTBEAT, name, json.dumps({
+                    redis_conn.hset(settings.REDIS_KEY_HEARTBEAT, name, json.dumps({
                         "time": int(time.time()),
                         "waiting": False,
                     }, ensure_ascii=False))

@@ -4,10 +4,12 @@
     print(BloomFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
     print(BloomFilter.is_repeat(request=RequestGet(url='https://www.baidu.com')))
 """
+
 from palp import settings
+from quickdb import RedisLock
+from palp.conn import redis_conn
 from palp.network.request import Request
 from palp.filter.filter_base import BaseFilter
-from palp.conn.conn_redis import Redis, RedisLock
 
 
 class RequestRedisFilter(BaseFilter):
@@ -27,10 +29,10 @@ class RequestRedisFilter(BaseFilter):
         else:
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_ITEM
 
-        with RedisLock(lock_name=settings.REDIS_KEY_LOCK):
-            if Redis.conn().sismember(redis_key_filter, fingerprint_md5):
+        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
+            if redis_conn.sismember(redis_key_filter, fingerprint_md5):
                 return True
 
-            Redis.conn().sadd(redis_key_filter, fingerprint_md5)
+            redis_conn.sadd(redis_key_filter, fingerprint_md5)
 
             return False
