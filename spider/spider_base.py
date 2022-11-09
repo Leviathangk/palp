@@ -99,6 +99,7 @@ class BaseSpider(Thread):
 
         # 创建连接，检查连接，防止连接不可用
         from palp import conn
+
         if settings.SPIDER_TYPE == 2:
             if conn.redis_conn is None:
                 raise ConnectionError('redis 未连接！')
