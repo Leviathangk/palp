@@ -17,7 +17,7 @@ from quickdb import MysqlSQLAlchemyEngine, MysqlSQLAlchemyMethods
 from quickdb import PostgreSQLAlchemyEngine, PostgreSQLAlchemyMethods
 
 # redis 连接
-if settings.SPIDER_TYPE == 2:
+if settings.REDIS_HOST:
     if settings.REDIS_CLUSTER_NODES:
         redis_conn = RedisClusterConn(
             startup_nodes=settings.REDIS_CLUSTER_NODES,

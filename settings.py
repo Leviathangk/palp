@@ -26,8 +26,8 @@ PG_CONFIG = {}  # 字典形式
 
 '''REDIS'''
 REDIS_DB = 0
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
+REDIS_HOST = None
+REDIS_PORT = None
 REDIS_PWD = None
 REDIS_CLUSTER_NODES = None  # 如果有集群的情况下，优先集群
 REDIS_MAX_CONNECTIONS = 5  # redis 最大连接数
