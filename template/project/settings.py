@@ -35,6 +35,10 @@ BASE_PATH = Path(__file__).absolute().parent
 # MONGO_PWD = None
 # MONGO_CONFIG = {}  # 字典形式
 
+'''KAFKA'''
+# KAFKA_SERVER = None
+# KAFKA_CONFIG = {}  # 字典形式
+
 '''REDIS'''
 # REDIS_DB = 0
 # REDIS_HOST = None

@@ -20,7 +20,7 @@
             reverse_table_model：逆向表模型
 """
 from palp import settings
-from quickdb import MongoConn
+from quickdb import MongoConn, KafkaMsgProducer
 from quickdb import RedisConn, RedisClusterConn
 from quickdb import MysqlSQLAlchemyEngine, MysqlSQLAlchemyMethods
 from quickdb import PostgreSQLAlchemyEngine, PostgreSQLAlchemyMethods
@@ -87,3 +87,9 @@ if settings.MONGO_HOST:
         **settings.MONGO_CONFIG)
 else:
     mongo_conn = None
+
+# kafka 连接
+if settings.KAFKA_SERVER:
+    kafka_conn = KafkaMsgProducer(server=settings.KAFKA_SERVER, **settings.KAFKA_CONFIG)
+else:
+    kafka_conn = None

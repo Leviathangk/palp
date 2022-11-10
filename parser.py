@@ -41,9 +41,9 @@ class Parser(Thread):
         """
         request_filter_middleware = import_module(
             settings.REQUEST_FILTER_MIDDLEWARE[settings.SPIDER_TYPE][settings.FILTERING_MODE])
-        palp_middleware = import_module(settings.PALP_REQUEST_MIDDLEWARE)
-        cls.REQUEST_MIDDLEWARE = palp_middleware + request_filter_middleware + import_module(
-            settings.REQUEST_MIDDLEWARE)
+        cls.REQUEST_MIDDLEWARE = import_module(
+            settings.PALP_FIRST_REQUEST_MIDDLEWARE) + request_filter_middleware + import_module(
+            settings.REQUEST_MIDDLEWARE) + import_module(settings.PALP_LAST_REQUEST_MIDDLEWARE)
 
     def run(self):
         """

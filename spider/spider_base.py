@@ -96,7 +96,8 @@ class BaseSpider(Thread):
             logger.warning("不受支持的设置格式，仅支持模块或者字典！")
 
         # 引入中间件
-        cls.SPIDER_MIDDLEWARE = import_module(settings.SPIDER_MIDDLEWARE)
+        cls.SPIDER_MIDDLEWARE = import_module(settings.PALP_FIRST_SPIDER_MIDDLEWARE) + import_module(
+            settings.SPIDER_MIDDLEWARE) + import_module(settings.PALP_LAST_SPIDER_MIDDLEWARE)
 
         # 创建连接，检查连接，防止连接不可用
         from palp import conn

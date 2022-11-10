@@ -32,6 +32,10 @@ MONGO_USER = None
 MONGO_PWD = None
 MONGO_CONFIG = {}  # 字典形式
 
+'''KAFKA'''
+KAFKA_SERVER = None
+KAFKA_CONFIG = {}  # 字典形式
+
 '''REDIS'''
 REDIS_DB = 0
 REDIS_HOST = None
@@ -69,9 +73,13 @@ REQUEST_MIDDLEWARE = [
     "palp.middleware.middleware_request_base.BaseRequestMiddleware",
 ]
 
-# palp 必须的请求中间件，用户定义
-PALP_REQUEST_MIDDLEWARE = [
+# palp 必须的请求中间件，非用户定义
+# first
+PALP_FIRST_REQUEST_MIDDLEWARE = [
     "palp.middleware.middleware_request_check.RequestCheckMiddleware",
+]
+# last
+PALP_LAST_REQUEST_MIDDLEWARE = [
 ]
 
 # 请求队列
@@ -134,6 +142,13 @@ FILTERING_MODE = 2  # 去重方式：1 为 set 集合，2 为 bloom 过滤（默
 # spider 中间件
 SPIDER_MIDDLEWARE = [
     'palp.middleware.middleware_spider_base.BaseSpiderMiddleware',
+]
+
+# palp 必须的请求中间件，非用户定义
+PALP_FIRST_SPIDER_MIDDLEWARE = [
+]
+PALP_LAST_SPIDER_MIDDLEWARE = [
+    'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',
 ]
 
 # 爬虫本身配置

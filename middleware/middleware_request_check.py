@@ -4,8 +4,8 @@
 from loguru import logger
 from palp import settings
 from urllib.parse import urlparse
-from palp.middleware import BaseRequestMiddleware
 from palp.exception.exception_drop import DropRequestException
+from palp.middleware.middleware_request_base import BaseRequestMiddleware
 
 
 class RequestCheckMiddleware(BaseRequestMiddleware):
