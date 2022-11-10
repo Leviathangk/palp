@@ -24,6 +24,7 @@ from palp.sequence.sequence_redis_item import FIFOSequence as FIFOSequenceRedis
 
 class BaseSpider(Thread):
     spider_name = None  # 用户输入的名字
+    spider_domains = []  # 允许 spider 通过的域名，默认都可以
     spider_settings: Union[types.ModuleType, dict] = None  # 用来指定爬虫单独的配置，可以是一个引入的 settings.py 模块 或 字典
     SPIDER_MIDDLEWARE: List[types.ModuleType] = []
 

@@ -69,6 +69,11 @@ REQUEST_MIDDLEWARE = [
     "palp.middleware.middleware_request_base.BaseRequestMiddleware",
 ]
 
+# palp 必须的请求中间件，用户定义
+PALP_REQUEST_MIDDLEWARE = [
+    "palp.middleware.middleware_request_check.RequestCheckMiddleware",
+]
+
 # 请求队列
 REQUEST_MODE = 1  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
 REQUEST_QUEUE = {
