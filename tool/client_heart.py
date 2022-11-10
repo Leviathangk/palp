@@ -44,7 +44,7 @@ class ClientHeart:
 
             all_client_is_waiting = True
 
-            with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=10) as lock:
+            with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=20) as lock:
                 # 判断是否上锁成功
                 if not lock.lock_success:
                     continue
@@ -63,6 +63,12 @@ class ClientHeart:
                         else:
                             logger.warning(f"该客户端可能异常关闭：{client_name}")
                             redis_conn.sadd(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
+
+                            # 检查是否是 master 死机，是的话自己成为 master
+                            master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
+                            if master_name and master_name.decode() == client_name:
+                                self.spider.spider_master = True
+                                redis_conn.set(settings.REDIS_KEY_MASTER, self.client_name)
                     else:
                         if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
@@ -148,8 +154,7 @@ class ClientHeart:
 
             time.sleep(0.1)
 
-    @staticmethod
-    def generate_client_name() -> str:
+    def generate_client_name(self) -> str:
         """
         生成客户端的名字
 
@@ -163,6 +168,10 @@ class ClientHeart:
                 if redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, name):
                     continue
                 else:
+
+                    if self.spider.spider_master:
+                        redis_conn.set(settings.REDIS_KEY_MASTER, name)
+
                     redis_conn.hset(settings.REDIS_KEY_HEARTBEAT, name, json.dumps({
                         "time": int(time.time()),
                         "waiting": False,

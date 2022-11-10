@@ -16,7 +16,7 @@ class RequestCheckMiddleware(BaseRequestMiddleware):
 
         # 判断域名是否在可用域名内
         domains = spider.__class__.spider_domains
-        if isinstance(domains, list):
+        if isinstance(domains, list) and len(domains) != 0:
             domain = urlparse(request.url).netloc
             if domain not in domains:
                 raise DropRequestException()

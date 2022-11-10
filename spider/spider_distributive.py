@@ -1,6 +1,7 @@
 """
     分布式 spider
 """
+import json
 import time
 from palp import settings
 from threading import Thread
@@ -75,6 +76,21 @@ class DistributiveSpider(BaseSpider, Thread):
                 self.spider_master = True
                 redis_conn.set(settings.REDIS_KEY_MASTER, '')
 
+    @staticmethod
+    def start_check():
+        """
+        启动检查，防止上次意外结束，导致 master 死机 key 未删除，无法正常启动
+
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
+        if master_name:
+            master_detail = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
+            if not master_detail or time.time() - json.loads(master_detail.decode())['time'] > 5:
+                redis_conn.delete(settings.REDIS_KEY_MASTER)
+
     def spider_logic(self):
         """
         spider 处理逻辑
@@ -82,6 +98,9 @@ class DistributiveSpider(BaseSpider, Thread):
         :return:
         """
         from palp.conn import redis_conn
+
+        # 检查是否正常
+        self.start_check()
 
         # master 竞争
         self.competition_for_master()
