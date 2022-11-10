@@ -95,6 +95,22 @@ class BaseItem:
         if key in self.__dict__:
             del self.__dict__[key]
 
+    def __len__(self):
+        """
+        使类可使用 len()
+
+        :return:
+        """
+        return len(self.__dict__)
+
+    def __iter__(self):
+        """
+        使类可遍历
+
+        :return:
+        """
+        return iter(self.__dict__)
+
     def __str__(self):
         return f"<{self.__class__.__name__} item:{self.to_dict()}>"
 
