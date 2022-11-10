@@ -1,10 +1,14 @@
 """
     基础的 item
+
+    要实现 Item() == {} 必须继承 MutableMapping
+    必须实现 item 的方法、__len__、__iter__ 方法
 """
 import json
+from typing import MutableMapping
 
 
-class BaseItem:
+class BaseItem(MutableMapping):
     def to_dict(self) -> dict:
         """
         转化为 dict
@@ -55,16 +59,6 @@ class BaseItem:
         """
         for key, value in self.__dict__.items():
             yield key, value
-
-    def __setattr__(self, key, value):
-        """
-        设置属性，也可以通过字典方法访问到
-
-        :param key:
-        :param value:
-        :return:
-        """
-        self.__dict__[key] = value
 
     def __setitem__(self, key, value):
         """
