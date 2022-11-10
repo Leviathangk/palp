@@ -40,8 +40,6 @@ class Request:
         'filter_repeat',
         'keep_session',
         'callback',
-        'render',
-        'render_time',
         'session',
         'cookie_jar'
     ]
@@ -49,8 +47,8 @@ class Request:
     def __init__(self, url: str = None, method: str = None, params=None, data=None, headers=None, cookies=None,
                  files=None, auth=None, timeout=None, allow_redirects=True, proxies=None, hooks=None, stream=None,
                  verify=None, cert=None, json=None, filter_repeat: bool = None, keep_session: bool = None,
-                 callback: Callable = None, render: bool = None, render_time: int = None, level: int = None,
-                 session: requests.Session = None, cookie_jar: RequestsCookieJar = None, **kwargs):
+                 callback: Callable = None, level: int = None, session: requests.Session = None,
+                 cookie_jar: RequestsCookieJar = None, **kwargs):
         """
         requests 参数
         :param url: 请求链接
@@ -73,8 +71,6 @@ class Request:
         :param filter_repeat: 是否过滤请求
         :param keep_session: 是否保持 session
         :param callback: 回调函数
-        :param render: 是否用浏览器渲染
-        :param render_time: 等待页面加载最大时间
         :param level: 启用优先级队列时的优先级，分数越大，优先级约低
 
         Palp 参数（非用户设置）
@@ -91,8 +87,6 @@ class Request:
         self.keep_session = keep_session or False
         self.filter_repeat = filter_repeat or False
         self.callback = callback
-        self.render = render or False
-        self.render_time = render_time or 60
         self.session = session or requests.session()
         self.level = level or 10
         self.cookie_jar = cookie_jar or RequestsCookieJar()
