@@ -15,6 +15,7 @@
                 # self.xxx = kwargs.get('xxx')
 """
 import json
+from loguru import logger
 from typing import MutableMapping
 
 
@@ -69,6 +70,29 @@ class BaseItem(MutableMapping):
         """
         for key, value in self.__dict__.items():
             yield key, value
+
+    def __setattr__(self, key, value):
+        """
+        这是属性，但是做的是字典，虽然可以但是不建议
+
+        :param key:
+        :param value:
+        :return:
+        """
+        logger.warning(f"请使用 item['xxx'] = xxx 而不是 item.xxx = xxx！")
+
+        self.__dict__[key] = value
+
+    def __getattr__(self, item):
+        """
+        这是属性，但是做的是字典，虽然可以但是不建议
+
+        :param item:
+        :return:
+        """
+        logger.warning(f"请使用 item['xxx'] 而不是 item.xxx！")
+
+        return self.__dict__.get(item)
 
     def __setitem__(self, key, value):
         """
