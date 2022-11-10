@@ -3,6 +3,16 @@
 
     要实现 Item() == {} 必须继承 MutableMapping
     必须实现 item 的方法、__len__、__iter__ 方法
+
+    案例：
+        class Item(palp.Item):
+            def __init__(self, **kwargs):
+                # 懒人方式
+                for key, value in kwargs.items():
+                    self[key] = value
+
+                # 一般方式
+                # self.xxx = kwargs.get('xxx')
 """
 import json
 from typing import MutableMapping
