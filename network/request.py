@@ -158,6 +158,18 @@ class Request:
 
         return self.callback, response
 
+    def __getattr__(self, item):
+        """
+        可以 request.xxx 进行访问，但是这里严格一点没有就报错避免误导
+
+        :param item:
+        :return:
+        """
+        if item in self.__dict__:
+            return self.__dict__[item]
+
+        raise AttributeError(f'未定义的属性：{item}')
+
     def __setattr__(self, key, value):
         """
         实现 requests.xxx 设置参数（只有 self.xxx 才会进入该函数）
