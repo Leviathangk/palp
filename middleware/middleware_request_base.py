@@ -58,7 +58,7 @@ class BaseRequestMiddleware:
 
 
 # 用于外部引用，避免写类型
-class RequestMiddleware:
+class RequestMiddleware(BaseRequestMiddleware):
     def request_in(self, spider, request) -> None:
         """
         请求进入时的操作
