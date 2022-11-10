@@ -1,18 +1,26 @@
 """
     项目连接创建处
-    这里的连接是懒加载的方式，使用的时候才会被引用，从而被创建（否则不同数据库的爬虫的连接将会是同一个库）
 
-    sqlalchemy 有两个连接
-        session：sqlalchemy 的连接
-        connect：原始连接
+    关于 redis
+        这里的连接是懒加载的方式，使用的时候才会被引用，从而被创建（否则不同数据库的爬虫的连接将会是同一个库）
 
-    methods 是包装了一些方法的，部分如下：
-        upsert
-        update
-        execute
-        reverse_table_model：逆向表模型
+    关于 mongo
+        mongo_conn.get_collection(db, col) 将会返回 Collection 对象（修改后的）
+
+    关于 mysql、pg：
+        mysql_conn 即 sqlalchemy 的 engine
+        engine 有两个连接
+            session：sqlalchemy 的连接
+            connect：原始连接
+
+        mysql_method 是包装了一些方法的，部分如下：
+            upsert
+            update
+            execute
+            reverse_table_model：逆向表模型
 """
 from palp import settings
+from quickdb import MongoConn
 from quickdb import RedisConn, RedisClusterConn
 from quickdb import MysqlSQLAlchemyEngine, MysqlSQLAlchemyMethods
 from quickdb import PostgreSQLAlchemyEngine, PostgreSQLAlchemyMethods
@@ -68,3 +76,14 @@ if settings.PG_HOST:
 else:
     pg_conn = None
     pg_method = None
+
+# mongo 连接
+if settings.MONGO_HOST:
+    mongo_conn = MongoConn(
+        host=settings.MONGO_HOST,
+        port=settings.MONGO_PORT,
+        user=settings.MONGO_USER,
+        pwd=settings.MONGO_PWD,
+        **settings.MONGO_CONFIG)
+else:
+    mongo_conn = None

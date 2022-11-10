@@ -28,6 +28,13 @@ BASE_PATH = Path(__file__).absolute().parent
 # PG_PWD = None
 # PG_CONFIG = {}  # 字典形式
 
+'''MONGO'''
+# MONGO_HOST = None
+# MONGO_PORT = None
+# MONGO_USER = None
+# MONGO_PWD = None
+# MONGO_CONFIG = {}  # 字典形式
+
 '''REDIS'''
 # REDIS_DB = 0
 # REDIS_HOST = None
