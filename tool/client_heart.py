@@ -30,10 +30,7 @@ class ClientHeart:
         try:
             self.check_client_beating()
         finally:
-            while True:
-                if not beating.is_alive():
-                    self.close()
-                    break
+            self.close(beating)
 
     def check_client_beating(self):
         """
@@ -110,7 +107,7 @@ class ClientHeart:
             )
             time.sleep(self.beating_time)
 
-    def close(self):
+    def close(self, beating: threading.Thread):
         """
         清理资源
 
@@ -118,7 +115,10 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
+        while True:
+            if not beating.is_alive():
+                redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
+                break
 
     @staticmethod
     def stop_all_client():
