@@ -42,9 +42,9 @@ class BaseFilter:
         """
         if isinstance(obj, Request):
             if obj.method == 'GET':
-                filter_str = urlencode(obj.params)
+                filter_str = urlencode(obj.params or {})
             elif obj.method == 'POST':
-                filter_str = urlencode(obj.params) + urlencode(obj.data) + urlencode(obj.json)
+                filter_str = urlencode(obj.params or {}) + urlencode(obj.data or {}) + urlencode(obj.json or {})
             else:
                 filter_str = ''
 

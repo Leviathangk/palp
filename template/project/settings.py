@@ -47,6 +47,7 @@ BASE_PATH = Path(__file__).absolute().parent
 
 '''请求相关'''
 # REQUEST_FILTER = False  # 去重请求，开启了，请求时的 filter_repeat 才有用（不然分布式时使用分布式锁，会极大的降低速度）
+# PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 # REQUEST_DELAY = 0  # 请求间隔
 # REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
 # REQUEST_TIMEOUT = 10  # 请求超时时间，也可以是元组 (connect timeout, read timeout)
@@ -54,7 +55,6 @@ BASE_PATH = Path(__file__).absolute().parent
 # RANDOM_USERAGENT_TYPE = 'computer'  # UA 类型：电脑（computer 代表电脑内随便选，后面代表指定浏览器 chrome、opera、firefox、ie、safari）手机：mobile
 # DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.35'
 # REQUEST_PROXIES_TUNNEL_URL = None  # 隧道代理 url
-# PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 
 # 请求中间件：处理请求中的各种情况
 REQUEST_MIDDLEWARE = [
