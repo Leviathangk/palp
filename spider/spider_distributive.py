@@ -88,7 +88,7 @@ class DistributiveSpider(BaseSpider, Thread):
         master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
         if master_name:
             master_detail = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
-            if not master_detail or time.time() - json.loads(master_detail.decode())['time'] > 5:
+            if master_detail and time.time() - json.loads(master_detail.decode())['time'] > 5:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
     def spider_logic(self):
