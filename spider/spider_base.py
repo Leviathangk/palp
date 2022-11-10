@@ -110,7 +110,7 @@ class BaseSpider(Thread):
             conn.mysql_conn.connect()
         if settings.PG_HOST:
             conn.pg_conn.connect()
-        if settings.MYSQL_HOST:
+        if settings.MONGO_HOST:
             conn.mongo_conn.conn.server_info()
 
     def start_requests(self) -> None:
