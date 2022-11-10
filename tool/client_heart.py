@@ -24,12 +24,16 @@ class ClientHeart:
         self.client_name = self.generate_client_name()  # 随机客户端名
 
     def start(self):
-        threading.Thread(target=self.beating, daemon=True).start()
+        beating = threading.Thread(target=self.beating, daemon=True)
+        beating.start()
 
         try:
             self.check_client_beating()
         finally:
-            self.close()
+            while True:
+                if not beating.is_alive():
+                    self.close()
+                    break
 
     def check_client_beating(self):
         """
