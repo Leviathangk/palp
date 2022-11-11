@@ -4,18 +4,22 @@
     要实现 Item() == {} 必须继承 MutableMapping
     必须实现 item 的方法、__len__、__iter__ 方法
 
+    注意：
+        通过 isinstance 还是不能判断出是 dict，所以部分场景需要 to_dict
+
     案例：
         class Item(palp.Item):
             def __init__(self, **kwargs):
                 # 懒人方式
                 for key, value in kwargs.items():
                     self[key] = value
+                    或者
+                    setattr(self, key, value)
 
                 # 一般方式
                 # self.xxx = kwargs.get('xxx')
 """
 import json
-from loguru import logger
 from typing import MutableMapping
 
 
@@ -44,55 +48,24 @@ class BaseItem(MutableMapping):
 
         return json.dumps(self.to_dict(), **kwargs)
 
-    def keys(self):
-        """
-        使类可以遍历 keys
-
-        :return:
-        """
-        for key in self.__dict__.keys():
-            yield key
-
-    def values(self):
-        """
-        使类可以遍历 values
-
-        :return:
-        """
-        for value in self.__dict__.values():
-            yield value
-
-    def items(self):
-        """
-        使类可以遍历 items
-
-        :return:
-        """
-        for key, value in self.__dict__.items():
-            yield key, value
-
     def __setattr__(self, key, value):
         """
-        这是属性，但是做的是字典，虽然可以但是不建议
+        设置属性
 
         :param key:
         :param value:
         :return:
         """
-        logger.warning(f"请使用 item['xxx'] = xxx 而不是 item.xxx = xxx！")
-
         self.__dict__[key] = value
 
     def __getattr__(self, item):
         """
-        这是属性，但是做的是字典，虽然可以但是不建议
+        获取属性
 
         :param item:
         :return:
         """
-        logger.warning(f"请使用 item['xxx'] 而不是 item.xxx！")
-
-        return self.__dict__.get(item)
+        return self.__dict__[item]
 
     def __setitem__(self, key, value):
         """
@@ -111,7 +84,7 @@ class BaseItem(MutableMapping):
         :param item:
         :return:
         """
-        return self.__dict__.get(item)
+        return self.__dict__[item]
 
     def __delitem__(self, key):
         """
@@ -120,8 +93,7 @@ class BaseItem(MutableMapping):
         :param key:
         :return:
         """
-        if key in self.__dict__:
-            del self.__dict__[key]
+        del self.__dict__[key]
 
     def __len__(self):
         """
