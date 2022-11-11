@@ -5,6 +5,7 @@
 """
 import sys
 import argparse
+from pathlib import Path
 from palp.tool.create_spider import CreateSpider
 from palp.tool.create_project import CreateProject
 
@@ -39,7 +40,11 @@ def generator():
 
 
 def helper():
-    print("palp 操作命令如下")
+    version_path = Path(__file__).parent.parent.joinpath('VERSION')
+    with open(version_path, 'r', encoding='utf-8') as f:
+        version = f.read()
+
+    print(f"palp {version}\n\nPalp 操作命令如下")
     print("\tpalp create [options] [args]")
     print("\n可选 options:")
     cmds = {"-p": "即 project，创建爬虫项目", "-s": "即 spider，创建爬虫"}
