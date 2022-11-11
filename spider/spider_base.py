@@ -11,6 +11,8 @@ from pathlib import Path
 from loguru import logger
 from palp import settings
 from threading import Thread
+
+from palp.buffer import ItemBuffer
 from palp.parser import Parser
 from typing import List, Union
 from palp.network.request import Request
@@ -251,12 +253,18 @@ class BaseSpider(Thread):
             for middleware in self.__class__.SPIDER_MIDDLEWARE:
                 middleware.spider_start(self)
 
-            # 启动对应的线程
+            # 启动对应的线程处理 yield
             Parser.from_settings()
             for i in range(settings.SPIDER_THREAD_COUNT):
                 parser = Parser(q=self._queue, q_item=self._queue_item, spider=self)
                 self._parser_list.append(parser)
                 parser.start()
+
+            # 启动一定的线程处理 item
+            ItemBuffer.from_settings()
+            for _ in range(settings.ITEM_THREADS):
+                self._item_buffer = ItemBuffer(spider=self, q=self._queue_item)
+                self._item_buffer.start()
 
             # spider 逻辑
             self.spider_logic()

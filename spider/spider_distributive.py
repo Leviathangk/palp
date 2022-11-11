@@ -177,11 +177,6 @@ class DistributiveSpider(BaseSpider, Thread):
             # 清空心跳
             redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
 
-            # 处理 item
-            ItemBuffer.from_settings()
-            self._item_buffer = ItemBuffer(spider=self, q=self._queue_item)
-            self._item_buffer.start()
-
             # 分发失败的任务
             self.distribute_failed_task_request()
             self.distribute_failed_task_item()

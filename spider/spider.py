@@ -44,10 +44,5 @@ class Spider(BaseSpider, Thread):
 
         :return:
         """
-        # 一个线程处理 item
-        ItemBuffer.from_settings()
-        self._item_buffer = ItemBuffer(spider=self, q=self._queue_item)
-        self._item_buffer.start()
-
         # 分发任务
         self.distribute_task()

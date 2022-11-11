@@ -115,11 +115,14 @@ REQUEST_FILTER_MIDDLEWARE = {
 }
 
 '''item'''
-# 下载中间件：请求前的处理
+# item 配置
+ITEM_THREADS = 1  # item 处理的线程数量，默认 1
 ITEM_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 ITEM_RETRY_FAILED = False  # 分布式时启动重试失败请求
 PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
+
+# 下载中间件：请求前的处理
 PIPELINE = [
     "palp.pipeline.pipeline_base.BasePipeline",
 ]
