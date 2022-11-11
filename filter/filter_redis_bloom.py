@@ -35,7 +35,7 @@ class RequestRedisBloomFilter(BaseFilter):
             redis_key_filter = settings.REDIS_KEY_QUEUE_FILTER_ITEM
 
         if settings.STRICT_FILTER:
-            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK):
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'Request'):
                 return self.judge(fingerprint, redis_key_filter)
         else:
             return self.judge(fingerprint, redis_key_filter)
