@@ -5,6 +5,7 @@ import urllib3
 import requests
 from palp import settings
 from typing import Callable
+from urllib.parse import urlparse
 from palp.tool.user_agent import random_ua
 from requests.cookies import RequestsCookieJar
 from palp.network.response import ResponseDownloader
@@ -16,7 +17,7 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 class Request:
     # requests 模块所需的
-    REQUEST_ATTRS = [
+    __REQUEST_ATTRS__ = [
         'url',
         'method',
         'params',
@@ -36,7 +37,7 @@ class Request:
     ]
 
     # 框架运行所需的
-    PALP_ATTRS = [
+    __PALP_ATTRS__ = [
         'filter_repeat',
         'keep_session',
         'callback',
@@ -83,7 +84,6 @@ class Request:
 
         # Request 所需字段
         self._requests_params = {}  # request 参数
-        self._original_params = {}  # __init__ 后的 request 参数，用来传递快速发起请求
         self.keep_session = keep_session or False
         self.filter_repeat = filter_repeat or False
         self.callback = callback
@@ -114,8 +114,6 @@ class Request:
         # 传递参数更新一下
         for key, value in kwargs.items():
             self.__dict__[key] = value
-
-        self._original_params.update(kwargs)
 
         # 判断类型
         if self.method:
@@ -149,14 +147,71 @@ class Request:
             cookie_jar=self.cookie_jar
         ).response(**self._requests_params)
 
-        # 给响应体携带上请求原数据（非纯原）
-        response.__dict__.update({
-            'palp': {
-                'requests': self._original_params
-            }
-        })
-
         return self.callback, response
+
+    def add_proxy(self, proxies: str = None, allow_domains: list = None) -> None:
+        """
+        指定域名添加代理
+
+        代理选用优先级：proxies > self.proxies > settings.REQUEST_PROXIES_TUNNEL_URL
+
+        使用方式：
+            1、在 RequestMiddleware 中的 request_in 中建立 allow_domains 列表
+            2、使用 request.add_proxy(allow_domains=allow_domains)
+
+        :param proxies: 代理
+        :param allow_domains: 允许的域名（middleware 中使用）
+        :return:
+        """
+        if isinstance(self.proxies, tuple):
+            self.proxies = dict(self.proxies)
+        if isinstance(self.proxies, dict):
+            proxies_input = list(self.proxies.values())[0]
+        else:
+            proxies_input = self.proxies
+
+        proxies = proxies or proxies_input or settings.REQUEST_PROXIES_TUNNEL_URL
+        if not proxies:
+            return
+
+        if allow_domains:
+            if self.domain in allow_domains:
+                self.proxies = {'http': proxies, 'https': proxies}
+            else:
+                self.proxies = None
+        else:
+            self.proxies = {'http': proxies, 'https': proxies}
+
+    def to_dict(self) -> dict:
+        """
+        获取字典形式
+
+        主要作用：快速进行二次请求
+
+        示例：
+            request_dict = request.to_dict()
+            request_dict[xxx] = xxx # 修改
+
+            yield palp.Request(**request_dict)
+        :return:
+        """
+        request_dict = {}
+
+        for key, value in self.__dict__.items():
+            if key.startswith('_'):
+                continue
+            request_dict[key] = value
+
+        return request_dict
+
+    @property
+    def domain(self) -> str:
+        """
+        获取请求的域名
+
+        :return:
+        """
+        return urlparse(self.url).netloc
 
     def __getattr__(self, item):
         """
@@ -180,11 +235,8 @@ class Request:
         """
         self.__dict__[key] = value
 
-        if key in self.__class__.REQUEST_ATTRS:
+        if key in self.__class__.__REQUEST_ATTRS__:
             self._requests_params[key] = value
-
-        if not key.startswith('_'):
-            self._original_params[key] = value
 
     def __str__(self):
         return f"<Request {self.method}-{self.url}>"
