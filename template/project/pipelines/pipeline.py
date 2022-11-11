@@ -46,7 +46,7 @@ class Pipeline(palp.Pipeline):
         :param item: 启用 item buffer 时是 List[item]
         :return:
         """
-        pass
+        logger.warning(f"失败的 item：{item}")
 
     def pipeline_close(self, spider) -> None:
         """

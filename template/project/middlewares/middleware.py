@@ -37,7 +37,6 @@ class SpiderMiddleware(palp.SpiderMiddleware):
         :param exception: 错误的详细信息
         :return:
         """
-
         logger.error(exception)
 
 
@@ -73,7 +72,6 @@ class RequestMiddleware(palp.RequestMiddleware):
         :param exception: 错误的详细信息
         :return: [Request, None]
         """
-
         logger.error(exception)
 
         return
@@ -86,4 +84,4 @@ class RequestMiddleware(palp.RequestMiddleware):
         :param request:
         :return:
         """
-        pass
+        logger.warning(f"失败的请求：{request}")
