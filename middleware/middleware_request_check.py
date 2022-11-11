@@ -5,10 +5,10 @@ from loguru import logger
 from palp import settings
 from urllib.parse import urlparse
 from palp.exception.exception_drop import DropRequestException
-from palp.middleware.middleware_request_base import BaseRequestMiddleware
+from palp.middleware.middleware_request_base import RequestMiddleware
 
 
-class RequestCheckMiddleware(BaseRequestMiddleware):
+class RequestCheckMiddleware(RequestMiddleware):
     def request_in(self, spider, request) -> None:
         # 判断使用过滤时是否开启了过滤
         if request.filter_repeat and not settings.REQUEST_FILTER:

@@ -2,10 +2,10 @@
     spider 资源回收中间件
 """
 from palp import conn
-from palp.middleware.middleware_spider_base import BaseSpiderMiddleware
+from palp.middleware.middleware_spider_base import SpiderMiddleware
 
 
-class SpiderRecycleMiddleware(BaseSpiderMiddleware):
+class SpiderRecycleMiddleware(SpiderMiddleware):
     def spider_close(self, spider) -> None:
         """
         关闭所有创建的连接

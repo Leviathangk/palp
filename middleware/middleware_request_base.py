@@ -41,7 +41,6 @@ class BaseRequestMiddleware:
         :param exception: 错误的详细信息
         :return: [Request, None]
         """
-
         logger.error(exception)
 
         return
@@ -54,7 +53,7 @@ class BaseRequestMiddleware:
         :param request:
         :return:
         """
-        pass
+        logger.warning(f"失败的请求：{request}")
 
 
 # 用于外部引用，避免写类型
@@ -90,8 +89,6 @@ class RequestMiddleware(BaseRequestMiddleware):
         :param exception: 错误的详细信息
         :return: [Request, None]
         """
-
-        logger.error(exception)
 
         return
 

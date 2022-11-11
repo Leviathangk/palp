@@ -66,5 +66,4 @@ class SpiderMiddleware(BaseSpiderMiddleware):
         :param exception: 错误的详细信息
         :return:
         """
-
-        logger.error(exception)
+        pass

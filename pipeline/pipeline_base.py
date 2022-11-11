@@ -49,7 +49,7 @@ class BasePipeline:
         :param item: 启用 item buffer 时是 List[item]
         :return:
         """
-        pass
+        logger.warning(f"失败的 item：{item}")
 
     def pipeline_close(self, spider: BaseSpider) -> None:
         """
@@ -93,7 +93,7 @@ class Pipeline(BasePipeline):
         :param exception: 错误的详细信息
         :return:
         """
-        logger.error(exception)
+        pass
 
     def pipeline_failed(self, spider, item) -> None:
         """

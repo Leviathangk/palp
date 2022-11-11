@@ -11,11 +11,11 @@ from palp.filter.filter_redis import RequestRedisFilter
 from palp.filter.filter_memory import RequestMemoryFilter
 from palp.exception.exception_drop import DropRequestException
 from palp.filter.filter_redis_bloom import RequestRedisBloomFilter
-from palp.middleware.middleware_request_base import BaseRequestMiddleware
+from palp.middleware.middleware_request_base import RequestMiddleware
 
 
 # 本地：基于 python set 的去重
-class RequestMemoryFilterMiddleware(BaseRequestMiddleware):
+class RequestMemoryFilterMiddleware(RequestMiddleware):
     def __init__(self):
         self.request_memory_filter = RequestMemoryFilter()
 
@@ -28,7 +28,7 @@ class RequestMemoryFilterMiddleware(BaseRequestMiddleware):
 
 
 # 本地：基于 bloom 的去重
-class RequestBloomFilterMiddleware(BaseRequestMiddleware):
+class RequestBloomFilterMiddleware(RequestMiddleware):
     def __init__(self):
         self.request_bloom_filter = BloomFilter()
 
@@ -41,7 +41,7 @@ class RequestBloomFilterMiddleware(BaseRequestMiddleware):
 
 
 # redis：基于 redis set 的去重
-class RequestRedisFilterMiddleware(BaseRequestMiddleware):
+class RequestRedisFilterMiddleware(RequestMiddleware):
     def __init__(self):
         self.request_redis_filter = RequestRedisFilter()
 
@@ -54,7 +54,7 @@ class RequestRedisFilterMiddleware(BaseRequestMiddleware):
 
 
 # redis：基于 redis 的 bloom 去重
-class RequestRedisBloomFilterMiddleware(BaseRequestMiddleware):
+class RequestRedisBloomFilterMiddleware(RequestMiddleware):
     def __init__(self):
         self.request_redis_bloom_filter = RequestRedisBloomFilter()
 
