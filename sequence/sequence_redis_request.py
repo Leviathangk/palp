@@ -10,9 +10,6 @@ from palp.sequence.sequence_base import BaseSequence
 
 # 先进先出队列
 class FIFOSequence(BaseSequence):
-    def __init__(self):
-        super().__init__()
-
     def put(self, obj, timeout: int = None):
         """
         添加任务
@@ -50,9 +47,6 @@ class FIFOSequence(BaseSequence):
 
 # 后进先出队列
 class LIFOSequence(FIFOSequence):
-    def __init__(self):
-        super().__init__()
-
     def get(self, timeout: int = None):
         """
         获取任务
@@ -67,9 +61,6 @@ class LIFOSequence(FIFOSequence):
 
 # 优先级队列
 class PrioritySequence(BaseSequence):
-    def __init__(self, spider):
-        super().__init__(spider)
-
     def put(self, obj, timeout: int = None):
         """
         添加任务

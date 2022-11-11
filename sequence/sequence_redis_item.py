@@ -10,9 +10,6 @@ from palp.sequence.sequence_base import BaseSequence
 
 # 先进先出队列
 class FIFOSequence(BaseSequence):
-    def __init__(self):
-        super().__init__()
-
     def put(self, obj, timeout: int = None):
         """
         添加任务
