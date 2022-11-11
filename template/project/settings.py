@@ -50,6 +50,8 @@ BASE_PATH = Path(__file__).absolute().parent
 # REDIS_POOL_CONFIG = {}  # redis pool 连接自定义配置项
 
 '''请求相关'''
+# REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
+# REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求
 # REQUEST_FILTER = False  # 去重请求，开启了，请求时的 filter_repeat 才有用（不然分布式时使用分布式锁，会极大的降低速度）
 # PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 # REQUEST_DELAY = 0  # 请求间隔
@@ -70,6 +72,8 @@ REQUEST_MIDDLEWARE = [
 
 '''item'''
 # 下载中间件：请求前的处理
+# ITEM_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
+# ITEM_RETRY_FAILED = False  # 分布式时启动重试失败请求
 # PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 # PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
 PIPELINE = [

@@ -51,13 +51,17 @@ REDIS_KEY_MASTER = '{redis_key}:master'  # redis master（分布式时）
 REDIS_KEY_LOCK = '{redis_key}:lock'  # redis 锁
 REDIS_KEY_STOP = '{redis_key}:stop'  # 停止所有机器运行（分布式时）
 REDIS_KEY_QUEUE_REQUEST = '{redis_key}:request'  # request 队列
+REDIS_KEY_QUEUE_BAD_REQUEST = '{redis_key}:requestFailed'  # request 失败队列（set）
 REDIS_KEY_QUEUE_FILTER_REQUEST = '{redis_key}:filter:request'  # request 过滤队列
 REDIS_KEY_QUEUE_ITEM = '{redis_key}:item'  # item 队列
+REDIS_KEY_QUEUE_BAD_ITEM = '{redis_key}:itemFailed'  # item 失败队列（set）
 REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列
 REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器
 
 '''请求相关'''
+REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
+REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求
 REQUEST_FILTER = False  # 去重请求，开启了，请求时的 filter_repeat 才有用（不然分布式时使用分布式锁，会极大的降低速度）
 PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
 REQUEST_DELAY = 0  # 请求间隔
@@ -112,6 +116,8 @@ REQUEST_FILTER_MIDDLEWARE = {
 
 '''item'''
 # 下载中间件：请求前的处理
+ITEM_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
+ITEM_RETRY_FAILED = False  # 分布式时启动重试失败请求
 PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
 PIPELINE = [
@@ -127,12 +133,12 @@ PERSISTENCE_ITEM_FILTER = False  # 是否持久化 item 过滤（分布式时才
 # item 过滤中间件（1、本地，2、云端分布式）
 ITEM_FILTER_PIPELINE = {
     1: {
-        1: 'palp.pipeline.pipeline_item_filter.ItemMemoryFilterPipeline',  # 本地：set 过滤
-        2: 'palp.pipeline.pipeline_item_filter.ItemBloomFilterPipeline',  # 本地：布隆过滤
+        1: 'palp.pipeline.pipeline_filter.ItemMemoryFilterPipeline',  # 本地：set 过滤
+        2: 'palp.pipeline.pipeline_filter.ItemBloomFilterPipeline',  # 本地：布隆过滤
     },
     2: {
-        1: 'palp.pipeline.pipeline_item_filter.ItemRedisFilterPipeline',  # redis：set 过滤
-        2: 'palp.pipeline.pipeline_item_filter.ItemRedisBloomFilterPipeline'  # redis：布隆过滤
+        1: 'palp.pipeline.pipeline_filter.ItemRedisFilterPipeline',  # redis：set 过滤
+        2: 'palp.pipeline.pipeline_filter.ItemRedisBloomFilterPipeline'  # redis：布隆过滤
     }
 }
 
