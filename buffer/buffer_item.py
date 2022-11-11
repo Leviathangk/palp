@@ -26,15 +26,11 @@ class ItemBuffer(BaseItemBuffer):
 
         :return:
         """
-        pipeline_list = [
-            import_module(settings.ITEM_FILTER_PIPELINE[settings.SPIDER_TYPE][settings.FILTERING_MODE]),
-            import_module(settings.PIPELINE)
-        ]
-
-        cls.PIPELINE.extend(pipeline_list)
+        cls.PIPELINE.extend(import_module(settings.ITEM_FILTER_PIPELINE[settings.SPIDER_TYPE][settings.FILTERING_MODE]))
+        cls.PIPELINE.extend(import_module(settings.PIPELINE))
 
         if settings.ITEM_FAILED_SAVE:
-            cls.PIPELINE.append(
+            cls.PIPELINE.extend(
                 import_module('palp.pipeline.pipeline_recycle.ItemRecyclePipeline')
             )
 

@@ -39,18 +39,17 @@ class Parser(Thread):
 
         :return:
         """
-        middleware_list = [
-            import_module(settings.PALP_FIRST_REQUEST_MIDDLEWARE),
-            import_module(settings.REQUEST_FILTER_MIDDLEWARE[settings.SPIDER_TYPE][settings.FILTERING_MODE]),
-            import_module(settings.REQUEST_MIDDLEWARE),
-            import_module(settings.PALP_LAST_REQUEST_MIDDLEWARE)
-        ]
 
-        cls.REQUEST_MIDDLEWARE.extend(middleware_list)
+        cls.REQUEST_MIDDLEWARE.extend(import_module(settings.PALP_FIRST_REQUEST_MIDDLEWARE))
+        cls.REQUEST_MIDDLEWARE.extend(
+            import_module(settings.REQUEST_FILTER_MIDDLEWARE[settings.SPIDER_TYPE][settings.FILTERING_MODE])
+        )
+        cls.REQUEST_MIDDLEWARE.extend(import_module(settings.REQUEST_MIDDLEWARE))
+        cls.REQUEST_MIDDLEWARE.extend(import_module(settings.PALP_LAST_REQUEST_MIDDLEWARE))
 
         # 如果启用失败则保存请求的话
         if settings.REQUEST_FAILED_SAVE:
-            cls.REQUEST_MIDDLEWARE.append(
+            cls.REQUEST_MIDDLEWARE.extend(
                 import_module('palp.middleware.middleware_request_recycle.RequestRecycleMiddleware')
             )
 
