@@ -143,7 +143,7 @@ class DistributiveSpider(BaseSpider, Thread):
                 else:
                     cls = modules[key]
 
-                self._queue_item.put(cls(**item['data']))
+                self._queue_item.put(cls(**json.loads(item['data'])))
 
     def spider_logic(self):
         """
