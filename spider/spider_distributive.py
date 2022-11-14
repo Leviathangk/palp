@@ -80,7 +80,9 @@ class DistributiveSpider(BaseSpider, Thread):
         from palp.conn import redis_conn
 
         master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
-        if master_name:
+        if master_name == b'':
+            redis_conn.delete(settings.REDIS_KEY_MASTER)
+        elif master_name:
             master_detail = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
             if master_detail and time.time() - json.loads(master_detail.decode())['time'] > 5:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
