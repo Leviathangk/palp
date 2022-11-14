@@ -124,7 +124,7 @@ class Parser(Thread):
         new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
 
         # 修改优先级，深层的函数应该优先处理，避免积压不前
-        if settings.REQUEST_QUEUE == 3:
+        if settings.REQUEST_MODE == 3:
             if old_request.level - 1 > 0:
                 new_request.level = old_request.level - 1
             else:
