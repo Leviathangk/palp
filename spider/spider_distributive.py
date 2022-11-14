@@ -11,7 +11,6 @@ from palp import settings
 from threading import Thread
 from abc import abstractmethod
 from quickdb import RedisLockNoWait
-from palp.buffer.buffer_item import ItemBuffer
 from palp.spider.spider_base import BaseSpider
 from palp.tool.client_heart import ClientHeart
 from requests.cookies import RequestsCookieJar

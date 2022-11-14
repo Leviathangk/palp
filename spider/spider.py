@@ -5,7 +5,6 @@ from palp import settings
 from threading import Thread
 from abc import abstractmethod
 from palp.spider.spider_base import BaseSpider
-from palp.buffer.buffer_item import ItemBuffer
 
 
 class Spider(BaseSpider, Thread):
