@@ -111,6 +111,23 @@ class BaseItem(MutableMapping):
         """
         return iter(self.__dict__)
 
+    def __getstate__(self):
+        """
+        pickle dumps 时使用
+
+        :return:
+        """
+        return self.to_dict()
+
+    def __setstate__(self, state):
+        """
+        pickle loads 时使用
+
+        :param state:
+        :return:
+        """
+        self.__dict__.update(state)
+
     def __str__(self):
         return f"<{self.__class__.__name__} item:{self.to_dict()}>"
 
