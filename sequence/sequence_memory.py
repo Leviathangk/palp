@@ -1,5 +1,7 @@
 """
     三种内存队列
+
+    注意，优先级队列的对象需要实现 __lt__ 方法
 """
 import queue
 from palp.sequence.sequence_base import BaseSequence

@@ -238,5 +238,14 @@ class Request:
         if key in self.__class__.__REQUEST_ATTRS__:
             self._requests_params[key] = value
 
+    def __lt__(self, other):
+        """
+        返回比较，否则使用优先级队列会报错
+
+        :param other:
+        :return:
+        """
+        return self.level < other.level
+
     def __str__(self):
         return f"<Request {self.method}-{self.url}>"
