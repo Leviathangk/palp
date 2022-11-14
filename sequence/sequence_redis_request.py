@@ -71,7 +71,12 @@ class PrioritySequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        redis_conn.zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): obj.level})
+        if hasattr(obj, 'level'):
+            level = obj.level
+        else:
+            level = 100
+
+        redis_conn.zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): level})
 
     def get(self, timeout: int = None):
         """

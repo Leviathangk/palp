@@ -2,7 +2,6 @@
     三种内存队列
 """
 import queue
-from palp.network.request import Request
 from palp.sequence.sequence_base import BaseSequence
 
 
@@ -62,10 +61,10 @@ class PrioritySequence(LIFOSequence):
         :param obj: 数据
         :return:
         """
-        if isinstance(obj, Request):
+        if hasattr(obj, 'level'):
             level = obj.level
         else:
-            level = 10
+            level = 100
 
         self.queue.put([level, obj], timeout=timeout)
 

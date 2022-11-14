@@ -87,18 +87,18 @@ PALP_LAST_REQUEST_MIDDLEWARE = [
 ]
 
 # 请求队列
-REQUEST_MODE = 1  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
+REQUEST_MODE = 3  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
 REQUEST_QUEUE = {
     1: {
         1: 'palp.sequence.sequence_memory.FIFOSequence',  # 本地：先进先出队列
         2: 'palp.sequence.sequence_memory.LIFOSequence',  # 本地：后进先出队列
-        3: 'palp.sequence.sequence_memory.PrioritySequence',  # 本地：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
+        3: 'palp.sequence.sequence_memory.PrioritySequence',  # 本地：优先级队列（通过 request 的 level 指定，默认 level 100，越小越高）
     },
     2: {
         1: 'palp.sequence.sequence_redis_request.FIFOSequence',  # redis：先进先出队列
         2: 'palp.sequence.sequence_redis_request.LIFOSequence',  # redis：后进先出队列
         3: 'palp.sequence.sequence_redis_request.PrioritySequence',
-        # redis：优先级队列（通过 request 的 level 指定，默认 level 10，越小越高）
+        # redis：优先级队列（通过 request 的 level 指定，默认 level 100，越小越高）
     }
 }
 

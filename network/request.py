@@ -88,7 +88,7 @@ class Request:
         self.filter_repeat = filter_repeat or False
         self.callback = callback
         self.session = session or requests.session()
-        self.level = level or 10
+        self.level = level or 100
         self.cookie_jar = cookie_jar or RequestsCookieJar()
 
         # requests 请求参数

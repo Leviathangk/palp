@@ -68,7 +68,7 @@ REQUEST_MIDDLEWARE = [
 ]
 
 # 请求队列
-# REQUEST_MODE = 1  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
+# REQUEST_MODE = 3  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列（默认）
 
 '''item'''
 # item 配置

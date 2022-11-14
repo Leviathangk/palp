@@ -11,10 +11,9 @@ from pathlib import Path
 from loguru import logger
 from palp import settings
 from threading import Thread
-
-from palp.buffer import ItemBuffer
 from palp.parser import Parser
 from typing import List, Union
+from palp.buffer import ItemBuffer
 from palp.network.request import Request
 from palp.network.response import Response
 from requests.cookies import RequestsCookieJar

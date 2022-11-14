@@ -122,6 +122,14 @@ class Parser(Thread):
         # 添加请求必须参数
         new_request.session = old_request.session  # 续上上一个的 session
         new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
+
+        # 修改优先级，深层的函数应该优先处理，避免积压不前
+        if settings.REQUEST_QUEUE == 3:
+            if old_request.level - 1 > 0:
+                new_request.level = old_request.level - 1
+            else:
+                new_request.level = 1
+
         self.queue.put(new_request)
 
     def run_requests(self, request: Request):
