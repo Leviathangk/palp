@@ -29,24 +29,10 @@ class DistributiveSpider(BaseSpider, Thread):
         setattr(settings, 'SPIDER_TYPE', 2)
         self.redis_key = redis_key or self.name
 
-        # 根据 spider 的名字设置前缀
-        setattr(settings, 'REDIS_KEY_QUEUE_BAD_ITEM',
-                settings.REDIS_KEY_QUEUE_BAD_ITEM.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_QUEUE_BAD_REQUEST',
-                settings.REDIS_KEY_QUEUE_BAD_REQUEST.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_QUEUE_ITEM', settings.REDIS_KEY_QUEUE_ITEM.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_MASTER', settings.REDIS_KEY_MASTER.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_STOP', settings.REDIS_KEY_STOP.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_LOCK', settings.REDIS_KEY_LOCK.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_HEARTBEAT', settings.REDIS_KEY_HEARTBEAT.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_QUEUE_REQUEST', settings.REDIS_KEY_QUEUE_REQUEST.format(redis_key=self.redis_key))
-
-        setattr(settings, 'REDIS_KEY_HEARTBEAT_FAILED',
-                settings.REDIS_KEY_HEARTBEAT_FAILED.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_QUEUE_FILTER_REQUEST',
-                settings.REDIS_KEY_QUEUE_FILTER_REQUEST.format(redis_key=self.redis_key))
-        setattr(settings, 'REDIS_KEY_QUEUE_FILTER_ITEM',
-                settings.REDIS_KEY_QUEUE_FILTER_ITEM.format(redis_key=self.redis_key))
+        # 根据 spider 的名字设置 redis 前缀
+        for key, value in settings.__dict__.items():
+            if key.startswith('REDIS_KEY'):
+                setattr(settings, key, value.format(redis_key=self.redis_key))
 
         super().__init__(thread_count, request_filter, item_filter)
 
