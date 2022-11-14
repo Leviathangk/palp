@@ -79,9 +79,9 @@ REQUEST_MIDDLEWARE = [
 # PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
 
 # 下载中间件：请求前的处理
-# PIPELINE = [
-#     "palp.pipeline.pipeline_base.BasePipeline",
-# ]
+PIPELINE = [
+    "pipelines.pipeline.Pipeline",
+]
 
 # 过滤去重
 # BLOOMFILTER_BIT = 6
