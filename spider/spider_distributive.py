@@ -117,6 +117,8 @@ class DistributiveSpider(BaseSpider, Thread):
                 # 为每一个起始函数添加一个 session、cookie_jar
                 request.session = requests.session()
                 request.cookie_jar = RequestsCookieJar()
+                request.cookie_jar.update(request['cookies'])
+                del request['cookies']
 
                 self._queue.put(request)
 
