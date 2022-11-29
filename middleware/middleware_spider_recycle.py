@@ -16,9 +16,9 @@ class SpiderRecycleMiddleware(SpiderMiddleware):
         if conn.redis_conn:
             conn.redis_conn.close()
         if conn.pg_conn:
-            conn.pg_conn.engine.dispose()
+            conn.pg_conn.close_all()
         if conn.mysql_conn:
-            conn.mysql_conn.engine.dispose()
+            conn.mysql_conn.close_all()
         if conn.mongo_conn:
             conn.mongo_conn.close()
         if conn.kafka_conn:

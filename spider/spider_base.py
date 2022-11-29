@@ -109,9 +109,9 @@ class BaseSpider(Thread):
             else:
                 conn.redis_conn.info()
         if settings.MYSQL_HOST:
-            conn.mysql_conn.connect()
+            conn.mysql_conn.connection()
         if settings.PG_HOST:
-            conn.pg_conn.connect()
+            conn.pg_conn.connection()
         if settings.MONGO_HOST:
             conn.mongo_conn.conn.server_info()
 

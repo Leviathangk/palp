@@ -13,7 +13,7 @@
             session：sqlalchemy 的连接
             connect：原始连接
 
-        mysql_method 是包装了一些方法的，部分如下：
+        engin 是包装了一些方法的，部分如下：
             upsert
             update
             execute
@@ -22,8 +22,7 @@
 from palp import settings
 from quickdb import MongoConn, KafkaMsgProducer
 from quickdb import RedisConn, RedisClusterConn
-from quickdb import MysqlSQLAlchemyEngine, MysqlSQLAlchemyMethods
-from quickdb import PostgreSQLAlchemyEngine, PostgreSQLAlchemyMethods
+from quickdb import MysqlSQLAlchemyEngine, PostgreSQLAlchemyEngine
 
 # redis 连接
 if settings.REDIS_HOST:
@@ -57,10 +56,8 @@ if settings.MYSQL_HOST:
         pwd=settings.MYSQL_PWD,
         **settings.MYSQL_CONFIG
     )
-    mysql_method = MysqlSQLAlchemyMethods(engine=mysql_conn)
 else:
     mysql_conn = None
-    mysql_method = None
 
 # postgresql 连接
 if settings.PG_HOST:
@@ -72,10 +69,8 @@ if settings.PG_HOST:
         pwd=settings.PG_PWD,
         **settings.PG_CONFIG
     )
-    pg_method = PostgreSQLAlchemyMethods(engine=pg_conn)
 else:
     pg_conn = None
-    pg_method = None
 
 # mongo 连接
 if settings.MONGO_HOST:
