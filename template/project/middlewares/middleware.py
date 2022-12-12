@@ -7,6 +7,7 @@
 """
 import palp
 from typing import Union
+from palp import settings
 from loguru import logger
 from palp.network.request import Request
 
@@ -48,6 +49,11 @@ class RequestMiddleware(palp.RequestMiddleware):
         :param request:
         :return:
         """
+        if settings.REQUEST_PROXIES_TUNNEL_URL:
+            request.proxies = {
+                'http': settings.REQUEST_PROXIES_TUNNEL_URL,
+                'https': settings.REQUEST_PROXIES_TUNNEL_URL,
+            }
 
     def request_error(self, spider, request, exception: Exception) -> Union[Request, None]:
         """

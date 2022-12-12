@@ -90,7 +90,13 @@ class RequestMiddleware(palp.RequestMiddleware):
         :return:
         """
         allow_domains = ['xxx']
-        request.add_proxy(allow_domains=allow_domains)
+        
+        if settings.REQUEST_PROXIES_TUNNEL_URL:
+            if request.domain in allow_domains:
+                request.proxies = {
+                    'http': settings.REQUEST_PROXIES_TUNNEL_URL,
+                    'https': settings.REQUEST_PROXIES_TUNNEL_URL,
+                }
 ```
 
 ## 3、快速二次请求

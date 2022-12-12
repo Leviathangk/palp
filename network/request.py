@@ -1,12 +1,12 @@
 """
     请求的处理
 """
-import random
 import time
-
+import random
 import urllib3
 from palp import settings
 from typing import Callable
+from urllib.parse import urlparse
 from palp.network.response import Response
 from palp.tool.user_agent import random_ua
 from requests.cookies import RequestsCookieJar
@@ -233,6 +233,15 @@ class Request:
             request_dict[key] = value
 
         return request_dict
+
+    @property
+    def domain(self) -> str:
+        """
+        获取请求的域名
+
+        :return:
+        """
+        return urlparse(self.url).netloc
 
     def __getattr__(self, item):
         """
