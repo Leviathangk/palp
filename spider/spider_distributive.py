@@ -22,6 +22,19 @@ class DistributiveSpider(Spider):
         分布式 spider
     """
 
+    def __new__(cls, *args, **kwargs):
+        """
+        加载 spider 设置，并定义 SPIDER_TYPE
+
+        :param args:
+        :param kwargs:
+        """
+        if not cls.SPIDER_MIDDLEWARE:
+            setattr(settings, 'SPIDER_TYPE', 2)
+            cls.from_settings()
+
+        return object.__new__(cls)
+
     def __init__(self, thread_count=None, redis_key: str = None, request_filter=False, item_filter=False):
         """
 
@@ -30,7 +43,6 @@ class DistributiveSpider(Spider):
         :param request_filter: 开启请求过滤，不然 filter_repeat 无效
         :param item_filter: 开启 item 过滤
         """
-        setattr(settings, 'SPIDER_TYPE', 2)
         self.spider_master = False
         self.redis_key = redis_key or self.name
 
@@ -159,8 +171,6 @@ class DistributiveSpider(Spider):
         from palp.conn import redis_conn
 
         self.start_controller()  # 任务处理
-        self.start_distribute()  # 分发任务
-
         self.start_check()  # 检查是否正常
         self.competition_for_master()  # 竞争为 master
 
@@ -196,7 +206,3 @@ class DistributiveSpider(Spider):
                 redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_REQUEST)
             if not settings.PERSISTENCE_ITEM_FILTER:
                 redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_ITEM)
-
-        # 等待程序执行
-        self.wait_spider_controller_done()
-        self.wait_item_controller_done()

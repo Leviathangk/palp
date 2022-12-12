@@ -1,18 +1,18 @@
-import inspect
 import sys
-import threading
 import time
 import types
+import inspect
+import threading
 from pathlib import Path
-from abc import abstractmethod
-from requests.cookies import RequestsCookieJar
 from palp import settings
 from loguru import logger
+from abc import abstractmethod
 from typing import Union, List
-from palp.controller import SpiderController, ItemController
-from palp.exception import NotGeneratorFunctionError
 from palp.network.request import Request
 from palp.network.response import Response
+from requests.cookies import RequestsCookieJar
+from palp.exception import NotGeneratorFunctionError
+from palp.controller import SpiderController, ItemController
 from palp.tool.short_module import sort_module, import_module
 
 

@@ -102,7 +102,7 @@ class ClientHeart:
                 self.client_name,
                 json.dumps({
                     "time": int(time.time()),
-                    "waiting": self.spider.all_parser_is_waiting(),
+                    "waiting": self.spider.all_spider_controller_is_waiting(),
                 }, ensure_ascii=False)
             )
             time.sleep(self.beating_time)
