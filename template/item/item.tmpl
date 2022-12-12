@@ -1,14 +1,18 @@
 """
     通过 item 将数据传输至 pipeline
 """
-from palp import Item
+import palp
 
 
-class ${PROJECT_NAME}Item(Item):
-    def __init__(self, **kwargs):
-        # 懒人方式
-        for key, value in kwargs.items():
-            self[key] = value
+class ${PROJECT_NAME}Item(palp.Item):
+    """
+        通用、懒人 item
+    """
 
-        # 一般方式
-        # self.xxx = kwargs.get('xxx')
+
+class ${PROJECT_NAME}StrictItem(palp.StrictItem):
+    """
+        严格 item
+    """
+    # 此处需要定义数据库字段
+    # name = palp.Field()

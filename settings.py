@@ -7,7 +7,6 @@ from pathlib import Path
 
 SPIDER_TYPE = 1  # 爬虫的类型（1 airspider 2 分布式 spider）（非用户设置）
 BASE_PATH = Path(__file__).absolute().parent
-STRICT_FILTER = False  # 严格去重，会加锁，影响性能但精准
 
 '''MYSQL'''
 MYSQL_HOST = None
@@ -60,109 +59,137 @@ REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器
 
 '''请求相关'''
+REQUEST_THREADS = 16  # 线程数量
 REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求
-REQUEST_FILTER = False  # 去重请求，开启了，请求时的 filter_repeat 才有用（不然分布式时使用分布式锁，会极大的降低速度）
 PERSISTENCE_REQUEST_FILTER = False  # 是否持久化请求过滤（分布式时才有效，否则每次结束都会清除）
-REQUEST_DELAY = 0  # 请求间隔
+REQUEST_DELAY = 0  # 请求间隔，可以是 [0, 3] 代表 0-3s
 REQUEST_RETRY_TIMES = 3  # 请求失败重试次数
 REQUEST_TIMEOUT = 10  # 请求超时时间，也可以是元组 (connect timeout, read timeout)
 RANDOM_USERAGENT = False  # 随机请求头（默认是 computer，指定则开启下面的选项）
 RANDOM_USERAGENT_TYPE = 'computer'  # UA 类型：电脑（computer 代表电脑内随便选，后面代表指定浏览器 chrome、opera、firefox、ie、safari）手机：mobile
 DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.35'
 REQUEST_PROXIES_TUNNEL_URL = None  # 隧道代理 url
+RESPONSE_DOWNLOADER = 'palp.network.downloader_requests.ResponseDownloaderByRequests'  # 请求器，这里默认是 requests
+RESPONSE_DOWNLOADER_PARSER = 'palp.network.response_requests.RequestsResponse'  # 解析器，这里默认是 requests
+# RESPONSE_DOWNLOADER = 'palp.network.downloader_httpx.ResponseDownloaderByHttpx'  # 请求器，这里是 httpx
+# RESPONSE_DOWNLOADER_PARSER = 'palp.network.response_httpx.HttpxResponse'  # 解析器，这里是 httpx
 
-# 请求中间件：处理请求中的各种情况
-REQUEST_MIDDLEWARE = [
-    "palp.middleware.middleware_request_base.BaseRequestMiddleware",
-]
 
-# palp 必须的请求中间件，非用户定义
-# first
-PALP_FIRST_REQUEST_MIDDLEWARE = [
-    "palp.middleware.middleware_request_check.RequestCheckMiddleware",
-]
-# last
-PALP_LAST_REQUEST_MIDDLEWARE = [
-]
-
-# 请求队列
-REQUEST_MODE = 3  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
-REQUEST_QUEUE = {
-    1: {
-        1: 'palp.sequence.sequence_memory.FIFOSequence',  # 本地：先进先出队列
-        2: 'palp.sequence.sequence_memory.LIFOSequence',  # 本地：后进先出队列
-        3: 'palp.sequence.sequence_memory.PrioritySequence',  # 本地：优先级队列（通过 request 的 level 指定，默认 level 100，越小越高）
-    },
-    2: {
-        1: 'palp.sequence.sequence_redis_request.FIFOSequence',  # redis：先进先出队列
-        2: 'palp.sequence.sequence_redis_request.LIFOSequence',  # redis：后进先出队列
-        3: 'palp.sequence.sequence_redis_request.PrioritySequence',
-        # redis：优先级队列（通过 request 的 level 指定，默认 level 100，越小越高）
-    }
-}
-
-# 请求过滤中间件（1、本地，2、云端分布式）
-REQUEST_FILTER_MIDDLEWARE = {
-    1: {
-        1: 'palp.middleware.middleware_request_filter.RequestMemoryFilterMiddleware',  # 本地：set 过滤
-        2: 'palp.middleware.middleware_request_filter.RequestBloomFilterMiddleware',  # 本地：布隆过滤
-    },
-    2: {
-        1: 'palp.middleware.middleware_request_filter.RequestRedisFilterMiddleware',  # redis：set 过滤
-        2: 'palp.middleware.middleware_request_filter.RequestRedisBloomFilterMiddleware'  # redis：布隆过滤
-    }
-}
-
-'''item'''
-# item 配置
-ITEM_THREADS = 1  # item 处理的线程数量，默认 1
+'''PIPELINE'''
+ITEM_THREADS = 5  # item 处理的线程数量，默认 5
 ITEM_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 ITEM_RETRY_FAILED = False  # 分布式时启动重试失败请求
 PIPELINE_ITEM_BUFFER = 0  # 缓存数量，只有当 item 达到一定数量才会入库，0 为不进行缓存
 PIPELINE_RETRY_TIMES = 3  # 入库失败重试次数
 
 # 下载中间件：请求前的处理
-PIPELINE = [
-    "palp.pipeline.pipeline_base.BasePipeline",
-]
+PIPELINE = {
+    1: "palp.pipeline.pipeline.Pipeline",
+}
 
-# 过滤去重
+PALP_PIPELINE = {
+    'min': {
+        'ITEM_FILTER_PIPELINE': 1
+    },
+    'max': {
+        1: ['ITEM_FAILED_SAVE', 'palp.pipeline.pipeline_recycle.RedisRecyclePipeline']
+    }
+}
+
+'''MIDDLEWARE'''
+# 请求中间件
+REQUEST_MIDDLEWARE = {
+    1: "palp.middleware.middleware_request.RequestMiddleware",
+}
+
+# palp 必须的请求中间件，非用户定义（min、max 代表 REQUEST_MIDDLEWARE 最小最大索引）
+PALP_REQUEST_MIDDLEWARE = {
+    'min': {
+        1: "palp.middleware.middleware_request_check.RequestCheckMiddleware",
+        'REQUEST_FILTER_MIDDLEWARE': 2  # 反着来代表占用，程序内也要传参，就会转化
+    },
+    'max': {
+        1: ['REQUEST_FAILED_SAVE', 'palp.middleware.middleware_request_recycle.RequestRecycleMiddleware']  # 列表代表判断
+    }
+}
+
+# spider 中间件
+SPIDER_MIDDLEWARE = {
+    1: 'palp.middleware.middleware_spider.SpiderMiddleware',
+}
+
+# palp 必须的请求中间件，非用户定义
+PALP_SPIDER_MIDDLEWARE = {
+    'min': {
+    },
+    'max': {
+        1: 'palp.middleware.middleware_spider_wait.SpiderWaitMiddleware',
+        2: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',
+    }
+}
+
+'''过滤器'''
 BLOOMFILTER_BIT = 6
 BLOOMFILTER_HASH_NUMBER = 30
-ITEM_FILTER = False  # 是否去重 item 默认不去重
+STRICT_FILTER = False  # 严格去重（加锁，会严重影响抓取效率）
+FILTER_ITEM = False  # item 去重
+FILTER_REQUEST = False  # 请求去重
+FILTERING_MODE = 2  # 去重方式：1 为 set 集合，2 为 bloom 过滤（默认）
 PERSISTENCE_ITEM_FILTER = False  # 是否持久化 item 过滤（分布式时才有效，否则每次结束都会清除）
 
 # item 过滤中间件（1、本地，2、云端分布式）
 ITEM_FILTER_PIPELINE = {
     1: {
-        1: 'palp.pipeline.pipeline_filter.ItemMemoryFilterPipeline',  # 本地：set 过滤
-        2: 'palp.pipeline.pipeline_filter.ItemBloomFilterPipeline',  # 本地：布隆过滤
+        1: 'palp.pipeline.pipeline_filter.SetFilterPipeline',  # 本地：set 过滤
+        2: 'palp.pipeline.pipeline_filter.BloomFilterPipeline',  # 本地：布隆过滤
     },
     2: {
-        1: 'palp.pipeline.pipeline_filter.ItemRedisFilterPipeline',  # redis：set 过滤
-        2: 'palp.pipeline.pipeline_filter.ItemRedisBloomFilterPipeline'  # redis：布隆过滤
+        1: 'palp.pipeline.pipeline_filter.RedisSetFilterPipeline',  # redis：set 过滤
+        2: 'palp.pipeline.pipeline_filter.RedisBloomFilterPipeline'  # redis：布隆过滤
     }
 }
 
-'''other'''
-FILTERING_MODE = 2  # 去重方式：1 为 set 集合，2 为 bloom 过滤（默认）
+# 请求过滤中间件（1、本地，2、云端分布式）
+REQUEST_FILTER_MIDDLEWARE = {
+    1: {
+        1: 'palp.middleware.middleware_request_filter.SetFilterMiddleware',  # 本地：set 过滤
+        2: 'palp.middleware.middleware_request_filter.BloomFilterMiddleware',  # 本地：布隆过滤
+    },
+    2: {
+        1: 'palp.middleware.middleware_request_filter.RedisSetFilterMiddleware',  # redis：set 过滤
+        2: 'palp.middleware.middleware_request_filter.RedisBloomFilterMiddleware'  # redis：布隆过滤
+    }
+}
 
-# spider 中间件
-SPIDER_MIDDLEWARE = [
-    'palp.middleware.middleware_spider_base.BaseSpiderMiddleware',
-]
+'''队列'''
+REQUEST_QUEUE_MODE = 3  # 1 为先进先出队列，2 为后进先出队列，3 为优先级队列
+ITEM_QUEUE_MODE = 1  # 1 为先进先出队列，2 为后进先出队列（未使用）
+DEFAULT_QUEUE_PRIORITY = 300  # 默认的优先级队列的优先级
+REQUEST_QUEUE = {
+    1: {
+        1: 'palp.sequence.sequence_memory.FIFOMemorySequence',  # 本地：先进先出队列
+        2: 'palp.sequence.sequence_memory.LIFOMemorySequence',  # 本地：后进先出队列
+        3: 'palp.sequence.sequence_memory.PriorityMemorySequence',  # 本地：优先级队列（通过 request 的 level 指定 越小越高）
+    },
+    2: {
+        1: 'palp.sequence.sequence_redis_request.FIFORequestRedisSequence',  # redis：先进先出队列
+        2: 'palp.sequence.sequence_redis_request.LIFORequestRedisSequence',  # redis：后进先出队列
+        3: 'palp.sequence.sequence_redis_request.PriorityRequestRedisSequence',  # redis：优先级队列（通过 request 的 level 指定）
+    }
+}
+ITEM_QUEUE = {
+    1: {
+        1: 'palp.sequence.sequence_memory.FIFOMemorySequence',  # 本地：先进先出队列
+        2: 'palp.sequence.sequence_memory.LIFOMemorySequence',  # 本地：后进先出队列
+    },
+    2: {
+        1: 'palp.sequence.sequence_redis_item.FIFOItemRedisSequence',  # redis：先进先出队列
+        2: 'palp.sequence.sequence_redis_item.LIFOItemRedisSequence',  # redis：后进先出队列
+    }
+}
 
-# palp 必须的请求中间件，非用户定义
-PALP_FIRST_SPIDER_MIDDLEWARE = [
-]
-PALP_LAST_SPIDER_MIDDLEWARE = [
-    'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',
-]
-
-# 爬虫本身配置
-SPIDER_THREAD_COUNT = 16  # spider 默认的线程数量
-
+'''其它'''
 # 预警：Email
 EMAIL_USER = None  # Email 账号
 EMAIL_PWD = None  # Email 授权码

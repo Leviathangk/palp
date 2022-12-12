@@ -5,10 +5,14 @@ import palp
 
 
 class Item(palp.Item):
-    def __init__(self, **kwargs):
-        # 懒人方式
-        for key, value in kwargs.items():
-            self[key] = value
+    """
+        通用、懒人 item
+    """
 
-        # 一般方式
-        # self.xxx = kwargs.get('xxx')
+
+class StrictItem(palp.StrictItem):
+    """
+        严格 item
+    """
+    # 此处需要定义数据库字段
+    # name = palp.Field

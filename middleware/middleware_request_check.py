@@ -4,17 +4,21 @@
 from loguru import logger
 from palp import settings
 from urllib.parse import urlparse
-from palp.exception.exception_drop import DropRequestException
-from palp.middleware.middleware_request_base import RequestMiddleware
+from palp.exception import DropRequestException
+from palp.middleware.middleware_request import RequestMiddleware
 
 
 class RequestCheckMiddleware(RequestMiddleware):
-    def request_in(self, spider, request) -> None:
-        # 判断使用过滤时是否开启了过滤
-        if request.filter_repeat and not settings.REQUEST_FILTER:
+    """
+        请求检查中间件
+    """
+
+    def request_in(self, spider, request):
+        # 过滤开启检查，请求开启过滤，设置没开启过滤抛出警告
+        if request.filter_repeat and not settings.FILTER_REQUEST:
             logger.warning(f'过滤请求请将 settings.REQUEST_FILTER 设置为 True，当前请求：{request.url}')
 
-        # 判断域名是否在可用域名内
+        # 域名检查，非指定域名则抛出
         domains = spider.__class__.spider_domains
         if isinstance(domains, list) and len(domains) != 0:
             domain = urlparse(request.url).netloc

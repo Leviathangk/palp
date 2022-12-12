@@ -1,41 +1,33 @@
 """
     基础的 item
 
-    要实现 Item() == {} 必须继承 MutableMapping
-    必须实现 item 的方法、__len__、__iter__ 方法
+    要实现 Item() == {} 必须继承 MutableMapping 必须实现 item 的方法、__len__、__iter__ 方法
 
     注意：
         通过 isinstance 还是不能判断出是 dict，所以部分场景需要 to_dict
 
     案例：
         class Item(palp.Item):
-            def __init__(self, **kwargs):
-                # 懒人方式
-                for key, value in kwargs.items():
-                    self[key] = value
-                    或者
-                    setattr(self, key, value)
-
-                # 一般方式
-                # self.xxx = kwargs.get('xxx')
+            pass    # 此处啥都不用写
 """
 import json
 from typing import MutableMapping
 
 
-class BaseItem(MutableMapping):
+class Field:
+    """
+        定义字段
+    """
+
+
+class ItemBase(MutableMapping):
     def to_dict(self) -> dict:
         """
         转化为 dict
 
         :return:
         """
-        item = {}
-
-        for key, value in self.__dict__.items():
-            item[key] = value
-
-        return item
+        return dict(self)
 
     def to_json(self, **kwargs) -> str:
         """
@@ -50,7 +42,7 @@ class BaseItem(MutableMapping):
 
     def __setattr__(self, key, value):
         """
-        设置属性
+        设置属性（不提倡，但允许）
 
         :param key:
         :param value:
@@ -60,12 +52,21 @@ class BaseItem(MutableMapping):
 
     def __getattr__(self, item):
         """
-        获取属性
+        获取属性（不提倡，但允许）
 
         :param item:
         :return:
         """
         return self.__dict__[item]
+
+    def __delattr__(self, item):
+        """
+        删除属性（不提倡，但允许）
+
+        :param item:
+        :return:
+        """
+        del self.__dict__[item]
 
     def __setitem__(self, key, value):
         """
@@ -132,7 +133,11 @@ class BaseItem(MutableMapping):
         return f"<{self.__class__.__name__} item:{self.to_dict()}>"
 
 
-class Item(BaseItem):
+class Item(ItemBase):
     """
-    外部引用使用
+        通用 item
     """
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            self[key] = value

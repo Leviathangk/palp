@@ -1,18 +1,24 @@
 """
     三种内存队列
 
-    注意，优先级队列的对象需要实现 __lt__ 方法
+    注意：
+        python 队列中的 PriorityQueue 需要对比的类实现 __lt__ 方法（小于）不然可能会报错
 """
 import queue
-from palp.sequence.sequence_base import BaseSequence
+
+from palp import settings
+from palp.sequence.sequence import Sequence
 
 
-# 先进先出队列
-class FIFOSequence(BaseSequence):
-    def __init__(self):
-        self.queue = queue.Queue()
+class FIFOMemorySequence(Sequence):
+    """
+        先进先出队列
+    """
 
-    def put(self, obj, timeout: int = None):
+    def __init__(self, q: queue.Queue = None):
+        self.queue = q or queue.Queue()
+
+    def put(self, obj, timeout=None):
         """
         添加任务
 
@@ -22,7 +28,7 @@ class FIFOSequence(BaseSequence):
         """
         self.queue.put(obj, timeout=timeout)
 
-    def get(self, timeout: int = None):
+    def get(self, timeout=None):
         """
         获取任务
         :return:
@@ -42,20 +48,24 @@ class FIFOSequence(BaseSequence):
         return self.queue.empty()
 
 
-# 后进先出队列
-class LIFOSequence(FIFOSequence):
+class LIFOMemorySequence(FIFOMemorySequence):
+    """
+        后进先出队列
+    """
+
     def __init__(self):
-        super().__init__()
-        self.queue = queue.LifoQueue()
+        super().__init__(q=queue.LifoQueue())
 
 
-# 优先级队列
-class PrioritySequence(LIFOSequence):
+class PriorityMemorySequence(FIFOMemorySequence):
+    """
+        优先级队列
+    """
+
     def __init__(self):
-        super().__init__()
-        self.queue = queue.PriorityQueue()
+        super().__init__(q=queue.PriorityQueue())
 
-    def put(self, obj, timeout: int = None):
+    def put(self, obj, timeout=None):
         """
         添加任务
 
@@ -63,16 +73,16 @@ class PrioritySequence(LIFOSequence):
         :param obj: 数据
         :return:
         """
-        if hasattr(obj, 'level'):
-            level = obj.level
+        if hasattr(obj, 'priority'):
+            priority = obj.priority
         else:
-            level = 100
+            priority = settings.DEFAULT_QUEUE_PRIORITY
 
-        self.queue.put([level, obj], timeout=timeout)
+        self.queue.put([priority, obj], timeout=timeout)
 
-    def get(self, timeout: int = None):
+    def get(self, timeout=None):
         """
-        获取任务（这里的 put 都必须是 [level，value] 的形式）
+        获取任务
 
         :return:
         """

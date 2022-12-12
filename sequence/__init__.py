@@ -1,3 +1,4 @@
-from palp.sequence.sequence_redis_request import FIFOSequence as RequestRedisFIFOSequence
-from palp.sequence.sequence_redis_request import LIFOSequence as RequestRedisLIFOSequence
-from palp.sequence.sequence_redis_request import PrioritySequence as RequestRedisPrioritySequence
+from palp.sequence.sequence_memory import FIFOMemorySequence, LIFOMemorySequence, PriorityMemorySequence
+from palp.sequence.sequence_redis_item import FIFOItemRedisSequence, LIFOItemRedisSequence
+from palp.sequence.sequence_redis_request import FIFORequestRedisSequence, LIFORequestRedisSequence, \
+    PriorityRequestRedisSequence

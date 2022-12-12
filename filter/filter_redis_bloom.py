@@ -1,14 +1,15 @@
 """
     redis 上才布隆过滤器
+
     学习链接：https://cuiqingcai.com/8472.html
 """
 from palp import settings
 from quickdb import RedisLock
 from palp.network.request import Request
-from palp.filter.filter_base import BaseFilter
+from palp.filter.filter import FilterBase
 
 
-class RequestRedisBloomFilter(BaseFilter):
+class RedisBloomFilter(FilterBase):
     def __init__(self):
         """
         Initialize BloomFilter
@@ -17,7 +18,7 @@ class RequestRedisBloomFilter(BaseFilter):
         self.m = 1 << settings.BLOOMFILTER_BIT
         self.seeds = range(settings.BLOOMFILTER_HASH_NUMBER)
 
-    def is_repeat(self, obj, **kwargs) -> bool:
+    def is_repeat(self, obj, **kwargs):
         """
         获取对应的指纹，通过本地实现 redis 的 布隆过滤器 去重
 
@@ -36,9 +37,9 @@ class RequestRedisBloomFilter(BaseFilter):
 
         if settings.STRICT_FILTER:
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'Request'):
-                return self.judge(fingerprint, redis_key_filter)
+                return self.judge(redis_key_filter, fingerprint)
         else:
-            return self.judge(fingerprint, redis_key_filter)
+            return self.judge(redis_key_filter, fingerprint)
 
     def exists(self, fingerprint: str, redis_key_filter: str):
         """
@@ -79,12 +80,12 @@ class RequestRedisBloomFilter(BaseFilter):
             ret += seed * ret + ord(value[i])
         return (self.m - 1) & ret
 
-    def judge(self, fingerprint, f) -> bool:
+    def judge(self, f, fingerprint):
         """
         进行判断
 
-        :param fingerprint:
-        :param f:
+        :param f: 判断条件或方法之类
+        :param fingerprint: 指纹
         :return:
         """
         if self.exists(fingerprint=fingerprint, redis_key_filter=f):

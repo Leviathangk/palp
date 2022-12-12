@@ -5,7 +5,7 @@ import re
 import datetime
 from pathlib import Path
 from typing import Union
-from palp.exception.exception_error import SpiderHasExistsError
+from palp.exception import SpiderHasExistsError
 
 
 class CreateSpider:

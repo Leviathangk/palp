@@ -38,7 +38,7 @@ class RequestDelete(Request):
 
 
 if __name__ == '__main__':
-    response = RequestGet(url='https://www.baidu.com', titan_meta={'name': '张三'}).send()
+    response = RequestGet(url='https://www.baidu.com', titan_meta={'name': '张三'}).send()[1]
     print(response.text)
     print(response.titan)
     print(response.titan_meta)

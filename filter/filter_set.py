@@ -6,15 +6,15 @@
 """
 from palp import settings
 from palp.network.request import Request
-from palp.filter.filter_base import BaseFilter, FilterLock
+from palp.filter.filter import FilterBase, FilterLock
 
 
-class RequestMemoryFilter(BaseFilter):
+class SetFilter(FilterBase):
     def __init__(self):
         self.memory_filter_request = set()
         self.memory_filter_item = set()
 
-    def is_repeat(self, obj, **kwargs) -> bool:
+    def is_repeat(self, obj, **kwargs):
         """
         获取对应的指纹，通过 python 的 set 去重
 
@@ -31,16 +31,16 @@ class RequestMemoryFilter(BaseFilter):
 
         if settings.STRICT_FILTER:
             with FilterLock():
-                return self.judge(fingerprint, memory_filter)
+                return self.judge(memory_filter, fingerprint)
         else:
-            return self.judge(fingerprint, memory_filter)
+            return self.judge(memory_filter, fingerprint)
 
-    def judge(self, fingerprint, f) -> bool:
+    def judge(self, f, fingerprint):
         """
         进行判断
 
-        :param fingerprint:
-        :param f:
+        :param f: 判断条件或方法之类
+        :param fingerprint: 指纹
         :return:
         """
         if fingerprint in f:

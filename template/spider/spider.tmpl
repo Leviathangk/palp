@@ -8,7 +8,7 @@ Create on ${DATE}
 import palp
 
 
-class ${SPIDER_NAME}Spider(palp.Spider):
+class ${SPIDER_NAME}Spider(palp.LocalSpider):
     spider_name = "${SPIDER_NAME_LOWER}"   # 自定义的名字
     spider_domains = []  # 允许通过的域名，默认不限制
     spider_settings = None  # 字典形式或导入形式的设置

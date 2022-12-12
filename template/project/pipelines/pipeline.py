@@ -14,7 +14,6 @@ class Pipeline(palp.Pipeline):
         :param item:
         :return:
         """
-        pass
 
     def pipeline_save(self, spider, item) -> None:
         """
@@ -26,17 +25,16 @@ class Pipeline(palp.Pipeline):
         """
         logger.info(item)
 
-    def pipeline_error(self, spider, item, exception_type: str, exception: str) -> None:
+    def pipeline_error(self, spider, item, exception: Exception) -> None:
         """
         入库出错时的操作
 
         :param spider:
         :param item: 启用 item buffer 时是 List[item]
-        :param exception_type: 错误的类型
         :param exception: 错误的详细信息
         :return:
         """
-        logger.error(exception)
+        logger.exception(exception)
 
     def pipeline_failed(self, spider, item) -> None:
         """
@@ -55,4 +53,3 @@ class Pipeline(palp.Pipeline):
         :param spider:
         :return:
         """
-        pass

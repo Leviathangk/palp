@@ -1,4 +1,4 @@
-from palp.middleware.middleware_spider_base import BaseSpiderMiddleware
-from palp.middleware.middleware_request_base import BaseRequestMiddleware
-from palp.middleware.middleware_request_filter import RequestBloomFilterMiddleware, RequestMemoryFilterMiddleware, \
-    RequestRedisBloomFilterMiddleware, RequestRedisFilterMiddleware
+from palp.middleware.middleware_spider import SpiderMiddleware
+from palp.middleware.middleware_request import RequestMiddleware
+from palp.middleware.middleware_request_filter import RedisSetFilter, RedisBloomFilter, RedisSetFilterMiddleware, \
+    RedisBloomFilterMiddleware

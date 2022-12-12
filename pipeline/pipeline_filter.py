@@ -1,63 +1,76 @@
 """
     item 去重
 
-    setting 启用才会去重，但是会提前存指纹
+    注意：
+        setting 启用才会去重
 """
 from palp import settings
 from palp.filter.filter_bloom import BloomFilter
-from palp.pipeline.pipeline_base import Pipeline
-from palp.filter.filter_redis import RequestRedisFilter
-from palp.filter.filter_memory import RequestMemoryFilter
-from palp.exception.exception_drop import DropItemException
-from palp.filter.filter_redis_bloom import RequestRedisBloomFilter
+from palp.pipeline.pipeline import Pipeline
+from palp.filter.filter_redis_set import RedisSetFilter
+from palp.filter.filter_set import SetFilter
+from palp.exception import DropItemException
+from palp.filter.filter_redis_bloom import RedisBloomFilter
 
 
-# 本地：基于 python set 的去重
-class ItemMemoryFilterPipeline(Pipeline):
+class SetFilterPipeline(Pipeline):
+    """
+        基于内存的 set 的去重
+    """
+
     def __init__(self):
-        self.item_memory_filter = RequestMemoryFilter()
+        self.item_memory_filter = SetFilter()
 
-    def pipeline_in(self, spider, item) -> None:
-        if settings.ITEM_FILTER:
+    def pipeline_in(self, spider, item):
+        if settings.FILTER_ITEM:
             is_repeat = self.item_memory_filter.is_repeat(spider=spider, obj=item)
 
             if is_repeat:
                 raise DropItemException(f"丢弃重复 item：{item}")
 
 
-# 本地：基于 bloom 的去重
-class ItemBloomFilterPipeline(Pipeline):
+class BloomFilterPipeline(Pipeline):
+    """
+        基于内存的 bloom 的去重
+    """
+
     def __init__(self):
         self.item_bloom_filter = BloomFilter()
 
-    def pipeline_in(self, spider, item) -> None:
-        if settings.ITEM_FILTER:
+    def pipeline_in(self, spider, item):
+        if settings.FILTER_ITEM:
             is_repeat = self.item_bloom_filter.is_repeat(spider=spider, obj=item)
 
             if is_repeat:
                 raise DropItemException(f"丢弃重复 item：{item}")
 
 
-# redis：基于 redis set 的去重
-class ItemRedisFilterPipeline(Pipeline):
-    def __init__(self):
-        self.item_redis_filter = RequestRedisFilter()
+class RedisSetFilterPipeline(Pipeline):
+    """
+        基于 redis 的 set 的去重
+    """
 
-    def pipeline_in(self, spider, item) -> None:
-        if settings.ITEM_FILTER:
+    def __init__(self):
+        self.item_redis_filter = RedisSetFilter()
+
+    def pipeline_in(self, spider, item):
+        if settings.FILTER_ITEM:
             is_repeat = self.item_redis_filter.is_repeat(spider=spider, obj=item)
 
             if is_repeat:
                 raise DropItemException(f"丢弃重复 item：{item}")
 
 
-# redis：基于 redis 的 bloom 去重
-class ItemRedisBloomFilterPipeline(Pipeline):
-    def __init__(self):
-        self.item_redis_bloom_filter = RequestRedisBloomFilter()
+class RedisBloomFilterPipeline(Pipeline):
+    """
+        基于 redis 的 bloom 去重
+    """
 
-    def pipeline_in(self, spider, item) -> None:
-        if settings.ITEM_FILTER:
+    def __init__(self):
+        self.item_redis_bloom_filter = RedisBloomFilter()
+
+    def pipeline_in(self, spider, item):
+        if settings.FILTER_ITEM:
             is_repeat = self.item_redis_bloom_filter.is_repeat(spider=spider, obj=item)
 
             if is_repeat:

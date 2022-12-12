@@ -5,13 +5,13 @@ import importlib
 from pathlib import Path
 from loguru import logger
 from multiprocessing import Process
-from palp.spider.spider_base import BaseSpider
-from palp.exception.exception_error import SpiderHasExistsError
+from palp.spider.spider import SpiderBase
+from palp.exception import SpiderHasExistsError
 
 
 # 启动指定 spider
 class SpiderRunner(Process):
-    def __init__(self, spider: BaseSpider, count: int = 1, **kwargs):
+    def __init__(self, spider: SpiderBase, count: int = 1, **kwargs):
         """
 
         :param spider:

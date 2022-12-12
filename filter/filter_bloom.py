@@ -7,15 +7,15 @@
 from palp import settings
 from palp.network.request import Request
 from pybloom_live import ScalableBloomFilter
-from palp.filter.filter_base import BaseFilter, FilterLock
+from palp.filter.filter import FilterBase, FilterLock
 
 
-class BloomFilter(BaseFilter):
+class BloomFilter(FilterBase):
     def __init__(self):
         self.bloom_filter_request = ScalableBloomFilter()
         self.bloom_filter_item = ScalableBloomFilter()
 
-    def is_repeat(self, obj, **kwargs) -> bool:
+    def is_repeat(self, obj, **kwargs):
         """
         获取对应的指纹，通过 本地 的 布隆过滤器 去重
 
@@ -32,16 +32,16 @@ class BloomFilter(BaseFilter):
 
         if settings.STRICT_FILTER:
             with FilterLock():
-                return self.judge(fingerprint, bloom_filter)
+                return self.judge(bloom_filter, fingerprint)
         else:
-            return self.judge(fingerprint, bloom_filter)
+            return self.judge(bloom_filter, fingerprint)
 
-    def judge(self, fingerprint, f) -> bool:
+    def judge(self, f, fingerprint):
         """
         进行判断
 
-        :param fingerprint:
-        :param f:
+        :param f: 判断条件或方法之类
+        :param fingerprint: 指纹
         :return:
         """
         return f.add(fingerprint)

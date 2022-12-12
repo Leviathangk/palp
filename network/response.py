@@ -1,35 +1,108 @@
 """
     返回带有解析器功能的 Response
+
+    注意：
+        这里没有强制实现所有方法，但是一定要有 text、url、cookies
 """
 
 import re
-import time
+import chardet
+from parsel import Selector
+from abc import abstractmethod
 from urllib.parse import urljoin
 
-import requests
-from typing import Any
-from palp import settings
-from parsel import Selector
-from requests.cookies import RequestsCookieJar
-from requests.models import Response as RequestResponse
 
+class Response:
+    """
+        根据响应体，解析响应
+    """
 
-# 响应解析器
-class Response(RequestResponse):
-    def __init__(self, resp: RequestResponse):
+    def __init__(self, resp):
         """
 
         :param resp: requests 返回的响应
         """
-        super().__init__()
-        self._resp = resp
-        self._resp.encoding = resp.apparent_encoding
-        self._selector = Selector(self._resp.text)
+        self.response = resp
+        self._selector = Selector(self.text)
 
-        self.__dict__.update(self._resp.__dict__)  # 把 request Response 对象的数据转移过来
+    @property
+    @abstractmethod
+    def text(self) -> str:
+        """
+        文本方法
 
-    def json(self, **kwargs) -> Any:
-        return self._resp.json(**kwargs)
+        :return:
+        """
+
+    @property
+    def content(self) -> bytes:
+        """
+        二进制 content
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+    def json(self, *args, **kwargs) -> dict:
+        """
+        json 方法
+
+        :return:
+        """
+
+    @property
+    def status_code(self) -> int:
+        """
+        状态码
+
+        :return:
+        """
+
+    @property
+    @abstractmethod
+    def cookies(self) -> dict:
+        """
+        返回 cookies，实在没有返回空字典： {}
+
+        :return:
+        """
+
+    @property
+    def headers(self) -> dict:
+        """
+        返回 请求头
+
+        :return:
+        """
+
+    @property
+    @abstractmethod
+    def url(self) -> str:
+        """
+        响应 url
+
+        :return:
+        """
+
+    @property
+    def history(self) -> list:
+        """
+        响应 历史
+
+        :return:
+        """
+
+    @property
+    def links(self) -> dict:
+        """
+
+        :return:
+        """
+
+    @property
+    def encoding(self):
+        return chardet.detect(self.content)["encoding"]
 
     def xpath(self, query: str, namespaces: str = None, **kwargs):
         """
@@ -91,34 +164,5 @@ class Response(RequestResponse):
     def __getattr__(self, item):
         return self.__dict__.get(item)
 
-
-# 发起请求，返回响应，含有 session 功能
-class ResponseDownloader:
-
-    def __init__(self, keep_session: bool, session: requests.Session, cookie_jar: RequestsCookieJar):
-        """
-
-        :param keep_session: 是否需要保持 session
-        :param session: session
-        :param cookie_jar: cookie_jar
-        """
-        self.keep_session = keep_session
-        self.session = session
-        self.cookie_jar = cookie_jar
-
-    def response(self, **kwargs) -> Response:
-        time.sleep(settings.REQUEST_DELAY)  # 请求等待延迟
-
-        if kwargs.get('cookies'):
-            self.cookie_jar.update(kwargs['cookies'])
-
-        if self.keep_session:
-            kwargs.update({'cookies': self.cookie_jar})
-
-        resp = self.session.request(**kwargs)
-
-        # 更新请求的 cookie、响应的 cookie
-        self.cookie_jar.update(resp.cookies.get_dict())
-        self.session.cookies.clear()
-
-        return Response(resp)
+    def __str__(self):
+        return f'<Response [{self.response.status_code}]>'

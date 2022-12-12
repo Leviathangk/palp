@@ -8,12 +8,12 @@
 from palp import settings
 from quickdb import RedisLock
 from palp.network.request import Request
-from palp.filter.filter_base import BaseFilter
+from palp.filter.filter import FilterBase
 
 
-class RequestRedisFilter(BaseFilter):
+class RedisSetFilter(FilterBase):
 
-    def is_repeat(self, obj, **kwargs) -> bool:
+    def is_repeat(self, obj, **kwargs):
         """
         获取对应的指纹，通过 redis 的 set 去重
 
@@ -32,16 +32,16 @@ class RequestRedisFilter(BaseFilter):
 
         if settings.STRICT_FILTER:
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'Request'):
-                return self.judge(fingerprint, redis_key_filter)
+                return self.judge(redis_key_filter, fingerprint)
         else:
-            return self.judge(fingerprint, redis_key_filter)
+            return self.judge(redis_key_filter, fingerprint)
 
-    def judge(self, fingerprint, f) -> bool:
+    def judge(self, f, fingerprint):
         """
         进行判断
 
-        :param fingerprint:
-        :param f:
+        :param f: 判断条件或方法之类
+        :param fingerprint: 指纹
         :return:
         """
         from palp.conn import redis_conn

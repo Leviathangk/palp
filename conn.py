@@ -79,7 +79,8 @@ if settings.MONGO_HOST:
         port=settings.MONGO_PORT,
         user=settings.MONGO_USER,
         pwd=settings.MONGO_PWD,
-        **settings.MONGO_CONFIG)
+        **settings.MONGO_CONFIG
+    )
 else:
     mongo_conn = None
 

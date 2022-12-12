@@ -1,22 +1,27 @@
 """
     分布式 spider
 """
-import importlib
 import json
 import time
-import palp
-import requests
+import importlib
 from loguru import logger
 from palp import settings
-from threading import Thread
 from abc import abstractmethod
 from quickdb import RedisLockNoWait
-from palp.spider.spider_base import BaseSpider
+from palp.spider.spider import Spider
+from palp.network.request import Request
 from palp.tool.client_heart import ClientHeart
 from requests.cookies import RequestsCookieJar
+from palp.tool.short_module import import_module
+from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
+from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
 
-class DistributiveSpider(BaseSpider, Thread):
+class DistributiveSpider(Spider):
+    """
+        分布式 spider
+    """
+
     def __init__(self, thread_count=None, redis_key: str = None, request_filter=False, item_filter=False):
         """
 
@@ -26,6 +31,7 @@ class DistributiveSpider(BaseSpider, Thread):
         :param item_filter: 开启 item 过滤
         """
         setattr(settings, 'SPIDER_TYPE', 2)
+        self.spider_master = False
         self.redis_key = redis_key or self.name
 
         # 根据 spider 的名字设置 redis 前缀
@@ -34,6 +40,10 @@ class DistributiveSpider(BaseSpider, Thread):
                 setattr(settings, key, value.format(redis_key=self.redis_key))
 
         super().__init__(thread_count, request_filter, item_filter)
+
+        queue_module = settings.REQUEST_QUEUE[settings.SPIDER_TYPE][settings.REQUEST_QUEUE_MODE]
+        self.queue = import_module(queue_module)[0]  # 请求队列
+        self.queue_item = FIFOItemRedisSequence()  # item 队列
 
     @abstractmethod
     def start_requests(self) -> None:
@@ -44,36 +54,11 @@ class DistributiveSpider(BaseSpider, Thread):
         """
         pass
 
-    def parse(self, request, response) -> None:
-        """
-        解析
-
-        :param request:
-        :param response:
-        :return:
-        """
-        pass
-
-    def competition_for_master(self) -> None:
-        """
-        竞争为 master
-
-        :return:
-        """
-        from palp.conn import redis_conn
-
-        if redis_conn.exists(settings.REDIS_KEY_MASTER):
-            return
-
-        with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK) as lock:
-            if lock.lock_success:
-                self.spider_master = True
-                redis_conn.set(settings.REDIS_KEY_MASTER, '')
-
     @staticmethod
     def start_check():
         """
         启动检查，防止上次意外结束，导致 master 死机 key 未删除，无法正常启动
+        这里设定时间 30s 即出意外后，超过 30s 启动才会移除 master key
 
         :return:
         """
@@ -84,12 +69,12 @@ class DistributiveSpider(BaseSpider, Thread):
             redis_conn.delete(settings.REDIS_KEY_MASTER)
         elif master_name:
             master_detail = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
-            if master_detail and time.time() - json.loads(master_detail.decode())['time'] > 5:
+            if master_detail and time.time() - json.loads(master_detail.decode())['time'] > 30:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
-    def distribute_failed_task_request(self):
+    def start_distribute_failed_request(self):
         """
-        执行失败的请求任务
+        重新放入 执行失败的请求任务
 
         :return:
         """
@@ -112,19 +97,18 @@ class DistributiveSpider(BaseSpider, Thread):
                     logger.warning(f"callback 不是 {self.name} 含有的函数：{request}")
                     continue
 
-                request = palp.Request(**request)
+                request = Request(**request)
 
                 # 为每一个起始函数添加一个 session、cookie_jar
-                request.session = requests.session()
                 request.cookie_jar = RequestsCookieJar()
                 request.cookie_jar.update(request['cookies'])
                 del request['cookies']
 
-                self._queue.put(request)
+                self.queue.put(request)
 
-    def distribute_failed_task_item(self) -> None:
+    def start_distribute_failed_item(self) -> None:
         """
-        处理失败的 item
+        重新放入 处理失败的 item
 
         :return:
         """
@@ -147,21 +131,38 @@ class DistributiveSpider(BaseSpider, Thread):
                 else:
                     cls = modules[key]
 
-                self._queue_item.put(cls(**json.loads(item['data'])))
+                self.queue_item.put(cls(**json.loads(item['data'])))
 
-    def spider_logic(self):
+    def competition_for_master(self) -> None:
         """
-        spider 处理逻辑
+        竞争为 master
 
         :return:
         """
         from palp.conn import redis_conn
 
-        # 检查是否正常
-        self.start_check()
+        if redis_conn.exists(settings.REDIS_KEY_MASTER):
+            return
 
-        # master 竞争
-        self.competition_for_master()
+        with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK) as lock:
+            if lock.lock_success:
+                self.spider_master = True
+                redis_conn.set(settings.REDIS_KEY_MASTER, '')
+
+    @SpiderMiddlewareDecorator()
+    def run(self) -> None:
+        """
+        分布式处理 逻辑
+
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        self.start_controller()  # 任务处理
+        self.start_distribute()  # 分发任务
+
+        self.start_check()  # 检查是否正常
+        self.competition_for_master()  # 竞争为 master
 
         # master 机器处理的事情
         if self.spider_master:
@@ -171,11 +172,11 @@ class DistributiveSpider(BaseSpider, Thread):
             redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
 
             # 分发失败的任务
-            self.distribute_failed_task_request()
-            self.distribute_failed_task_item()
+            self.start_distribute_failed_request()
+            self.start_distribute_failed_item()
 
             # 分发任务
-            self.distribute_task()
+            self.start_distribute()
         else:
             time.sleep(1)  # 睡 1s 避免停止标志没被移除
 
@@ -195,3 +196,7 @@ class DistributiveSpider(BaseSpider, Thread):
                 redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_REQUEST)
             if not settings.PERSISTENCE_ITEM_FILTER:
                 redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_ITEM)
+
+        # 等待程序执行
+        self.wait_spider_controller_done()
+        self.wait_item_controller_done()

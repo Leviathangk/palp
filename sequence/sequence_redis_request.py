@@ -5,12 +5,24 @@
 import zlib
 import pickle
 from palp import settings
-from palp.sequence.sequence_base import BaseSequence
+from palp.sequence.sequence import RedisSequence
 
 
-# 先进先出队列
-class FIFOSequence(BaseSequence):
-    def put(self, obj, timeout: int = None):
+class FIFORequestRedisSequence(RedisSequence):
+    """
+        先进先出队列
+    """
+
+    @classmethod
+    def get_redis_key(cls):
+        """
+        获取 redis 的键
+
+        :return:
+        """
+        return settings.REDIS_KEY_QUEUE_REQUEST
+
+    def put(self, obj, timeout=None):
         """
         添加任务
 
@@ -20,9 +32,9 @@ class FIFOSequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST, zlib.compress(pickle.dumps(obj)))
+        redis_conn.rpush(self.redis_key, zlib.compress(pickle.dumps(obj)))
 
-    def get(self, timeout: int = None):
+    def get(self, timeout=None):
         """
         获取任务（这里是返回的对象）
 
@@ -30,7 +42,7 @@ class FIFOSequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        result = redis_conn.blpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.blpop(self.redis_key, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))  # 这里不需要 decode 因为是对象
 
@@ -42,26 +54,32 @@ class FIFOSequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        return redis_conn.llen(settings.REDIS_KEY_QUEUE_REQUEST) == 0
+        return redis_conn.llen(self.redis_key) == 0
 
 
-# 后进先出队列
-class LIFOSequence(FIFOSequence):
-    def get(self, timeout: int = None):
+class LIFORequestRedisSequence(FIFORequestRedisSequence):
+    """
+        后进先出队列
+    """
+
+    def get(self, timeout=None):
         """
         获取任务
         :return:
         """
         from palp.conn import redis_conn
 
-        result = redis_conn.brpop(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.brpop(self.redis_key, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[-1]))
 
 
-# 优先级队列
-class PrioritySequence(BaseSequence):
-    def put(self, obj, timeout: int = None):
+class PriorityRequestRedisSequence(FIFORequestRedisSequence):
+    """
+        优先级队列
+    """
+
+    def put(self, obj, timeout=None):
         """
         添加任务
 
@@ -71,14 +89,14 @@ class PrioritySequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        if hasattr(obj, 'level'):
-            level = obj.level
+        if hasattr(obj, 'priority'):
+            priority = obj.priority
         else:
-            level = 100
+            priority = settings.DEFAULT_QUEUE_PRIORITY
 
-        redis_conn.zadd(settings.REDIS_KEY_QUEUE_REQUEST, {zlib.compress(pickle.dumps(obj)): level})
+        redis_conn.zadd(self.redis_key, {zlib.compress(pickle.dumps(obj)): priority})
 
-    def get(self, timeout: int = None):
+    def get(self, timeout=None):
         """
         获取任务（这里是返回的对象）
 
@@ -86,7 +104,7 @@ class PrioritySequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        result = redis_conn.bzpopmin(settings.REDIS_KEY_QUEUE_REQUEST, timeout=timeout)
+        result = redis_conn.bzpopmin(self.redis_key, timeout=timeout)
         if result:
             return pickle.loads(zlib.decompress(result[1]))
 
@@ -98,4 +116,4 @@ class PrioritySequence(BaseSequence):
         """
         from palp.conn import redis_conn
 
-        return redis_conn.zcard(settings.REDIS_KEY_QUEUE_REQUEST) == 0
+        return redis_conn.zcard(self.redis_key) == 0
