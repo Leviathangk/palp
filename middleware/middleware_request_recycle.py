@@ -58,4 +58,8 @@ class RequestRecycleMiddleware(RequestMiddleware):
         else:
             del req['downloader_parser']
 
+        # 删除代理
+        if request.proxies:
+            del req['proxies']
+
         redis_conn.sadd(settings.REDIS_KEY_QUEUE_BAD_REQUEST, json.dumps(req, ensure_ascii=False))
