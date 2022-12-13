@@ -47,8 +47,6 @@ class ResponseDownloaderByHttpx(ResponseDownloader):
 
         # 是否保持 cookie
         if not self.keep_session and self.keep_cookie:
-            if self.cookies:
-                self.cookie_jar.update(self.cookies)
             self.cookies = self.cookie_jar
 
         # 构建请求参数

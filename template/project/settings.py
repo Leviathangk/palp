@@ -71,18 +71,18 @@ BASE_PATH = Path(__file__).absolute().parent
 
 # 下载中间件：请求前的处理
 PIPELINE = {
-    1: "palp.pipeline.pipeline.Pipeline",
+    1: "pipelines.pipeline.Pipeline",
 }
 
 '''MIDDLEWARE'''
 # 请求中间件
 REQUEST_MIDDLEWARE = {
-    1: "palp.middleware.middleware_request.RequestMiddleware",
+    1: "middlewares.middleware.RequestMiddleware",
 }
 
 # spider 中间件
 SPIDER_MIDDLEWARE = {
-    1: 'palp.middleware.middleware_spider.SpiderMiddleware',
+    1: 'middlewares.middleware.SpiderMiddleware',
 }
 
 '''过滤器'''

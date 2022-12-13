@@ -40,6 +40,8 @@ class Request:
 
     # 框架运行所需的
     __PALP_ATTRS__ = [
+        'downloader',
+        'downloader_parser',
         'filter_repeat',
         'keep_session',
         'keep_cookie',
@@ -79,6 +81,7 @@ class Request:
             proxies=None,
             json=None,
             downloader=None,
+            downloader_parser=None,
             filter_repeat: bool = False,
             keep_session: bool = False,
             keep_cookie: bool = False,
@@ -106,6 +109,8 @@ class Request:
         :param callback: 回调函数
         :param priority: 启用优先级队列时的优先级，分数越大，优先级约低，默认 settings.DEFAULT_QUEUE_PRIORITY
         :param command: 自定义操作命令，用于自定义 downloader 时使用
+        :param downloader: 自定义的下载器（局部）
+        :param downloader_parser: 自定义的下载器的解析器（局部）
 
         Palp 参数（非用户设置）
         :param cookie_jar: cookie_jar，存储 cookie，这里使用的是 requests 模块的，其它请求的话可以自己提取
@@ -124,6 +129,7 @@ class Request:
         self.keep_cookie = keep_cookie
         self.keep_session = keep_session
         self.filter_repeat = filter_repeat
+        self.downloader_parser = downloader_parser
 
         # requests 请求参数
         self.url = url
@@ -155,6 +161,9 @@ class Request:
         elif isinstance(settings.REQUEST_DELAY, list):
             time.sleep(random.choice([i for i in range(settings.REQUEST_DELAY[0], settings.REQUEST_DELAY[1] + 1)]))
 
+        # cookie_jar 更新传入的 cookie
+        self.cookie_jar.update(self.cookies)
+
         # 获取响应
         response = self.downloader(
             **self._requests_params,
@@ -164,7 +173,7 @@ class Request:
             command=self.command
         ).response()
 
-        response_parser = self.__class__.DOWNLOADER_PARSER(response)  # 解析器解析响应
+        response_parser = self.downloader_parser(response)  # 解析器解析响应
         if response_parser.cookies:
             self.cookie_jar.update(response_parser.cookies)  # 将响应的 cookie 更新到 cookieJar
 
@@ -187,6 +196,8 @@ class Request:
         # 设置默认
         if self.downloader is None:
             self.downloader = self.__class__.DOWNLOADER
+        if self.downloader_parser is None:
+            self.downloader_parser = self.__class__.DOWNLOADER_PARSER
         if self.cookie_jar is None:
             self.cookie_jar = RequestsCookieJar()
         if self.command is None:
@@ -195,6 +206,8 @@ class Request:
             self.headers = {}
         if self.cookies is None:
             self.cookies = {}
+        elif isinstance(self.cookies, tuple):
+            self.cookies = dict(self.cookies)
         if self.timeout is None:
             self.timeout = settings.REQUEST_TIMEOUT or 60
         self._requests_params.setdefault('verify', False)

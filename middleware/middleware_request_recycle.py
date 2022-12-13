@@ -26,11 +26,36 @@ class RequestRecycleMiddleware(RequestMiddleware):
         if redis_conn is None:
             return
 
+        # 保存请求
         req = request.to_dict()
-        if req['callback']:
-            req['callback'] = req['callback'].__name__
-        req['cookies'] = req['cookie_jar'].get_dict()
 
-        del req['cookie_jar']
+        # 转化 callback
+        if request.callback:
+            req['callback'] = req['callback'].__name__
+
+        # 转化 cookie_jar
+        if request.cookie_jar:
+            if request.cookies:
+                request.cookie_jar.update(request.cookies)
+            req['cookies'] = request.cookie_jar.get_dict()
+            del req['cookie_jar']
+
+        # 转化 downloader
+        if request.downloader != request.__class__.DOWNLOADER:
+            req['downloader'] = {
+                'module': request.downloader.__module__,  # 引用自哪里（downloader 都是未实例化的所以不需要 __class__）
+                'init': request.downloader.__name__,  # 模块名叫什么
+            }
+        else:
+            del req['downloader']
+
+        # 转化 downloader_parser
+        if request.downloader_parser != request.__class__.DOWNLOADER_PARSER:
+            req['downloader_parser'] = {
+                'module': request.downloader_parser.__module__,  # 引用自哪里
+                'init': request.downloader_parser.__name__,  # 模块名叫什么
+            }
+        else:
+            del req['downloader_parser']
 
         redis_conn.sadd(settings.REDIS_KEY_QUEUE_BAD_REQUEST, json.dumps(req, ensure_ascii=False))
