@@ -8,6 +8,7 @@
 import re
 import chardet
 from parsel import Selector
+from bs4 import BeautifulSoup
 from abc import abstractmethod
 from urllib.parse import urljoin
 
@@ -24,6 +25,7 @@ class Response:
         """
         self.response = resp
         self._selector = None
+        self._bs4 = None
 
     @property
     @abstractmethod
@@ -105,11 +107,27 @@ class Response:
         return chardet.detect(self.content)["encoding"]
 
     @property
-    def selector(self):
+    def selector(self) -> Selector:
+        """
+        延迟解析，否则严重影响性能
+
+        :return:
+        """
         if self._selector is None:
             self._selector = Selector(self.text)
 
         return self._selector
+
+    def bs4(self, features: str = 'lxml') -> BeautifulSoup:
+        """
+
+        :param features: 解析器
+        :return:
+        """
+        if self._bs4 is None:
+            self._bs4 = BeautifulSoup(markup=self.text, features=features)
+
+        return self._bs4
 
     def xpath(self, query: str, namespaces: str = None, **kwargs):
         """
