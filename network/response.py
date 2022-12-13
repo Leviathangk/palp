@@ -23,7 +23,7 @@ class Response:
         :param resp: requests 返回的响应
         """
         self.response = resp
-        self._selector = Selector(self.text)
+        self._selector = None
 
     @property
     @abstractmethod
@@ -104,6 +104,13 @@ class Response:
     def encoding(self):
         return chardet.detect(self.content)["encoding"]
 
+    @property
+    def selector(self):
+        if self._selector is None:
+            self._selector = Selector(self.text)
+
+        return self._selector
+
     def xpath(self, query: str, namespaces: str = None, **kwargs):
         """
         实现 xpath 选择器功能
@@ -113,7 +120,7 @@ class Response:
         :param kwargs:
         :return:
         """
-        return self._selector.xpath(query=query, namespaces=namespaces, **kwargs)
+        return self.selector.xpath(query=query, namespaces=namespaces, **kwargs)
 
     def css(self, query: str):
         """
@@ -122,7 +129,7 @@ class Response:
         :param query: 匹配规则
         :return:
         """
-        return self._selector.css(query=query)
+        return self.selector.css(query=query)
 
     def re(self, pattern: str, flags=0) -> list:
         """
