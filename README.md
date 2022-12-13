@@ -9,6 +9,7 @@ Palp 是一个爬虫框架
 - 无感分布式，不需要内网，只需要 redis，分布式与非分布式仅继承的类不同
 - 自动 cookiejar 仅需要使用 keep_cookie 即可
 - 自带 requests、httpx 两种请求器，并可自定义请求器（同时需要自定义解析器）
+- 自动 join url
 
 但有以下注意点：
 
@@ -436,7 +437,6 @@ class Pipeline(palp.Pipeline):
 PIPELINE = {
     1: "pipelines.pipeline.Pipeline",
 }
-
 ```
 
 # Item
@@ -449,7 +449,7 @@ Item 提供了两种
 
 ## Item
 
-懒人 item 不需要定义字段，但是最好有多个就写不同的名字做区分
+懒人 item 不需要定义字段，但是最好有多个就写不同的名字做区分  
 【创建】
 
 ```
@@ -534,6 +534,7 @@ yield StrictItem(**{'xxx':'yyy'})
 - re
 - re_first
 - bs4（默认解析器：lxml）
+- urljoin：合并 url，可以手动使用（默认会自动处理）
 
 【示例】
 
@@ -650,3 +651,21 @@ request_dict[xxx] = xxx # 修改
 
 yield palp.Request(**request_dict)
 ```
+
+## 3、个性化爬虫
+
+比如批次爬虫，根据 redis 获取任务，其实很简单的（不内置批次爬取爬虫）
+
+### 关于表
+
+可以设置多种状态：已抓取，待抓取，队列中，等等
+大概流程如下：
+
+- 不论你什么需求是，只要在 start_requests 函数中，设置获取方法
+- 随后设置为队列中状态
+- 在 pipeline 中设置修改已爬取状态
+
+### 关于 redis
+
+可以设置最简单的 list、或者不重复的 set 或者优先级的 zset  
+只要在 start_requests 函数中 直接执行对应的 pop 方法不就行了
