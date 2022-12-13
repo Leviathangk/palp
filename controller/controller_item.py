@@ -138,7 +138,10 @@ class ItemController(Thread):
         :return:
         """
         for pipeline in self.__class__.PIPELINE:
-            pipeline.pipeline_close(self.spider)
+            try:
+                pipeline.pipeline_close(self.spider)
+            except Exception as e:
+                logger.exception(e)
 
     @property
     def buffer_size(self):

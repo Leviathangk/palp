@@ -15,4 +15,4 @@ class StrictItem(palp.StrictItem):
         严格 item
     """
     # 此处需要定义数据库字段
-    # name = palp.Field
+    # name = palp.Field()
