@@ -45,7 +45,8 @@ class ClientHeart:
 
             all_client_is_waiting = True
 
-            with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=20) as lock:
+            with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'CheckHeart',
+                                 block_timeout=20) as lock:
                 # 判断是否上锁成功
                 if not lock.lock_success:
                     continue
@@ -168,7 +169,7 @@ class ClientHeart:
 
         while True:
             name = str(uuid.uuid1())
-            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK, block_timeout=10):
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK+'GenerateHeart', block_timeout=10):
                 if redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, name):
                     continue
                 else:

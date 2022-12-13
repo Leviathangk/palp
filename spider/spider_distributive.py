@@ -2,12 +2,15 @@
     分布式 spider
 """
 import json
+import threading
 import time
 import importlib
+import uuid
+
 from loguru import logger
 from palp import settings
+from quickdb import RedisLock
 from abc import abstractmethod
-from quickdb import RedisLockNoWait
 from palp.spider.spider import Spider
 from palp.network.request import Request
 from palp.tool.client_heart import ClientHeart
@@ -77,11 +80,11 @@ class DistributiveSpider(Spider):
         from palp.conn import redis_conn
 
         master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
-        if master_name == b'':
-            redis_conn.delete(settings.REDIS_KEY_MASTER)
-        elif master_name:
-            master_detail = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
-            if master_detail and time.time() - json.loads(master_detail.decode())['time'] > 30:
+        if master_name:
+            heart_beat = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_name.decode())
+            if not heart_beat:
+                redis_conn.delete(settings.REDIS_KEY_MASTER)
+            elif time.time() - json.loads(heart_beat.decode())['time'] > 30:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
     def start_distribute_failed_request(self):
@@ -172,19 +175,34 @@ class DistributiveSpider(Spider):
 
     def competition_for_master(self) -> None:
         """
-        竞争为 master
+        竞争为 master 并执行任务分配
+
+        注意：任务分配为线程分配，不然数量一旦过多，将会影响程序执行
 
         :return:
         """
         from palp.conn import redis_conn
 
-        if redis_conn.exists(settings.REDIS_KEY_MASTER):
-            return
+        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'Master', block_timeout=10):
+            if redis_conn.exists(settings.REDIS_KEY_MASTER):
+                return
 
-        with RedisLockNoWait(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK) as lock:
-            if lock.lock_success:
-                self.spider_master = True
-                redis_conn.set(settings.REDIS_KEY_MASTER, '')
+            # 设置 master 标志
+            self.spider_master = True
+            redis_conn.set(settings.REDIS_KEY_MASTER, uuid.uuid1().hex.encode())
+
+            # 删除停止标志
+            redis_conn.delete(settings.REDIS_KEY_STOP)
+
+            # 清空心跳
+            redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
+
+            # 分发失败的任务
+            threading.Thread(target=self.start_distribute_failed_request, daemon=True).start()
+            threading.Thread(target=self.start_distribute_failed_item, daemon=True).start()
+
+            # 分发任务
+            threading.Thread(target=self.start_distribute, daemon=True).start()
 
     @SpiderMiddlewareDecorator()
     def run(self) -> None:
@@ -198,22 +216,6 @@ class DistributiveSpider(Spider):
         self.start_controller()  # 任务处理
         self.start_check()  # 检查是否正常
         self.competition_for_master()  # 竞争为 master
-
-        # master 机器处理的事情
-        if self.spider_master:
-            # 删除停止标志
-            redis_conn.delete(settings.REDIS_KEY_STOP)
-            # 清空心跳
-            redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
-
-            # 分发失败的任务
-            self.start_distribute_failed_request()
-            self.start_distribute_failed_item()
-
-            # 分发任务
-            self.start_distribute()
-        else:
-            time.sleep(1)  # 睡 1s 避免停止标志没被移除
 
         # 等待所有任务执行结束
         ClientHeart(spider=self).start()
