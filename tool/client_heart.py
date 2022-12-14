@@ -67,10 +67,12 @@ class ClientHeart:
                             redis_conn.sadd(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
 
                             # 检查是否是 master 死机，是的话自己成为 master
-                            master_name = redis_conn.get(settings.REDIS_KEY_MASTER)
-                            if master_name and master_name.decode() == client_name:
+                            master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
+
+                            if master_detail and master_detail['name'] == client_name:
                                 self.spider.spider_master = True
-                                redis_conn.set(settings.REDIS_KEY_MASTER, self.client_name)
+                                master_detail['name'] = self.client_name
+                                redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps(master_detail, ensure_ascii=False))
                     else:
                         if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
