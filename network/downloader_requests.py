@@ -21,6 +21,7 @@ class ResponseDownloaderByRequests(ResponseDownloader):
         """
         if cls.SESSION is None:
             cls.SESSION = requests.Session()
+            # 同一 session 默认连接池、最大连接数都是 10，这里改为 1000
             cls.SESSION.mount("http", HTTPAdapter(pool_connections=1000, pool_maxsize=1000))
 
         return object.__new__(cls)

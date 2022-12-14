@@ -10,6 +10,8 @@ Palp 是一个爬虫框架
 - 自动 cookiejar 仅需要使用 keep_cookie 即可
 - 自带 requests、httpx 两种请求器，并可自定义请求器（同时需要自定义解析器）
 - 自动 join url
+- 数据、任务防丢，续接（分布式）
+- 数据、任务失败后自动回收，启动自动接续（需开启 ITEM_FAILED_SAVE、ITEM_RETRY_FAILED、REQUEST_FAILED_SAVE、REQUEST_RETRY_FAILED）
 
 但有以下注意点：
 
@@ -551,8 +553,8 @@ yield StrictItem(**{'xxx':'yyy'})
 
 - 请求过滤默认是不开启的，需要开启 settings.FILTER_REQUEST（普通过滤）
 - 在开启普通过滤的情况下，可以选择开启 settings.STRICT_FILTER（严格过滤）加锁，严重影响性能，不推荐
-- keep_session 虽然可以提高部分效率，但不建议使用，因为既然是爬虫多线程，隧道代理，但是你只有一个连接，很容易就判断出来
-- keep_session 时，检测的话，很容易出现断连，那所有爬虫歇菜，那就需要 new_session=True 重新创建
+- keep_session 虽然可以提高部分效率，但是除非你对 cookie 要求不高，否则分布式 cookie 无法随着请求发到其他机器
+- keep_session 时，如果需要创建新的 session，那就需要 new_session=True 重新创建
 - keep_cookie 推荐，类似 scrapy 手动使用 cookiejar，这里只要一直 keep_cookie=True 就行
 - 请求队列默认是 优先级队列，想修改通过 settings.REQUEST_QUEUE_MODE 修改
 - 优先级队列，本身就有过滤重复请求的作用！！！
