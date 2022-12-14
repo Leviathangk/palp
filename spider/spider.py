@@ -206,7 +206,7 @@ class SpiderBase(threading.Thread):
         done_status = True
 
         for p in self.distribute_thread_list:
-            if not p.waiting:
+            if p.is_alive():
                 done_status = False
                 break
 

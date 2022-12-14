@@ -1,9 +1,7 @@
 """
-    中间件
-    SpiderMiddleware：爬虫中间件
-    RequestMiddleware：请求中间件
+    Middleware
 
-    参数全部可直接原地修改
+    注意：默认报错是 logger.error 输出，需要详细信息请使用 logger.exception（输出会很多，但很细）
 """
 import palp
 from typing import Union
@@ -13,6 +11,10 @@ from palp.network.request import Request
 
 
 class SpiderMiddleware(palp.SpiderMiddleware):
+    """
+        Spider 中间件：处理 spider 开启关闭任务
+    """
+
     def spider_start(self, spider) -> None:
         """
         spider 开始时的操作
@@ -29,7 +31,7 @@ class SpiderMiddleware(palp.SpiderMiddleware):
         :param exception: 错误的详细信息
         :return:
         """
-        logger.exception(exception)
+        logger.error(exception)
 
     def spider_close(self, spider) -> None:
         """
@@ -41,6 +43,10 @@ class SpiderMiddleware(palp.SpiderMiddleware):
 
 
 class RequestMiddleware(palp.RequestMiddleware):
+    """
+        Request 中间件：处理请求
+    """
+
     def request_in(self, spider, request) -> None:
         """
         请求进入时的操作
@@ -64,7 +70,7 @@ class RequestMiddleware(palp.RequestMiddleware):
         :param exception: 错误的详细信息
         :return: [Request, None]
         """
-        logger.exception(exception)
+        logger.error(exception)
 
         return
 

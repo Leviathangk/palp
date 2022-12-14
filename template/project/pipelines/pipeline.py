@@ -1,5 +1,7 @@
 """
-    处理 item，清洗、入库
+    Pipeline 处理 item，清洗、入库
+
+    注意：默认报错是 logger.error 输出，需要详细信息请使用 logger.exception（输出会很多，但很细）
 """
 import palp
 from loguru import logger
@@ -34,7 +36,7 @@ class Pipeline(palp.Pipeline):
         :param exception: 错误的详细信息
         :return:
         """
-        logger.exception(exception)
+        logger.error(exception)
 
     def pipeline_failed(self, spider, item) -> None:
         """

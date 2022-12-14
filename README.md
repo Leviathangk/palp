@@ -146,6 +146,38 @@ if __name__ == '__main__':
     BaiduSpider(thread_count=1).start()
 ```
 
+# 启动爬虫
+
+## 爬虫内启动
+
+```
+BaiduSpider(thread_count=1).start() # 启动可选参数看源码，就几个
+```
+
+## 启动文件启动
+
+注意：是进程形式启动，推荐直接使用 start.py 即可，可同时启动多个爬虫
+
+参数介绍
+
+- spider_name：爬虫名（spider 内一致）
+- count：启动多少个实例（可实现单机分布式，就是进程启动多少个）
+- **kwargs：爬虫启动参数，同 spider 的启动参数
+
+【示例】
+
+```
+from palp import start_spider
+
+
+def main():
+    start_spider.execute(spider_name='xxx', count=1)
+ 
+ 
+if __name__ == '__main__':
+    main()
+```
+
 # 数据库连接
 
 通过 quickdb 模块，内置了 redis、mongo、mysql、kafka、postgresql 的连接，引用方式如下：
