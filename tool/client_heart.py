@@ -130,7 +130,7 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        redis_conn.set(settings.REDIS_KEY_STOP, '停止时间：' + str(datetime.datetime.now()))
+        redis_conn.set(settings.REDIS_KEY_STOP, str(datetime.datetime.now()))
 
     @property
     def all_client_is_waiting(self) -> bool:
@@ -169,7 +169,7 @@ class ClientHeart:
 
         while True:
             name = str(uuid.uuid1())
-            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK+'GenerateHeart', block_timeout=10):
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'GenerateHeart', block_timeout=10):
                 if redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, name):
                     continue
                 else:

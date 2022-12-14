@@ -226,8 +226,6 @@ class DistributiveSpider(Spider):
         if self.spider_master:
             # 删除 master 的标志
             redis_conn.delete(settings.REDIS_KEY_MASTER)
-            # 删除 stop 标志
-            ClientHeart.remove_stop_status()
             # 删除 heart 标志
             redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
             # 判断是否移除 filter

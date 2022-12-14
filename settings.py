@@ -106,8 +106,9 @@ REQUEST_MIDDLEWARE = {
 # palp 必须的请求中间件，非用户定义（min、max 代表 REQUEST_MIDDLEWARE 最小最大索引）
 PALP_REQUEST_MIDDLEWARE = {
     'min': {
-        1: "palp.middleware.middleware_request_check.RequestCheckMiddleware",
-        'REQUEST_FILTER_MIDDLEWARE': 2  # 反着来代表占用，程序内也要传参，就会转化
+        1: "palp.middleware.middleware_request_check.RequestCheckMiddleware",  # 请求检查
+        'REQUEST_FILTER_MIDDLEWARE': 2,  # 请求过滤（反着来代表占用，程序内也要传参，就会转化）
+        3: 'palp.middleware.middleware_request_record.RequestsRecordMiddleware'  # 记录请求
     },
     'max': {
         1: ['REQUEST_FAILED_SAVE', 'palp.middleware.middleware_request_recycle.RequestRecycleMiddleware']  # 列表代表判断
@@ -124,8 +125,9 @@ PALP_SPIDER_MIDDLEWARE = {
     'min': {
     },
     'max': {
-        1: 'palp.middleware.middleware_spider_wait.SpiderWaitMiddleware',
-        2: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',
+        1: 'palp.middleware.middleware_spider_wait.SpiderWaitMiddleware',  # spider 等待结束
+        2: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
+        3: 'palp.middleware.middleware_request_record.RequestsRecordMiddleware'  # 记录请求
     }
 }
 
