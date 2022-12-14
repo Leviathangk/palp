@@ -11,7 +11,9 @@ Palp 是一个爬虫框架
 - 自带 requests、httpx 两种请求器，并可自定义请求器（同时需要自定义解析器）
 - 自动 join url
 - 数据、任务防丢，续接（分布式）
-- 数据、任务失败后自动回收，启动自动接续（需开启 ITEM_FAILED_SAVE、ITEM_RETRY_FAILED、REQUEST_FAILED_SAVE、REQUEST_RETRY_FAILED）
+- 数据、任务失败后自动回收，启动自动接续（需开启
+  ITEM_FAILED_SAVE、ITEM_RETRY_FAILED、REQUEST_FAILED_SAVE、REQUEST_RETRY_FAILED）
+- 成功、失败任务自动统计（分布式结束后在 redis 的 stop key 去看）
 
 但有以下注意点：
 

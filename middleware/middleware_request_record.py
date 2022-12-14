@@ -10,6 +10,9 @@
 """
 import json
 from typing import Union
+
+from quickdb import RedisLock
+
 from palp import settings
 from palp.network.request import Request
 from palp.decorator.decorator_lock import FuncLock
@@ -55,10 +58,23 @@ class RequestsRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         from palp.conn import redis_conn
 
         if redis_conn is not None:
-            stop_time = redis_conn.get(settings.REDIS_KEY_STOP)
-            redis_conn.set(settings.REDIS_KEY_STOP, json.dumps({
-                'request_all': self.__class__.request_count_all,
-                'request_failed': self.__class__.request_count_failed,
-                'request_succeed': self.__class__.request_count_succeed,
-                'stop_time': stop_time.decode()
-            }, ensure_ascii=False))
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'RequestRecord'):
+                stop_detail = redis_conn.get(settings.REDIS_KEY_STOP)
+                stop_detail = stop_detail.decode()
+
+                # 判断有无统计，有则合并，无则新建
+                if 'request_all' in stop_detail:
+                    stop_detail = json.loads(stop_detail)
+                    redis_conn.set(settings.REDIS_KEY_STOP, json.dumps({
+                        'request_all': self.__class__.request_count_all + stop_detail['request_all'],
+                        'request_failed': self.__class__.request_count_failed + stop_detail['request_failed'],
+                        'request_succeed': self.__class__.request_count_succeed + stop_detail['request_succeed'],
+                        'stop_time': stop_detail['stop_time']
+                    }, ensure_ascii=False))
+                else:
+                    redis_conn.set(settings.REDIS_KEY_STOP, json.dumps({
+                        'request_all': self.__class__.request_count_all,
+                        'request_failed': self.__class__.request_count_failed,
+                        'request_succeed': self.__class__.request_count_succeed,
+                        'stop_time': stop_detail
+                    }, ensure_ascii=False))
