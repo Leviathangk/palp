@@ -14,6 +14,7 @@ from requests.cookies import RequestsCookieJar
 from palp.exception import NotGeneratorFunctionError
 from palp.controller import SpiderController, ItemController
 from palp.tool.short_module import sort_module, import_module
+from palp.decorator.decorator_run_func_by_thread import RunByThread
 
 
 class SpiderBase(threading.Thread):
@@ -113,6 +114,7 @@ class SpiderBase(threading.Thread):
         self.spider_done = False  # 爬虫是否运行结束
         self.item_controller_list = []  # 存储所有的解析器
         self.spider_controller_list = []  # 存储所有的解析器
+        self.distribute_thread_list = []  # 存储所有任务分发线程
 
     def start_requests(self) -> None:
         """
@@ -129,6 +131,22 @@ class SpiderBase(threading.Thread):
         @result:
         """
         pass
+
+    def wait_distribute_thread_done(self) -> None:
+        """
+        等待所有任务分发线程执行结束
+
+        :return:
+        """
+        while True:
+            for distribute_thread in self.distribute_thread_list.copy():
+                if not distribute_thread.is_alive():
+                    self.distribute_thread_list.remove(distribute_thread)
+
+            if len(self.distribute_thread_list) == 0:
+                break
+
+            time.sleep(1)
 
     def wait_spider_controller_done(self) -> None:
         """
@@ -179,6 +197,21 @@ class SpiderBase(threading.Thread):
 
             time.sleep(0.1)
 
+    def all_distribute_thread_is_done(self) -> bool:
+        """
+        是否分发任务已经完成
+
+        :return:
+        """
+        done_status = True
+
+        for p in self.distribute_thread_list:
+            if not p.waiting:
+                done_status = False
+                break
+
+        return done_status
+
     def all_spider_controller_is_waiting(self) -> bool:
         """
         是否所有 spider_controller 都没事干
@@ -210,6 +243,7 @@ class SpiderBase(threading.Thread):
 
         return done_status
 
+    @RunByThread(daemon=True)
     def start_distribute(self) -> None:
         """
         刚开始的分发任务

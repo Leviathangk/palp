@@ -33,3 +33,4 @@ class LocalSpider(Spider):
     def run(self) -> None:
         self.start_controller()  # 任务处理
         self.start_distribute()  # 分发任务
+        self.wait_distribute_thread_done()  # 等待任务分发完毕

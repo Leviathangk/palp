@@ -2,11 +2,10 @@
     分布式 spider
 """
 import json
-import threading
 import time
-import importlib
 import uuid
-
+import importlib
+import threading
 from loguru import logger
 from palp import settings
 from quickdb import RedisLock
@@ -17,6 +16,7 @@ from palp.tool.client_heart import ClientHeart
 from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
+from palp.decorator.decorator_run_func_by_thread import RunByThread
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
 
@@ -87,6 +87,7 @@ class DistributiveSpider(Spider):
             elif time.time() - json.loads(heart_beat.decode())['time'] > 30:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
+    @RunByThread(daemon=True)
     def start_distribute_failed_request(self):
         """
         重新放入 执行失败的请求任务
@@ -146,6 +147,7 @@ class DistributiveSpider(Spider):
 
                 self.queue.put(request)
 
+    @RunByThread(daemon=True)
     def start_distribute_failed_item(self) -> None:
         """
         重新放入 处理失败的 item
@@ -198,11 +200,11 @@ class DistributiveSpider(Spider):
             redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
 
             # 分发失败的任务
-            threading.Thread(target=self.start_distribute_failed_request, daemon=True).start()
-            threading.Thread(target=self.start_distribute_failed_item, daemon=True).start()
+            self.start_distribute_failed_request()
+            self.start_distribute_failed_item()
 
             # 分发任务
-            threading.Thread(target=self.start_distribute, daemon=True).start()
+            self.start_distribute()
 
     @SpiderMiddlewareDecorator()
     def run(self) -> None:
@@ -217,7 +219,7 @@ class DistributiveSpider(Spider):
         self.start_check()  # 检查是否正常
         self.competition_for_master()  # 竞争为 master
 
-        # 等待所有任务执行结束
+        # 等待任务分发完毕，客户端无任务，视为执行结束
         ClientHeart(spider=self).start()
 
         # master 机器处理的事情

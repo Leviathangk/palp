@@ -523,6 +523,7 @@ yield StrictItem(**{'xxx':'yyy'})
 - keep_session 时，检测的话，很容易出现断连，那所有爬虫歇菜，那就需要 new_session=True 重新创建
 - keep_cookie 推荐，类似 scrapy 手动使用 cookiejar，这里只要一直 keep_cookie=True 就行
 - 请求队列默认是 优先级队列，想修改通过 settings.REQUEST_QUEUE_MODE 修改
+- 优先级队列，本身就有过滤重复请求的作用！！！
 
 # Response
 

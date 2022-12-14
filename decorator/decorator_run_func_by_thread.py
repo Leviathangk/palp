@@ -24,6 +24,10 @@ class RunByThread(threading.Thread):
 
     def __call__(self, func: Callable):
         def _wrapper(*args, **kwargs):
+            spider = args[0]
+            if hasattr(spider, 'distribute_thread_list'):
+                spider.distribute_thread_list.append(self)  # 将线程存入列表
+
             self.func = func
             self.args = args
             self.kwargs = kwargs

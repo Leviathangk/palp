@@ -80,7 +80,7 @@ class ClientHeart:
                         logger.debug(f"心跳正常：{client_name}")
 
                 # 如果所有客户端都无任务，则结束
-                if all_client_is_waiting:
+                if all_client_is_waiting and self.spider.all_distribute_thread_is_done():
                     logger.debug("所有客户端都已挂起，即将停止")
                     self.stop_all_client()
                     break
