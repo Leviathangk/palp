@@ -5,7 +5,6 @@ import json
 import time
 import uuid
 import importlib
-import threading
 from loguru import logger
 from palp import settings
 from quickdb import RedisLock
