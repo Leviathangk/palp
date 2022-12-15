@@ -12,6 +12,7 @@ from palp.tool.short_module import import_module, sort_module
 
 class ItemController(Thread):
     PIPELINE = []
+    PIPELINE_CLOSED = False
 
     def __new__(cls, *args, **kwargs):
         """
@@ -82,7 +83,9 @@ class ItemController(Thread):
                     for middleware in self.spider.SPIDER_MIDDLEWARE:
                         middleware.spider_error(self.spider, e)
         finally:
-            self.pipeline_close()
+            if not self.__class__.PIPELINE_CLOSED:
+                self.__class__.PIPELINE_CLOSED = True
+                self.pipeline_close()
 
     def pipeline_in(self, item: Item):
         """

@@ -50,7 +50,7 @@ class PipelineBase:
 
     def pipeline_close(self, spider: SpiderBase) -> None:
         """
-        spider 结束时的操作
+        spider 结束时的操作，虽然是多线程，但是只会执行一次
 
         :param spider:
         :return:
@@ -101,7 +101,7 @@ class Pipeline(PipelineBase):
 
     def pipeline_close(self, spider) -> None:
         """
-        spider 结束时的操作
+        spider 结束时的操作，虽然是多线程，但是只会执行一次
 
         :param spider:
         :return:
