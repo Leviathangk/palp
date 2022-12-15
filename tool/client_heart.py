@@ -1,5 +1,8 @@
 """
     通过 redis 实现心跳功能
+
+    master 异常会把自己设置为 slave
+    slave 检测到 master 死机会把自己设置为 master
 """
 import json
 import time
