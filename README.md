@@ -591,6 +591,16 @@ def parse(self, request, response) -> None:
     response.xpath().extract_first()
 ```
 
+# alarm
+
+基于 gsender 模块的内置报警  
+提供两个函数
+
+- send_email：发送邮件
+- send_dingtalk：支持所有钉钉群聊消息类型
+
+注意：模块需要主动调用
+
 # M、其它使用技巧
 
 ## 1、增量爬虫

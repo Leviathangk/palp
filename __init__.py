@@ -1,3 +1,5 @@
+from palp.tool.alarm import send_email
+from palp.tool.alarm import send_dingtalk
 from palp.tool import start_spider
 from palp.item.item import Item
 from palp.item.item_strict import StrictItem

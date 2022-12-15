@@ -8,6 +8,7 @@ from palp import settings
 from loguru import logger
 from abc import abstractmethod
 from typing import Union, List
+from gsender import EmailSender
 from palp.network.request import Request
 from palp.network.response import Response
 from requests.cookies import RequestsCookieJar
@@ -98,6 +99,11 @@ class SpiderBase(threading.Thread):
             conn.pg_conn.connection()
         if settings.MONGO_HOST:
             conn.mongo_conn.conn.server_info()
+
+        # 检查其余可用性
+        # 邮件是否可用
+        if settings.EMAIL_USER and settings.EMAIL_PWD:
+            EmailSender(user=settings.EMAIL_USER, pwd=settings.EMAIL_PWD).check_availability()
 
     def __init__(self, thread_count: int = None, request_filter: bool = False, item_filter: bool = False):
         super().__init__()

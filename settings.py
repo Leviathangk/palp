@@ -192,15 +192,11 @@ ITEM_QUEUE = {
 }
 
 '''其它'''
-# 预警：Email
+# 预警：Email（from palp import send_email）
 EMAIL_USER = None  # Email 账号
 EMAIL_PWD = None  # Email 授权码
-EMAIL_RECEIVER = []  # Email 接收者列表
 
-# 预警：DingTalk
-DING_TALK_AT_MOBILES = []  # @ 手机号
-DING_TALK_AT_USER_IDS = []  # @ user_id
-DING_TALK_AT_ALL = False  # @ 所有人
+# 预警：DingTalk（from palp import send_dingtalk）
 DING_TALK_SECRET = None  # 加签
 DING_TALK_ACCESS_TOKEN = None  # webhook 链接内的 access_token
 
