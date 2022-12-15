@@ -82,7 +82,7 @@ class ClientHeart:
                         logger.debug(f"心跳正常：{client_name}")
 
                 # 如果所有客户端都无任务，则结束
-                if all_client_is_waiting and self.spider.all_distribute_thread_is_done():
+                if all_client_is_waiting and self.master_distribute_thread_is_done():
                     logger.debug("所有客户端都已挂起，即将停止")
                     self.stop_all_client()
                     break
@@ -100,13 +100,21 @@ class ClientHeart:
         from palp.conn import redis_conn
 
         while not self.all_client_is_waiting:
+            # 检测是否分发完毕
+            heart = {
+                "time": int(time.time()),
+                "waiting": self.spider.all_spider_controller_is_waiting(),
+            }
+            if self.spider.spider_master:
+                heart.update({'distribute_done': self.spider.all_distribute_thread_is_done()})
+            else:
+                heart.update({'distribute_done': False})
+
+            # 设置 redis 心跳
             redis_conn.hset(
                 settings.REDIS_KEY_HEARTBEAT,
                 self.client_name,
-                json.dumps({
-                    "time": int(time.time()),
-                    "waiting": self.spider.all_spider_controller_is_waiting(),
-                }, ensure_ascii=False)
+                json.dumps(heart, ensure_ascii=False)
             )
             time.sleep(self.beating_time)
 
@@ -122,6 +130,21 @@ class ClientHeart:
             if not beating.is_alive():
                 redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
                 break
+
+    @staticmethod
+    def master_distribute_thread_is_done() -> bool:
+        """
+        判断 master 有没有把任务分发完毕
+
+        注意：master 死机后 slave 接管 master 会直接设置为 False
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
+        res = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name'].decode())
+
+        return json.loads(res)['distribute_done']
 
     @staticmethod
     def stop_all_client():
@@ -176,11 +199,17 @@ class ClientHeart:
                     continue
                 else:
 
+                    # master 重新起名字
                     if self.spider.spider_master:
-                        redis_conn.set(settings.REDIS_KEY_MASTER, name)
+                        master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
+                        master_detail['name'] = name
+                        redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps(master_detail, ensure_ascii=False))
 
+                    # 发送起始心跳
                     redis_conn.hset(settings.REDIS_KEY_HEARTBEAT, name, json.dumps({
                         "time": int(time.time()),
-                        "waiting": False,
+                        "waiting": False,  # 是否所有线程没事干
+                        'distribute_done': False,  # 任务分发是否结束
                     }, ensure_ascii=False))
+
                     return name
