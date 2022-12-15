@@ -599,7 +599,19 @@ def parse(self, request, response) -> None:
 - send_email：发送邮件
 - send_dingtalk：支持所有钉钉群聊消息类型
 
-注意：模块需要主动调用
+注意：
+
+- 模块需要主动调用
+- 钉钉消息考虑到模板较多，所以返回的是 DingTalkSender 对象，再去调用对应的发送方法
+
+【示例】
+
+```python
+import palp
+
+palp.send_email(receiver='xxx', content_text='palp 执行结束')
+palp.send_dingtalk().send_text(content='测试消息')
+```
 
 # M、其它使用技巧
 
