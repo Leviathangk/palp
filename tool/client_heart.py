@@ -33,9 +33,10 @@ class ClientHeart:
 
         try:
             self.check_client_beating()
-        except:
+        except Exception as e:
             self.stop = True
             self.spider.spider_master = False
+            logger.exception(e)
         finally:
             self.close(beating)
 
