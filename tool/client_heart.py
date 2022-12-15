@@ -19,6 +19,7 @@ class ClientHeart:
         """
         self.spider = spider
 
+        self.stop = False  # 停止标志（用于异常时）
         self.beating_time = 4  # 心跳频率
         self.check_time = self.beating_time - 1  # 心跳检查频率
         self.client_name = self.generate_client_name()  # 随机客户端名
@@ -29,6 +30,9 @@ class ClientHeart:
 
         try:
             self.check_client_beating()
+        except:
+            self.stop = True
+            self.spider.spider_master = False
         finally:
             self.close(beating)
 
@@ -99,7 +103,7 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        while not self.all_client_is_waiting:
+        while not self.stop and not self.all_client_is_waiting:
             # 检测是否分发完毕
             heart = {
                 "time": int(time.time()),
@@ -142,7 +146,7 @@ class ClientHeart:
         from palp.conn import redis_conn
 
         master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
-        res = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name'].decode())
+        res = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name']).decode()
 
         return json.loads(res)['distribute_done']
 

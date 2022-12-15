@@ -60,6 +60,11 @@ class RequestsRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         if settings.SPIDER_TYPE != 1:
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'RequestRecord'):
                 stop_detail = redis_conn.get(settings.REDIS_KEY_STOP)
+
+                # 避免异常终止的获取不到再次报错
+                if not stop_detail:
+                    return
+
                 stop_detail = stop_detail.decode()
 
                 # 判断有无统计，有则合并，无则新建
