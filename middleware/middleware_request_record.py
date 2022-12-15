@@ -57,7 +57,7 @@ class RequestsRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         """
         from palp.conn import redis_conn
 
-        if redis_conn is not None:
+        if settings.SPIDER_TYPE != 1:
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'RequestRecord'):
                 stop_detail = redis_conn.get(settings.REDIS_KEY_STOP)
                 stop_detail = stop_detail.decode()
