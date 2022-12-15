@@ -244,7 +244,8 @@ class SpiderBase(threading.Thread):
                 done_status = False
                 break
 
-        self.spider_done = True
+        if done_status:
+            self.spider_done = True
 
         return done_status
 
