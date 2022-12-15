@@ -88,11 +88,10 @@ class SpiderBase(threading.Thread):
         # 创建连接，检查连接，防止连接不可用
         from palp import conn
 
-        if settings.SPIDER_TYPE != 1:
-            if conn.redis_conn is None:
-                raise ConnectionError('redis 未连接！')
-            else:
-                conn.redis_conn.info()
+        if settings.SPIDER_TYPE != 1 and conn.redis_conn is None:
+            raise ConnectionError('redis 未连接！')
+        if conn.redis_conn:
+            conn.redis_conn.info()
         if settings.MYSQL_HOST:
             conn.mysql_conn.connection()
         if settings.PG_HOST:
