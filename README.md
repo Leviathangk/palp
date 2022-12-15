@@ -720,7 +720,7 @@ yield palp.Request(**request_dict)
 可以设置多种状态：已抓取，待抓取，队列中，等等  
 大概流程如下：
 
-- 不论你什么需求是，只要在 start_requests 函数中，设置获取方法
+- 不论你什么需求，只要在 start_requests 函数中，设置获取方法
 - 随后设置为队列中状态
 - 在 pipeline 中设置修改已爬取状态
 
