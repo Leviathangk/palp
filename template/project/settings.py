@@ -6,6 +6,7 @@
 from pathlib import Path
 
 BASE_PATH = Path(__file__).absolute().parent
+# SPIDER_STOP_ON_ERROR = False  # spider 在报错时停止（spider、pipeline、middleware）
 
 '''MYSQL'''
 # MYSQL_HOST = None

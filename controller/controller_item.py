@@ -79,6 +79,9 @@ class ItemController(Thread):
                 except DropItemException:
                     logger.debug(f"丢弃 item：{self.item_buffer}")
                 except Exception as e:
+                    if settings.SPIDER_STOP_ON_ERROR:
+                        raise
+                        
                     # spider 报错处理
                     for middleware in self.spider.SPIDER_MIDDLEWARE:
                         middleware.spider_error(self.spider, e)

@@ -1,6 +1,7 @@
 """
     spider 中间件装饰器
 """
+from palp import settings
 from loguru import logger
 
 
@@ -20,8 +21,12 @@ class SpiderMiddlewareDecorator:
             try:
                 func(*args, **kwargs)
             except Exception as e:
-                for middleware in middlewares:
-                    middleware.spider_error(spider, e)
+                if settings.SPIDER_STOP_ON_ERROR:
+                    spider.stop_all_spider_controller()
+                    logger.exception(e)
+                else:
+                    for middleware in middlewares:
+                        middleware.spider_error(spider, e)
             finally:
                 for middleware in middlewares:
                     try:
