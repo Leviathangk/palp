@@ -599,6 +599,17 @@ def parse(self, request, response) -> None:
 - send_email：发送邮件
 - send_dingtalk：支持所有钉钉群聊消息类型
 
+修改设置
+```
+# 预警：Email
+EMAIL_USER = None  # Email 账号
+EMAIL_PWD = None  # Email 授权码
+
+# 预警：DingTalk
+DING_TALK_SECRET = None  # 加签
+DING_TALK_ACCESS_TOKEN = None  # webhook 链接内的 access_token
+```
+
 注意：
 
 - 模块需要主动调用
@@ -606,7 +617,7 @@ def parse(self, request, response) -> None:
 
 【示例】
 
-```python
+```
 import palp
 
 palp.send_email(receiver='xxx', content_text='palp 执行结束')
