@@ -169,8 +169,6 @@ class SpiderBase(threading.Thread):
 
             time.sleep(1)  # 不加延迟将会导致性能问题
 
-        self.spider_done = True
-
     def wait_item_controller_done(self) -> None:
         """
         等待 item buffer 结束
@@ -245,6 +243,8 @@ class SpiderBase(threading.Thread):
             if p.is_alive():
                 done_status = False
                 break
+
+        self.spider_done = True
 
         return done_status
 

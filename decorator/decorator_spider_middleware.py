@@ -22,11 +22,11 @@ class SpiderMiddlewareDecorator:
             except Exception as e:
                 for middleware in middlewares:
                     middleware.spider_error(spider, e)
-
-            for middleware in middlewares:
-                try:
-                    middleware.spider_close(spider)
-                except Exception as e:
-                    logger.exception(e)
+            finally:
+                for middleware in middlewares:
+                    try:
+                        middleware.spider_close(spider)
+                    except Exception as e:
+                        logger.exception(e)
 
         return _wrapper
