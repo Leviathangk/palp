@@ -59,6 +59,9 @@ class ClientHeart:
                 if not lock.lock_success:
                     continue
 
+                # 获取失败的客户端
+                failed_client = [i.decode() for i in redis_conn.smembers(settings.REDIS_KEY_HEARTBEAT_FAILED)]
+
                 # 上锁成功则判断客户端运行情况
                 for client_name, detail in redis_conn.hgetall(settings.REDIS_KEY_HEARTBEAT).items():
                     client_name = client_name.decode()
@@ -66,7 +69,7 @@ class ClientHeart:
 
                     # 校验 2 次失败则为客户端关闭
                     if int(time.time()) - detail['time'] - self.beating_time > 1:
-                        if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
+                        if client_name in failed_client:
                             logger.warning(f"该客户端异常关闭：{client_name}")
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
                             redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, client_name)
@@ -82,7 +85,7 @@ class ClientHeart:
                                 master_detail['name'] = self.client_name
                                 redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps(master_detail, ensure_ascii=False))
                     else:
-                        if redis_conn.sismember(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name):
+                        if client_name in failed_client:
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
 
                         if detail['waiting'] is False:
