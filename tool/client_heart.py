@@ -49,7 +49,7 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        while not self.all_client_is_waiting:
+        while not self.stop and not self.all_client_is_waiting:
 
             all_client_is_waiting = True
 
