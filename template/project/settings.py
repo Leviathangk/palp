@@ -9,24 +9,24 @@ BASE_PATH = Path(__file__).absolute().parent
 # SPIDER_STOP_ON_ERROR = False  # spider 在报错时停止（spider、pipeline、middleware）
 
 '''MYSQL'''
-# MYSQL_HOST = None
-# MYSQL_PORT = None
+# MYSQL_HOST = '127.0.0.1'
+# MYSQL_PORT = 3306
 # MYSQL_DB = None
-# MYSQL_USER = None
+# MYSQL_USER = 'root'
 # MYSQL_PWD = None
 # MYSQL_CONFIG = {}  # 字典形式
 
 '''POSTGRESQL'''
-# PG_HOST = None
-# PG_PORT = None
-# PG_DB = None
-# PG_USER = None
+# PG_HOST = '127.0.0.1'
+# PG_PORT = 5432
+# PG_DB = 'postgres'
+# PG_USER = 'root'
 # PG_PWD = None
 # PG_CONFIG = {}  # 字典形式
 
 '''MONGO'''
-# MONGO_HOST = None
-# MONGO_PORT = None
+# MONGO_HOST = '127.0.0.1'
+# MONGO_PORT = 27017
 # MONGO_USER = None
 # MONGO_PWD = None
 # MONGO_CONFIG = {}  # 字典形式
@@ -37,8 +37,8 @@ BASE_PATH = Path(__file__).absolute().parent
 
 '''REDIS'''
 # REDIS_DB = 0
-# REDIS_HOST = None
-# REDIS_PORT = None
+# REDIS_HOST = '127.0.0.1'
+# REDIS_PORT = 6379
 # REDIS_PWD = None
 # REDIS_CLUSTER_NODES = None  # 如果有集群的情况下，优先集群
 # REDIS_MAX_CONNECTIONS = 5  # redis 最大连接数
