@@ -89,7 +89,7 @@ class ClientHeart:
                             all_client_is_waiting = False
                         logger.debug(f"心跳正常：{client_name}")
 
-                # 如果所有客户端都无任务，则结束
+                # 如果所有客户端都无任务进行，并且任务分发完毕，则结束
                 if all_client_is_waiting and self.master_distribute_thread_is_done():
                     logger.debug("所有客户端都已挂起，即将停止")
                     self.stop_all_client()
