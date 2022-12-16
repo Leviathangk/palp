@@ -47,17 +47,17 @@ REDIS_CONFIG = {}  # redis 连接自定义配置项
 REDIS_POOL_CONFIG = {}  # redis pool 连接自定义配置项
 
 # 分布式时的 REDIS KEY
-REDIS_KEY_MASTER = '{redis_key}:master'  # redis master（分布式时）
-REDIS_KEY_LOCK = '{redis_key}:lock'  # redis 锁
-REDIS_KEY_STOP = '{redis_key}:stop'  # 停止所有机器运行（分布式时）
-REDIS_KEY_QUEUE_REQUEST = '{redis_key}:request'  # request 队列
+REDIS_KEY_MASTER = '{redis_key}:master'  # redis master（分布式时）(str)
+REDIS_KEY_LOCK = '{redis_key}:lock'  # redis 锁(str)
+REDIS_KEY_STOP = '{redis_key}:stop'  # 停止所有机器运行（分布式时）(str)
+REDIS_KEY_QUEUE_REQUEST = '{redis_key}:request'  # request 队列（list、zset）
 REDIS_KEY_QUEUE_BAD_REQUEST = '{redis_key}:requestFailed'  # request 失败队列（set）
-REDIS_KEY_QUEUE_FILTER_REQUEST = '{redis_key}:filter:request'  # request 过滤队列
-REDIS_KEY_QUEUE_ITEM = '{redis_key}:item'  # item 队列
+REDIS_KEY_QUEUE_FILTER_REQUEST = '{redis_key}:filter:request'  # request 过滤队列（set、bloom）
+REDIS_KEY_QUEUE_ITEM = '{redis_key}:item'  # item 队列（list）
 REDIS_KEY_QUEUE_BAD_ITEM = '{redis_key}:itemFailed'  # item 失败队列（set）
-REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列
+REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列（set、bloom）
 REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
-REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器
+REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器（set）
 
 '''请求相关'''
 REQUEST_THREADS = 16  # 线程数量
