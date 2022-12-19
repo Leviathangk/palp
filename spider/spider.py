@@ -122,7 +122,7 @@ class SpiderBase(threading.Thread):
         self.spider_controller_list = []  # 存储所有的解析器
         self.distribute_thread_list = []  # 存储所有任务分发线程
 
-        self.spider_uuid = uuid.uuid1()  # uuid 用作线上区分
+        self.spider_uuid = uuid.uuid1().hex  # uuid 用作线上区分
 
     def start_requests(self) -> None:
         """

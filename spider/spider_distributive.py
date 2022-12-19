@@ -197,7 +197,7 @@ class DistributiveSpider(Spider):
             # 设置 master 标志
             self.spider_master = True
             redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps({
-                'name': str(uuid.uuid1().hex.encode()),
+                'name': self.spider_uuid,
                 'time': time.time(),
             }, ensure_ascii=False))
 
