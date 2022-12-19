@@ -16,7 +16,7 @@ from requests.cookies import RequestsCookieJar
 from palp.exception import NotGeneratorFunctionError
 from palp.controller import SpiderController, ItemController
 from palp.tool.short_module import sort_module, import_module
-from palp.decorator.decorator_run_func_by_thread import RunByThread
+from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
 
 
 class SpiderBase(threading.Thread):
@@ -122,6 +122,7 @@ class SpiderBase(threading.Thread):
         self.spider_controller_list = []  # 存储所有的解析器
         self.distribute_thread_list = []  # 存储所有任务分发线程
 
+        self.spider_record = {'all': 0, 'failed': 0, 'succeed': 0}  # 爬取情况记录
         self.spider_uuid = uuid.uuid1().hex  # uuid 用作线上区分
 
     def start_requests(self) -> None:
@@ -252,7 +253,7 @@ class SpiderBase(threading.Thread):
 
         return done_status
 
-    @RunByThread(daemon=True)
+    @RunByThreadDecorator(daemon=True)
     def start_distribute(self) -> None:
         """
         刚开始的分发任务

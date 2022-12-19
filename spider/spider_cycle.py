@@ -26,7 +26,7 @@
             DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
             DemoSpider(thread_count=1).start()
 """
-
+import datetime
 from typing import Union, List
 
 
@@ -36,6 +36,7 @@ class CycleSpider:
     """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
+    spider_table_record_id = None  # 记录表的 id
 
     @classmethod
     def initialize_all_task_states(cls):
@@ -160,7 +161,7 @@ class CycleSpider:
                   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                   PRIMARY KEY (`id`),
                   UNIQUE KEY `task_unique` (`task`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期爬取表';
+                ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期爬取表';
             '''
             mysql_conn.execute(sql=sql)
 
@@ -176,7 +177,7 @@ class CycleSpider:
                   `start_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '执行开始时间',
                   `end_time` datetime DEFAULT NULL COMMENT '执行结束时间',
                   PRIMARY KEY (`id`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
+                ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
             '''
             mysql_conn.execute(sql=sql)
 
@@ -228,3 +229,22 @@ class CycleSpider:
 
         sql = sql.rstrip(',') + ';'
         mysql_conn.execute(sql=sql)
+
+    @classmethod
+    def insert_task_record_start(cls):
+        """
+        插入一条记录
+
+        :param total_count: 总量
+        :param success_count: 成功量
+        :param failed_count: 失败量
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        sql = f'''
+            INSERT IGNORE INTO `{cls.spider_table_record_name}` ( is_done,start_time )
+            VALUES(0,{datetime.datetime.now()}  return id;
+        '''
+        res = mysql_conn.execute(sql=sql, fetchone=True)
+        print(res)

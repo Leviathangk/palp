@@ -3,7 +3,6 @@
 """
 import json
 import time
-import uuid
 import importlib
 from loguru import logger
 from palp import settings
@@ -15,8 +14,9 @@ from palp.tool.client_heart import ClientHeart
 from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
-from palp.decorator.decorator_run_func_by_thread import RunByThread
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
+from palp.decorator.decorator_spider_record import SpiderRecordDecorator
+from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
 
@@ -92,7 +92,7 @@ class DistributiveSpider(Spider):
             elif time.time() - json.loads(heart_beat.decode())['time'] > 20:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
-    @RunByThread(daemon=True)
+    @RunByThreadDecorator(daemon=True)
     def start_distribute_failed_request(self):
         """
         重新放入 执行失败的请求任务
@@ -152,7 +152,7 @@ class DistributiveSpider(Spider):
 
                 self.queue.put(request)
 
-    @RunByThread(daemon=True)
+    @RunByThreadDecorator(daemon=True)
     def start_distribute_failed_item(self) -> None:
         """
         重新放入 处理失败的 item
@@ -215,6 +215,7 @@ class DistributiveSpider(Spider):
             self.start_distribute()
 
     @SpiderMiddlewareDecorator()
+    @SpiderRecordDecorator()
     @SpiderWaitDecorator()
     def run(self) -> None:
         """

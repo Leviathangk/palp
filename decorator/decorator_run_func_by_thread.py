@@ -5,7 +5,7 @@ import threading
 from typing import Callable
 
 
-class RunByThread(threading.Thread):
+class RunByThreadDecorator(threading.Thread):
     """
         通过线程执行函数，简化创建线程
     """

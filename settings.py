@@ -110,7 +110,7 @@ PALP_REQUEST_MIDDLEWARE = {
     'min': {
         1: "palp.middleware.middleware_request_check.RequestCheckMiddleware",  # 请求检查
         'REQUEST_FILTER_MIDDLEWARE': 2,  # 请求过滤（反着来代表占用，程序内也要传参，就会转化）
-        3: 'palp.middleware.middleware_record.RequestRecordMiddleware'  # 记录请求
+        3: 'palp.middleware.middleware_request_record.RequestRecordMiddleware'  # 记录请求
     },
     'max': {
         1: ['REQUEST_FAILED_SAVE', 'palp.middleware.middleware_request_recycle.RequestRecycleMiddleware']  # 列表代表判断
@@ -127,8 +127,7 @@ PALP_SPIDER_MIDDLEWARE = {
     'min': {
     },
     'max': {
-        1: 'palp.middleware.middleware_record.RequestRecordMiddleware',  # 记录请求
-        2: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
+        1: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
     }
 }
 
