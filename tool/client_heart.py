@@ -10,7 +10,7 @@ import datetime
 import threading
 from loguru import logger
 from palp import settings
-from quickdb import RedisLockNoWait, RedisLock
+from quickdb import RedisLockNoWait
 
 
 class ClientHeart:
@@ -162,19 +162,3 @@ class ClientHeart:
         from palp.conn import redis_conn
 
         return bool(redis_conn.exists(settings.REDIS_KEY_STOP))
-
-    @staticmethod
-    def remove_stop_status():
-        """
-        移除停止信号
-
-        :return:
-        """
-        from palp.conn import redis_conn
-
-        while True:
-            if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
-                redis_conn.delete(settings.REDIS_KEY_STOP)
-                break
-
-            time.sleep(0.1)
