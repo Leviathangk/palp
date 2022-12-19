@@ -20,8 +20,6 @@ class ClientHeart:
         :param spider:
         """
         self.spider = spider
-
-        self.stop = False  # 停止标志（用于异常时）
         self.beating_time = 4  # 心跳频率
         self.check_time = self.beating_time - 1  # 心跳检查频率
 
@@ -32,11 +30,8 @@ class ClientHeart:
         try:
             self.check_client_beating()
         except Exception as e:
-            self.stop = True
             self.spider.spider_master = False
             logger.exception(e)
-        finally:
-            self.close(beating)
 
     def check_client_beating(self):
         """
@@ -47,7 +42,7 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        while not self.stop and not self.all_client_is_waiting:
+        while not self.all_client_is_waiting:
 
             all_client_is_waiting = True
 
@@ -108,7 +103,7 @@ class ClientHeart:
         """
         from palp.conn import redis_conn
 
-        while not self.stop and not self.all_client_is_waiting:
+        while True:
             # 检测是否分发完毕
             heart = {
                 "time": int(time.time()),
@@ -126,19 +121,6 @@ class ClientHeart:
                 json.dumps(heart, ensure_ascii=False)
             )
             time.sleep(self.beating_time)
-
-    def close(self, beating: threading.Thread):
-        """
-        清理资源
-
-        :return:
-        """
-        from palp.conn import redis_conn
-
-        while True:
-            if not beating.is_alive():
-                redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.spider.spider_uuid)
-                break
 
     @staticmethod
     def master_distribute_thread_is_done() -> bool:
