@@ -201,8 +201,8 @@ class DistributiveSpider(Spider):
                 'time': time.time(),
             }, ensure_ascii=False))
 
-            # 删除停止标志
-            redis_conn.delete(settings.REDIS_KEY_STOP)
+            # 删除停止标志、记录
+            redis_conn.delete(settings.REDIS_KEY_STOP, settings.REDIS_KEY_RECORD)
 
             # 清空心跳
             redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
