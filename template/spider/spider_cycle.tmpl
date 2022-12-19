@@ -8,7 +8,7 @@ Create on ${DATE}
 import palp
 
 
-class ${SPIDER_NAME}CycleSpider(palp.LocalSpider, CycleSpider):
+class ${SPIDER_NAME}CycleSpider(palp.LocalSpider, palp.CycleSpider):
     spider_name = "${SPIDER_NAME_LOWER}"   # 自定义的名字
     spider_domains = []  # 允许通过的域名，默认不限制
     spider_settings = None  # 字典形式或导入形式的设置
@@ -41,6 +41,6 @@ class ${SPIDER_NAME}CycleSpider(palp.LocalSpider, CycleSpider):
 
 
 if __name__ == '__main__':
-    ${SPIDER_NAME}CycleSpider().create_mysql_table()  # 快捷创建表
-    ${SPIDER_NAME}CycleSpider().insert_tasks(['xxx'])  # 快捷插入任务
+    ${SPIDER_NAME}CycleSpider.create_mysql_table()  # 快捷创建表
+    ${SPIDER_NAME}CycleSpider.insert_tasks(['xxx'])  # 快捷插入任务
     ${SPIDER_NAME}CycleSpider().start()
