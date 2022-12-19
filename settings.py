@@ -127,8 +127,8 @@ PALP_SPIDER_MIDDLEWARE = {
     'min': {
     },
     'max': {
-        1: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
-        2: 'palp.middleware.middleware_record.RequestRecordMiddleware'  # 记录请求
+        1: 'palp.middleware.middleware_record.RequestRecordMiddleware',  # 记录请求
+        2: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
     }
 }
 
