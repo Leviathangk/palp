@@ -16,6 +16,7 @@ from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
 from palp.decorator.decorator_run_func_by_thread import RunByThread
+from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
 
@@ -214,6 +215,7 @@ class DistributiveSpider(Spider):
             self.start_distribute()
 
     @SpiderMiddlewareDecorator()
+    @SpiderWaitDecorator()
     def run(self) -> None:
         """
         分布式处理 逻辑

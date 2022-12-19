@@ -1,5 +1,4 @@
 from palp.middleware.middleware_spider_recycle import SpiderRecycleMiddleware
-from palp.middleware.middleware_spider_wait import SpiderWaitMiddleware
 from palp.middleware.middleware_request_recycle import RequestRecycleMiddleware
 from palp.middleware.middleware_request_check import RequestCheckMiddleware
 from palp.middleware.middleware_request_record import RequestsRecordMiddleware

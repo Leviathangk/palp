@@ -4,6 +4,7 @@
 from palp import settings
 from abc import abstractmethod
 from palp.spider.spider import Spider
+from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 from palp.sequence.sequence_memory import PriorityMemorySequence, FIFOMemorySequence
 
@@ -30,6 +31,7 @@ class LocalSpider(Spider):
         pass
 
     @SpiderMiddlewareDecorator()
+    @SpiderWaitDecorator()
     def run(self) -> None:
         self.start_controller()  # 任务处理
         self.start_distribute()  # 分发任务
