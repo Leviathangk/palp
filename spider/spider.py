@@ -3,6 +3,7 @@ import time
 import types
 import inspect
 import threading
+import uuid
 from pathlib import Path
 from palp import settings
 from loguru import logger
@@ -120,6 +121,8 @@ class SpiderBase(threading.Thread):
         self.item_controller_list = []  # 存储所有的解析器
         self.spider_controller_list = []  # 存储所有的解析器
         self.distribute_thread_list = []  # 存储所有任务分发线程
+
+        self.spider_uuid = uuid.uuid1()  # uuid 用作线上区分
 
     def start_requests(self) -> None:
         """

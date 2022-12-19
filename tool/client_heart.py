@@ -6,7 +6,6 @@
 """
 import json
 import time
-import uuid
 import datetime
 import threading
 from loguru import logger
@@ -25,7 +24,6 @@ class ClientHeart:
         self.stop = False  # 停止标志（用于异常时）
         self.beating_time = 4  # 心跳频率
         self.check_time = self.beating_time - 1  # 心跳检查频率
-        self.client_name = self.generate_client_name()  # 随机客户端名
 
     def start(self):
         beating = threading.Thread(target=self.beating, daemon=True)
@@ -82,7 +80,7 @@ class ClientHeart:
 
                             if master_detail and master_detail['name'] == client_name:
                                 self.spider.spider_master = True
-                                master_detail['name'] = self.client_name
+                                master_detail['name'] = self.spider.spider_uuid
                                 redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps(master_detail, ensure_ascii=False))
                     else:
                         if client_name in failed_client:
@@ -124,7 +122,7 @@ class ClientHeart:
             # 设置 redis 心跳
             redis_conn.hset(
                 settings.REDIS_KEY_HEARTBEAT,
-                self.client_name,
+                self.spider.spider_uuid,
                 json.dumps(heart, ensure_ascii=False)
             )
             time.sleep(self.beating_time)
@@ -139,7 +137,7 @@ class ClientHeart:
 
         while True:
             if not beating.is_alive():
-                redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.client_name)
+                redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, self.spider.spider_uuid)
                 break
 
     @staticmethod
@@ -153,9 +151,13 @@ class ClientHeart:
         from palp.conn import redis_conn
 
         master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
-        res = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name']).decode()
+        res = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name'])
+        if res:
+            res = res.decode()  # 一定要判断，不然可能产生时间差，master 还没有心跳，但是已经开始检测心跳
 
-        return json.loads(res)['distribute_done']
+            return json.loads(res)['distribute_done']
+
+        return False
 
     @staticmethod
     def stop_all_client():
@@ -194,33 +196,3 @@ class ClientHeart:
                 break
 
             time.sleep(0.1)
-
-    def generate_client_name(self) -> str:
-        """
-        生成客户端的名字
-
-        :return:
-        """
-        from palp.conn import redis_conn
-
-        while True:
-            name = str(uuid.uuid1())
-            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'GenerateHeart', block_timeout=10):
-                if redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, name):
-                    continue
-                else:
-
-                    # master 重新起名字
-                    if self.spider.spider_master:
-                        master_detail = json.loads(redis_conn.get(settings.REDIS_KEY_MASTER).decode())
-                        master_detail['name'] = name
-                        redis_conn.set(settings.REDIS_KEY_MASTER, json.dumps(master_detail, ensure_ascii=False))
-
-                    # 发送起始心跳
-                    redis_conn.hset(settings.REDIS_KEY_HEARTBEAT, name, json.dumps({
-                        "time": int(time.time()),
-                        "waiting": False,  # 是否所有线程没事干
-                        'distribute_done': False,  # 任务分发是否结束
-                    }, ensure_ascii=False))
-
-                    return name
