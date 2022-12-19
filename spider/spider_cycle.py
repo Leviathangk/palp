@@ -10,33 +10,37 @@
             spider_table_record_name = f'palp_cycle_record_{spider_name}'  # 记录表
 
             def start_requests(self) -> None:
-                print(self.name)
+                self.initialize_all_task_states()   # 重置所有任务状态为 0
+
+                # 获取任务状态为 0 的任务
+                for task in self.get_tasks_state0():
+                    print(task)
+                    yield palp.RequestGet(url=task['task'])
 
             def parse(self, request, response) -> None:
                 print(response)
 
 
         if __name__ == '__main__':
-            DemoSpider().start()
-
-    DemoSpider.create_mysql_table()    # 快捷创建表
-    DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
-    DemoSpider(thread_count=1).start()
+            DemoSpider.create_mysql_table()    # 快捷创建表
+            DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
+            DemoSpider(thread_count=1).start()
 """
 
 from typing import Union, List
 
-import palp
-
 
 class CycleSpider:
+    """
+        周期性爬虫，需被继承，同时继承其余爬虫
+    """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
 
     @classmethod
     def initialize_all_task_states(cls):
         """
-        重置所有的任务状态为 0
+            重置所有的任务状态为 0
         """
         from palp.conn import mysql_conn
 
@@ -49,10 +53,12 @@ class CycleSpider:
 
     @classmethod
     def get_tasks(cls, state: int) -> dict:
-        '''
+        """
         寻找任务
-        返回数据库的数据字典
-        '''
+
+        :param state: 数据库内的状态
+        :return: 数据库字典
+        """
         from palp.conn import mysql_conn
 
         sql = f'''
@@ -71,17 +77,17 @@ class CycleSpider:
                 yield task
 
     @classmethod
-    def get_tasks_status0(cls) -> dict:
-        '''
-        寻找未做的任务
-        '''
+    def get_tasks_state0(cls) -> dict:
+        """
+            寻找未做的任务（state 为 0 的）
+        """
         for task in cls.get_tasks(0):
             yield task
 
     @classmethod
-    def get_tasks_status2(cls) -> dict:
+    def get_tasks_state2(cls) -> dict:
         """
-        获取之前失败的任务
+            获取之前失败的任务（state 为 2 的）
         """
         for task in cls.get_tasks(2):
             yield task
@@ -90,6 +96,10 @@ class CycleSpider:
     def set_task_state(cls, task_id: int, state: int) -> None:
         """
         设置任务状态
+
+        :param task_id: task 表的 id
+        :param state: task 表的 state
+        :return:
         """
         from palp.conn import mysql_conn
 
@@ -106,6 +116,9 @@ class CycleSpider:
     def set_task_state_running(cls, task_id: int) -> None:
         """
         设置任务状态为 1 抓取中
+
+        :param task_id: task 表的 id
+        :return:
         """
         cls.set_task_state(task_id=task_id, state=1)
 
@@ -113,6 +126,9 @@ class CycleSpider:
     def set_task_state_done(cls, task_id: int) -> None:
         """
         设置任务状态为 2 抓取完毕
+
+        :param task_id: task 表的 id
+        :return:
         """
         cls.set_task_state(task_id=task_id, state=2)
 
@@ -120,6 +136,9 @@ class CycleSpider:
     def set_task_state_failed(cls, task_id: int) -> None:
         """
         设置任务状态为 3 抓取失败
+
+        :param task_id: task 表的 id
+        :return:
         """
         cls.set_task_state(task_id=task_id, state=3)
 
@@ -163,9 +182,12 @@ class CycleSpider:
 
     @classmethod
     def check_mysql_table_exists(cls, table_name: str) -> bool:
-        '''
-        检查 mysql 是否存在改表
-        '''
+        """
+        检查 mysql 是否存在指定表
+
+        :param table_name: 表名
+        :return:
+        """
         from palp.conn import mysql_conn
 
         sql = f'''
@@ -186,8 +208,10 @@ class CycleSpider:
     def insert_tasks(cls, tasks: Union[List[str], str]):
         """
         插入任务
+        注意：任务不能重复，因为 task 是唯一键（插入使用了 IGNORE 所以不会报错）
 
-        注意：任务不能重复，因为 task 是唯一键
+        :param tasks: 存放在 task 字段的任务
+        :return:
         """
         from palp.conn import mysql_conn
 
@@ -196,7 +220,7 @@ class CycleSpider:
 
         # 组合 sql
         sql = f'''
-            INSERT INTO `palp_cycle_task_{cls.spider_name}` ( task )
+            INSERT IGNORE INTO `{cls.spider_table_task_name}` ( task )
             VALUES
         '''
         for task in tasks:
@@ -204,21 +228,3 @@ class CycleSpider:
 
         sql = sql.rstrip(',') + ';'
         mysql_conn.execute(sql=sql)
-
-
-class DSpider(CycleSpider, palp.LocalSpider):
-    spider_name = "baidu3"  # 自定义的名字
-    spider_domains = []  # 允许通过的域名，默认不限制
-    spider_settings = None  # 字典形式或导入形式的设置
-    spider_table_task_name = f'palp_cycle_task_{spider_name}'  # 任务表
-    spider_table_record_name = f'palp_cycle_record_{spider_name}'  # 记录表
-
-    def start_requests(self) -> None:
-        print(self.name)
-
-    def parse(self, request, response) -> None:
-        print(response)
-
-
-if __name__ == '__main__':
-    print(DSpider().create_mysql_table())

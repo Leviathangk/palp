@@ -14,7 +14,7 @@ def generator():
     if len(sys.argv) == 1:
         sys.argv.append('--h')  # 无参数默认输出帮助
 
-    parser = argparse.ArgumentParser(description="Palp 创建爬虫模板")
+    parser = argparse.ArgumentParser(description='Palp 创建爬虫模板')
     parser.add_argument('-p', '--project', help='创建爬虫项目如：palp create -p <project_name>')
     parser.add_argument('-s', '--spider', nargs='+', help='创建爬虫如：palp create -s <spider_name> <spider_type>')
     args = parser.parse_args()
@@ -29,8 +29,8 @@ def generator():
             spider_name = args_spider[0]
             spider_type = int(args_spider[1])
 
-        if spider_type not in [1, 2]:
-            raise ValueError('spider 只能是 1 或 2 ！')
+        if spider_type not in [1, 2, 3]:
+            raise ValueError('spider_type 不在允许范围内！')
         CreateSpider(spider_name, spider_type).create()
 
     # 创建项目
@@ -44,21 +44,25 @@ def helper():
     with open(version_path, 'r', encoding='utf-8') as f:
         version = f.read()
 
-    print(f"palp {version}\n\nPalp 操作命令如下")
-    print("\tpalp create [options] [args]")
-    print("\n可选 options:")
-    cmds = {"-p": "即 project，创建爬虫项目", "-s": "即 spider，创建爬虫"}
+    print(f'palp {version}\n\nPalp 操作命令如下')
+    print('\tpalp create [options] [args]')
+    print('\n可选 options:')
+    cmds = {'-p': '即 project，创建爬虫项目', '-s': '即 spider，创建爬虫'}
     for cmdname, cmdclass in sorted(cmds.items()):
-        print("\t%s\t\t%s" % (cmdname, cmdclass))
+        print('\t%s\t\t%s' % (cmdname, cmdclass))
 
-    print("\n可选 args:")
-    cmds = {"1": "创建 spider 时，创建普通 spider", "2": "创建 spider 时，创建分布式 spider"}
+    print('\n可选 args:')
+    cmds = {
+        '1': '创建 spider 时，创建普通 spider',
+        '2': '创建 spider 时，创建分布式 spider',
+        '3': '创建 spider 时，创建周期 spider'
+    }
     for cmdname, cmdclass in sorted(cmds.items()):
-        print("\t%s\t\t%s" % (cmdname, cmdclass))
+        print('\t%s\t\t%s' % (cmdname, cmdclass))
 
-    print("\n示例:")
-    print("\tpalp create -p demo")
-    print("\tpalp create -s baidu 1")
+    print('\n示例:')
+    print('\tpalp create -p demo')
+    print('\tpalp create -s baidu 1')
 
 
 def main():
@@ -68,7 +72,7 @@ def main():
         return
 
     command = args.pop(1)
-    if command == "create":
+    if command == 'create':
         generator()
     else:
         helper()

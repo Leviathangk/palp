@@ -20,9 +20,11 @@ class CreateSpider:
         self.path = Path('.').absolute()  # 相对路径
         self.path_template = Path(__file__).absolute().parent.parent.joinpath('template').joinpath('spider')  # 模板路径
         if self.spider_type == 2:
-            self.path_template_spider = self.path_template.joinpath('distributive_spider.tmpl')
+            self.path_template_spider = self.path_template.joinpath('spider_distributive.tmpl')
+        elif self.spider_type == 3:
+            self.path_template_spider = self.path_template.joinpath('spider_cycle.tmpl')
         else:
-            self.path_template_spider = self.path_template.joinpath('spider.tmpl')
+            self.path_template_spider = self.path_template.joinpath('spider_local.tmpl')
 
     def create(self):
         """

@@ -42,6 +42,7 @@ palp create -s xxx 1
 
 - LocalSpider：本地爬虫
 - DistributiveSpider：分布式爬虫
+- CycleSpider：周期爬虫（根据需求可继承本地、分布式）
 
 ## LocalSpider
 
@@ -148,6 +149,56 @@ class BaiduSpider(palp.DistributiveSpider):
 
 if __name__ == '__main__':
     BaiduSpider(thread_count=1).start()
+```
+
+## CycleSpider
+
+周期爬虫，使用 mysql 创建任务表，并在爬虫内部获取进行抓取  
+个人任务需求是多样化的，所以任务表的 task 字段  
+注意：继承周期爬虫的【同时需要继承 分布式 或 本地爬虫】才可以执行
+
+含有以下方法：
+- initialize_all_task_states：重置所有任务状态为 0
+- get_tasks：根据指定状态获取任务
+- get_tasks_state0：获取状态为 0 的任务
+- get_tasks_state2：获取状态为 2 的任务
+- set_task_state：设置指定任务的状态
+- set_task_state_running：设置指定任务状态为 1
+- set_task_state_done：设置指定任务状态为 2
+- set_task_state_failed：设置指定任务状态为 3
+- create_mysql_table：创建任务表、记录表
+- check_mysql_table_exists：检查表是否存在
+- insert_tasks：插入任务（字符串或字符串列表）
+
+【示例】
+
+```
+import palp
+
+
+class CycleSpider(palp.LocalSpider, palp.CycleSpider):
+    spider_name = "baidu"  # 自定义的名字
+    spider_domains = []  # 允许通过的域名，默认不限制
+    spider_settings = None  # 字典形式或导入形式的设置
+    spider_table_task_name = f'palp_cycle_task_{spider_name}'  # 任务表
+    spider_table_record_name = f'palp_cycle_record_{spider_name}'  # 记录表
+
+    def start_requests(self) -> None:
+        self.initialize_all_task_states()  # 重置所有任务状态为 0
+
+        # 获取任务状态为 0 的任务
+        for task in self.get_tasks_state0():
+            print(task)
+            yield palp.RequestGet(url=task['task'])
+
+    def parse(self, request, response) -> None:
+        print(response)
+
+
+if __name__ == '__main__':
+    CycleSpider.create_mysql_table()  # 快捷创建表
+    CycleSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])  # 快捷插入任务
+    CycleSpider(thread_count=1).start()
 ```
 
 # 启动爬虫
@@ -600,6 +651,7 @@ def parse(self, request, response) -> None:
 - send_dingtalk：支持所有钉钉群聊消息类型
 
 修改设置
+
 ```
 # 预警：Email
 EMAIL_USER = None  # Email 账号

@@ -1,0 +1,46 @@
+"""
+Create on ${DATE}
+----------
+@summary:
+----------
+@author:
+"""
+import palp
+
+
+class ${SPIDER_NAME}CycleSpider(palp.LocalSpider, CycleSpider):
+    spider_name = "${SPIDER_NAME_LOWER}"   # 自定义的名字
+    spider_domains = []  # 允许通过的域名，默认不限制
+    spider_settings = None  # 字典形式或导入形式的设置
+    spider_table_task_name = f'palp_cycle_task_{spider_name}'  # 任务表
+    spider_table_record_name = f'palp_cycle_record_{spider_name}'  # 记录表
+
+    def start_requests(self) -> None:
+        """
+        起始函数
+
+        :return:
+        """
+        self.initialize_all_task_states()   # 重置所有任务状态为 0
+
+        # 获取任务状态为 0 的任务
+        for task in self.get_tasks_state0():
+            print(task)
+            yield palp.RequestGet(url=task['task'])
+
+    def parse(self, request, response) -> None:
+        """
+        解析函数
+
+        :param request:
+        :param response:
+        :return:
+        """
+        print(response.text)
+        print(response)
+
+
+if __name__ == '__main__':
+    ${SPIDER_NAME}CycleSpider().create_mysql_table()  # 快捷创建表
+    ${SPIDER_NAME}CycleSpider().insert_tasks(['xxx'])  # 快捷插入任务
+    ${SPIDER_NAME}CycleSpider().start()
