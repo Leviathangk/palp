@@ -58,6 +58,7 @@ REDIS_KEY_QUEUE_BAD_ITEM = '{redis_key}:itemFailed'  # item 失败队列（set�
 REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列（set、bloom）
 REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器（set）
+REDIS_KEY_RECORD = '{redis_key}:record'  # 记录请求 key (hash)
 
 '''请求相关'''
 REQUEST_THREADS = 16  # 线程数量
@@ -109,7 +110,7 @@ PALP_REQUEST_MIDDLEWARE = {
     'min': {
         1: "palp.middleware.middleware_request_check.RequestCheckMiddleware",  # 请求检查
         'REQUEST_FILTER_MIDDLEWARE': 2,  # 请求过滤（反着来代表占用，程序内也要传参，就会转化）
-        3: 'palp.middleware.middleware_request_record.RequestsRecordMiddleware'  # 记录请求
+        3: 'palp.middleware.middleware_record.RequestRecordMiddleware'  # 记录请求
     },
     'max': {
         1: ['REQUEST_FAILED_SAVE', 'palp.middleware.middleware_request_recycle.RequestRecycleMiddleware']  # 列表代表判断
@@ -127,7 +128,7 @@ PALP_SPIDER_MIDDLEWARE = {
     },
     'max': {
         1: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
-        2: 'palp.middleware.middleware_request_record.RequestsRecordMiddleware'  # 记录请求
+        2: 'palp.middleware.middleware_record.RequestRecordMiddleware'  # 记录请求
     }
 }
 

@@ -6,21 +6,22 @@
         请求成功数
         请求失败数
 
-    注意：双继承意味着双导入，所以不能在 init 上共享信息
+    注意：
+        双继承意味着双导入，所以不能在 init 上共享信息
+        双继承的中间件，需要导入 2 次
+        双继承的中间件，文件名、类名不含有 middleware_spider、middleware_request
 """
 import json
 from typing import Union
-
-from quickdb import RedisLock
-
 from palp import settings
+from quickdb import RedisLock
 from palp.network.request import Request
 from palp.decorator.decorator_lock import FuncLock
 from palp.middleware.middleware_spider import SpiderMiddleware
 from palp.middleware.middleware_request import RequestMiddleware
 
 
-class RequestsRecordMiddleware(RequestMiddleware, SpiderMiddleware):
+class RequestRecordMiddleware(RequestMiddleware, SpiderMiddleware):
     """
         请求记录中间件
     """
