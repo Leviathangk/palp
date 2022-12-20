@@ -38,7 +38,7 @@ palp create -s xxx 1
 
 # spider
 
-目前提供 2 个 spider
+目前提供以下 spider
 
 - LocalSpider：本地爬虫
 - DistributiveSpider：分布式爬虫
@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
 ### DistributiveSpider
 
-分布式爬虫，需要在设置中增加 redis 连接
+分布式爬虫，需要在设置中增加 redis 连接  
 【命令】
 
 ```
@@ -157,7 +157,12 @@ if __name__ == '__main__':
 
 个人认为，任务需求是多样化的，所以任务表的 task 字段是一个字符串，并且获取的任务是全表字段，这样就可以自定义部分表字段，实现更多需求
 
-注意：继承周期爬虫的【同时需要继承 分布式 或 本地爬虫】才可以执行
+注意：
+
+- 继承周期爬虫的【同时需要继承 分布式 或 本地爬虫】才可以执行
+- 自动导入记录中间件
+- 记录中间件会：自动修改失败、成功的任务状态
+- 记录中间件会：自动在记录表中添加、修改任务执行情况
 
 含有以下方法：
 
@@ -176,17 +181,7 @@ if __name__ == '__main__':
 - update_task_record：更新记录表任务处理量
 - update_task_record_end：更新当前爬虫结束
 
-【示例】  
-启用记录中间件（都放在最后面）  
-该中间件是一个双继承的中间件（自动引入，不需要手动）  
-主要作用：
-
-- 自动修改失败、成功的任务状态
-- 自动在记录表中添加、修改任务执行情况
-
-注意：请求需要向下传递 task_id=task['id']，即任务表中的 id
-
-爬虫继承 CycleSpider
+【示例】
 
 ```
 import palp
@@ -215,6 +210,17 @@ if __name__ == '__main__':
     CycleSpider.create_mysql_table()  # 快捷创建表
     CycleSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])  # 快捷插入任务
     CycleSpider(thread_count=1).start()
+```
+
+注意到这里传递了 task_id，那么什么时候传递 task_id？
+
+- 首先：task_id 代表 task 的 id，传递则代表当当前请求成功时 == 任务执行成功
+- task 字段就是一个 url，请求成功视为执行成功
+- task 字段不是 url，那么就不需要 task_id 字段，只有在你觉得这个 task 执行结束时调用以下代码（比如 pipeline 收到指定数据）
+
+```
+spider.set_task_state_done(task_id=xxx)
+spider.set_task_state_failed(task_id=xxx)
 ```
 
 # 启动爬虫
