@@ -5,8 +5,8 @@
         class ItemStrict(palp.ItemStrict):
             name = palp.Field()
 """
-from loguru import logger
 from palp.item.item import ItemBase, Field
+from palp.exception import NotStrictItemFieldException
 
 
 class StrictItemBase(ItemBase):
@@ -33,8 +33,7 @@ class StrictItemBase(ItemBase):
     def __init__(self, **kwargs):
         for field, field_value in kwargs.items():
             if field not in self.__class__.palp_fields:
-                logger.warning(f"字段 {field} 不在 {self.__class__.__name__} 允许字段列表中")
-                continue
+                raise NotStrictItemFieldException(f"字段 {field} 不在 {self.__class__.__name__} 允许字段列表中")
 
             self[field] = field_value
 

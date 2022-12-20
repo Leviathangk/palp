@@ -45,7 +45,6 @@ class Request:
         'filter_repeat',
         'keep_session',
         'keep_cookie',
-        'new_session',
         'callback',
         'cookie_jar',
         'priority',

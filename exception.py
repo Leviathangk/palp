@@ -37,3 +37,12 @@ class DropItemException(Exception):
 
     def __init__(self, *args):
         super(DropItemException, self).__init__(*args)
+
+
+class NotStrictItemFieldException(Exception):
+    """
+        非 StrictItem 字段错误
+    """
+
+    def __init__(self, *args):
+        super(NotStrictItemFieldException, self).__init__(*args)

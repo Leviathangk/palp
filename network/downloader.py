@@ -38,7 +38,6 @@ class ResponseDownloader:
 
         :param keep_session: 是否保持 session
         :param keep_cookie: 是否保持 cookie，启用 session 则不用 cookie_jar
-        :param new_session: 可能有时需要启用一个新的 session 丢弃之前的连接
         :param command: 自定义命令
         :param kwargs: 不在常用命令里的请求命令
         """
