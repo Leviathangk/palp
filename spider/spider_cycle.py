@@ -189,7 +189,7 @@ class CycleSpider:
                   `is_done` int DEFAULT '0' COMMENT '0执行中，1执行完毕',
                   `start_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '执行开始时间',
                   `end_time` datetime DEFAULT NULL COMMENT '执行结束时间',
-                  PRIMARY KEY (`id`),
+                  PRIMARY KEY (`id`)
                 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
             '''
             mysql_conn.execute(sql=sql)
@@ -252,11 +252,9 @@ class CycleSpider:
         """
         from palp.conn import mysql_conn
 
-        max_id = cls.get_spider_table_record_max_id()
-
         sql = f'''
-            INSERT INTO `{cls.spider_table_record_name}` ( is_done,start_time,id )
-            VALUES(0,now(),'{max_id}');
+            INSERT INTO `{cls.spider_table_record_name}` ( is_done,start_time )
+            VALUES(0,now());
         '''
         mysql_conn.execute(sql=sql)
 
@@ -280,7 +278,7 @@ class CycleSpider:
             succeed = {succeed}, 
             failed = {failed} 
             WHERE
-                id = '{max_id}';
+                id = {max_id};
         '''
         mysql_conn.execute(sql=sql)
 
@@ -300,7 +298,7 @@ class CycleSpider:
             SET is_done = 1,
             end_time = now() 
             WHERE
-                id = '{max_id}';
+                id = {max_id};
         '''
         mysql_conn.execute(sql=sql)
 

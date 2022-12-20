@@ -88,16 +88,18 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
             spider.update_task_record_end()
         else:
             if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
-                record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
-                spider.update_task_record(
-                    total=record['all'],
-                    succeed=record['succeed'],
-                    failed=record['failed'],
-                )
-                spider.update_task_record_end()
+                try:
+                    record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
+                    spider.update_task_record(
+                        total=record['all'],
+                        succeed=record['succeed'],
+                        failed=record['failed'],
+                    )
+                finally:
+                    spider.update_task_record_end()
 
-    @staticmethod
-    def check_max_id_is_done(spider: CycleSpider) -> bool:
+    @classmethod
+    def check_max_id_is_done(cls, spider: CycleSpider) -> bool:
         """
         检查最大 id 的执行状态
 
@@ -106,18 +108,17 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         """
         from palp.conn import mysql_conn
 
-        if spider.spider_table_record_max_id is None:
-            sql = f'''
-                SELECT
-                    is_done
-                FROM
-                    `{spider.spider_table_record_name}`
-                WHERE
-                    id = {spider.get_spider_table_record_max_id()};
-            '''
+        sql = f'''
+            SELECT
+                max( id ),
+                is_done
+            FROM
+                `{spider.spider_table_record_name}`
+        '''
 
-            res = mysql_conn.execute(sql=sql, fetchone=True)
-            if res:
-                return bool(res[-1])
+        res = mysql_conn.execute(sql=sql, fetchone=True)
 
-        return False
+        if res[-1] is None:
+            return True
+        else:
+            return bool(res[-1])
