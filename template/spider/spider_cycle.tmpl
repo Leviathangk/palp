@@ -26,7 +26,7 @@ class ${SPIDER_NAME}CycleSpider(palp.LocalSpider, palp.CycleSpider):
         # 获取任务状态为 0 的任务
         for task in self.get_tasks_state0():
             print(task)
-            yield palp.RequestGet(url=task['task'])
+            yield palp.RequestGet(url=task['task'], task_id=task['id'])
 
     def parse(self, request, response) -> None:
         """

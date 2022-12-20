@@ -155,11 +155,12 @@ if __name__ == '__main__':
 
 周期爬虫，使用 mysql 创建任务表，并在爬虫内部获取进行抓取
 
-个人认为，任务需求是多样化的，所以任务表的 task 字段是一个字符串，并且获取的任务是全表字段，这样就可以自定义部分表字段，实现更多需求  
-  
+个人认为，任务需求是多样化的，所以任务表的 task 字段是一个字符串，并且获取的任务是全表字段，这样就可以自定义部分表字段，实现更多需求
+
 注意：继承周期爬虫的【同时需要继承 分布式 或 本地爬虫】才可以执行
 
 含有以下方法：
+
 - initialize_all_task_states：重置所有任务状态为 0
 - get_tasks：根据指定状态获取任务
 - get_tasks_state0：获取状态为 0 的任务
@@ -171,8 +172,31 @@ if __name__ == '__main__':
 - create_mysql_table：创建任务表、记录表
 - check_mysql_table_exists：检查表是否存在
 - insert_tasks：插入任务（字符串或字符串列表）
+- insert_task_record_start：创建记录表的初始记录
+- update_task_record：更新记录表任务处理量
+- update_task_record_end：更新当前爬虫结束
 
-【示例】
+【示例】  
+启用记录中间件（都放在最后面）  
+该中间件是一个双继承的中间件，所以两个地方都要引入  
+主要作用：
+
+- 自动修改失败、成功的任务状态
+- 自动在记录表中添加、修改任务执行情况
+
+注意：请求需要向下传递 task_id=task['id']，即任务表中的 id
+
+```
+REQUEST_MIDDLEWARE = {
+    1: "palp.middleware.CycleSpiderRecordMiddleware",
+}
+
+SPIDER_MIDDLEWARE = {
+    1: 'palp.middleware.CycleSpiderRecordMiddleware',
+}
+```
+
+爬虫继承 CycleSpider
 
 ```
 import palp
@@ -191,7 +215,7 @@ class CycleSpider(palp.LocalSpider, palp.CycleSpider):
         # 获取任务状态为 0 的任务
         for task in self.get_tasks_state0():
             print(task)
-            yield palp.RequestGet(url=task['task'])
+            yield palp.RequestGet(url=task['task'], task_id=task['id'])
 
     def parse(self, request, response) -> None:
         print(response)

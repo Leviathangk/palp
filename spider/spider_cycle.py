@@ -26,7 +26,6 @@
             DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
             DemoSpider(thread_count=1).start()
 """
-import datetime
 from typing import Union, List
 
 
@@ -36,7 +35,6 @@ class CycleSpider:
     """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
-    spider_table_record_uuid = None  # 记录表的 uuid
 
     @classmethod
     def initialize_all_task_states(cls):
@@ -170,9 +168,9 @@ class CycleSpider:
             sql = f'''
                 CREATE TABLE `{cls.spider_table_record_name}` (
                   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
-                  `total_count` int DEFAULT NULL COMMENT '任务总数',
-                  `success_count` int DEFAULT NULL COMMENT '任务成功总数',
-                  `failed_count` int DEFAULT NULL COMMENT '任务失败总数',
+                  `total` int DEFAULT NULL COMMENT '任务总数',
+                  `succeed` int DEFAULT NULL COMMENT '任务成功总数',
+                  `failed` int DEFAULT NULL COMMENT '任务失败总数',
                   `is_done` int DEFAULT '0' COMMENT '0执行中，1执行完毕',
                   `start_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '执行开始时间',
                   `end_time` datetime DEFAULT NULL COMMENT '执行结束时间',
@@ -233,20 +231,59 @@ class CycleSpider:
         mysql_conn.execute(sql=sql)
 
     @classmethod
-    def insert_task_record_start(cls):
+    def insert_task_record_start(cls, uuid: str):
         """
-        插入一条记录
+        插入初始记录
 
-        :param total_count: 总量
-        :param success_count: 成功量
-        :param failed_count: 失败量
+        :param uuid: uuid
         :return:
         """
         from palp.conn import mysql_conn
 
         sql = f'''
-            INSERT IGNORE INTO `{cls.spider_table_record_name}` ( is_done,start_time )
-            VALUES(0,{datetime.datetime.now()}  return id;
+            INSERT INTO `{cls.spider_table_record_name}` ( is_done,start_time,uuid )
+            VALUES(0,now(),'{uuid}');
         '''
-        res = mysql_conn.execute(sql=sql, fetchone=True)
-        print(res)
+        mysql_conn.execute(sql=sql)
+
+    @classmethod
+    def update_task_record(cls, total: int, succeed: int, failed: int, uuid: str):
+        """
+        更新记录表
+
+        :param total: 总量
+        :param succeed: 成功量
+        :param failed: 失败量
+        :param uuid: uuid
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        sql = f'''
+            UPDATE `{cls.spider_table_record_name}` 
+            SET total = {total},
+            succeed = {succeed}, 
+            failed = {failed} 
+            WHERE
+                uuid = '{uuid}';
+        '''
+        mysql_conn.execute(sql=sql)
+
+    @classmethod
+    def update_task_record_end(cls, uuid: str):
+        """
+        设置记录结束
+
+        :param uuid: uuid
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        sql = f'''
+            UPDATE `{cls.spider_table_record_name}` 
+            SET is_done = 1,
+            end_time = now() 
+            WHERE
+                uuid = '{uuid}';
+        '''
+        mysql_conn.execute(sql=sql)

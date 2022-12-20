@@ -59,6 +59,7 @@ REDIS_KEY_QUEUE_FILTER_ITEM = '{redis_key}:filter:item'  # item 过滤队列（s
 REDIS_KEY_HEARTBEAT = '{redis_key}:heartbeat'  # 机器的心跳（hash）
 REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的机器（set）
 REDIS_KEY_RECORD = '{redis_key}:record'  # 记录请求 key (hash)
+REDIS_KEY_UUID = '{redis_key}:uuid'  # 记录 uuid,用于记录表记录（str）
 
 '''请求相关'''
 REQUEST_THREADS = 16  # 线程数量
