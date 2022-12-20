@@ -28,7 +28,10 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         """
         from palp.conn import redis_conn
 
-        if not isinstance(spider, CycleSpider) and not issubclass(spider.__class__, Spider):
+        # 判断是否是 CycleSpider 并继承了其它 spider（没写一行是为了避免导入后被其它爬虫误用）
+        if not isinstance(spider, CycleSpider):
+            return
+        if not issubclass(spider.__class__, Spider):
             return
 
         if settings.SPIDER_TYPE == 1:
@@ -46,7 +49,9 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         :param request:
         :return:
         """
-        if not isinstance(spider, CycleSpider) and not issubclass(spider.__class__, Spider):
+        if not isinstance(spider, CycleSpider):
+            return
+        if not issubclass(spider.__class__, Spider):
             return
 
         if hasattr(request, 'task_id'):
@@ -60,7 +65,9 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         :param request:
         :return:
         """
-        if not isinstance(spider, CycleSpider) and not issubclass(spider.__class__, Spider):
+        if not isinstance(spider, CycleSpider):
+            return
+        if not issubclass(spider.__class__, Spider):
             return
 
         if hasattr(request, 'task_id'):
@@ -75,7 +82,9 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         """
         from palp.conn import redis_conn
 
-        if not isinstance(spider, CycleSpider) and not issubclass(spider.__class__, Spider):
+        if not isinstance(spider, CycleSpider):
+            return
+        if not issubclass(spider.__class__, Spider):
             return
 
         if settings.SPIDER_TYPE == 1:
