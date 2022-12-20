@@ -1,6 +1,17 @@
 """
     周期性爬虫
 
+    更新设置，添加中间件
+    # 启用则修改 task 表中对应任务的失败、生成状态
+    REQUEST_MIDDLEWARE = {
+        1: "palp.middleware.CycleSpiderRecordMiddleware",
+    }
+
+    # 启用则生成、汇总 record 表单批次爬取记录
+    SPIDER_MIDDLEWARE = {
+        1: 'palp.middleware.CycleSpiderRecordMiddleware',
+    }
+
     示例
         class DemoSpider(CycleSpider, palp.LocalSpider):
             spider_name = "baidu3"  # 自定义的名字
@@ -37,19 +48,6 @@ class CycleSpider:
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
     spider_table_record_max_id = None  # 记录表 id
-
-    # 自动导入中间件
-    request_middleware = settings.REQUEST_MIDDLEWARE
-    spider_middleware = settings.SPIDER_MIDDLEWARE
-
-    request_max_index = max(request_middleware.keys())
-    spider_max_index = max(spider_middleware.keys())
-    settings.REQUEST_MIDDLEWARE.update({
-        request_max_index + 1: 'palp.middleware.CycleSpiderRecordMiddleware'
-    })
-    settings.SPIDER_MIDDLEWARE.update({
-        spider_max_index + 1: 'palp.middleware.CycleSpiderRecordMiddleware'
-    })
 
     @classmethod
     def initialize_all_task_states(cls):
