@@ -36,7 +36,7 @@ class CycleSpider:
     """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
-    spider_table_record_id = None  # 记录表的 id
+    spider_table_record_uuid = None  # 记录表的 uuid
 
     @classmethod
     def initialize_all_task_states(cls):
@@ -161,23 +161,25 @@ class CycleSpider:
                   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                   PRIMARY KEY (`id`),
                   UNIQUE KEY `task_unique` (`task`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期爬取表';
+                ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期爬取表';
             '''
             mysql_conn.execute(sql=sql)
 
         # 创建 mysql 记录表
-        if not cls.check_mysql_table_exists(table_name=cls.spider_table_task_name):
+        if not cls.check_mysql_table_exists(table_name=cls.spider_table_record_name):
             sql = f'''
-                CREATE TABLE `{cls.spider_table_task_name}` (
-                  `id` int NOT NULL COMMENT '主键',
+                CREATE TABLE `{cls.spider_table_record_name}` (
+                  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
                   `total_count` int DEFAULT NULL COMMENT '任务总数',
                   `success_count` int DEFAULT NULL COMMENT '任务成功总数',
                   `failed_count` int DEFAULT NULL COMMENT '任务失败总数',
                   `is_done` int DEFAULT '0' COMMENT '0执行中，1执行完毕',
                   `start_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '执行开始时间',
                   `end_time` datetime DEFAULT NULL COMMENT '执行结束时间',
-                  PRIMARY KEY (`id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
+                  `uuid` varchar(255) DEFAULT NULL COMMENT '该条记录的 uuid（避免分布式多任务混淆）',
+                  PRIMARY KEY (`id`),
+                  UNIQUE KEY `uuid_unique` (`uuid`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
             '''
             mysql_conn.execute(sql=sql)
 

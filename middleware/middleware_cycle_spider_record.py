@@ -5,6 +5,7 @@
         双继承的中间件，需要导入 2 次
         双继承的中间件，文件名、类名不含有 middleware_spider、middleware_request
 """
+import json
 import datetime
 from palp import settings
 from palp.spider.spider_cycle import CycleSpider
@@ -52,6 +53,7 @@ class CycleSpiderRecordRequestMiddleware(RequestMiddleware, SpiderMiddleware):
         from palp.conn import redis_conn
 
         if settings.SPIDER_TYPE == 1:
-            pass
+            record = spider.spider_record
         else:
-            pass
+            if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
+                record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
