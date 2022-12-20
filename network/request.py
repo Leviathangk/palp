@@ -144,7 +144,7 @@ class Request:
 
         # 传递参数更新一下
         for key, value in kwargs.items():
-            self[key] = value
+            setattr(self, key, value)
 
     def send(self) -> Response:
         """

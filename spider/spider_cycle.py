@@ -44,7 +44,7 @@ class CycleSpider:
         from palp.conn import mysql_conn
 
         sql = f'''
-            UPDATE `{cls.table_task_name}` 
+            UPDATE `{cls.spider_table_task_name}` 
             SET state = 0;
         '''
 
@@ -64,7 +64,7 @@ class CycleSpider:
             SELECT
                 * 
             FROM
-                `{cls.table_task_name}`
+                `{cls.spider_table_task_name}`
             WHERE
                 state = {state};
         '''
@@ -103,7 +103,7 @@ class CycleSpider:
         from palp.conn import mysql_conn
 
         sql = f'''
-        UPDATE `{cls.table_task_name}` 
+        UPDATE `{cls.spider_table_task_name}` 
         SET state = {state} 
         WHERE
             id = {task_id};
