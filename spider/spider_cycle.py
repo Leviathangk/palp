@@ -36,6 +36,7 @@ class CycleSpider:
     """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
+    spider_table_record_max_id = None  # 记录表 id
 
     # 自动导入中间件
     request_middleware = settings.REQUEST_MIDDLEWARE
@@ -188,9 +189,7 @@ class CycleSpider:
                   `is_done` int DEFAULT '0' COMMENT '0执行中，1执行完毕',
                   `start_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '执行开始时间',
                   `end_time` datetime DEFAULT NULL COMMENT '执行结束时间',
-                  `uuid` varchar(255) DEFAULT NULL COMMENT '该条记录的 uuid（避免分布式多任务混淆）',
                   PRIMARY KEY (`id`),
-                  UNIQUE KEY `uuid_unique` (`uuid`)
                 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Palp {cls.spider_name} 周期记录表';
             '''
             mysql_conn.execute(sql=sql)
@@ -245,33 +244,35 @@ class CycleSpider:
         mysql_conn.execute(sql=sql)
 
     @classmethod
-    def insert_task_record_start(cls, uuid: str):
+    def insert_task_record_start(cls):
         """
         插入初始记录
 
-        :param uuid: uuid
         :return:
         """
         from palp.conn import mysql_conn
 
+        max_id = cls.get_spider_table_record_max_id()
+
         sql = f'''
-            INSERT INTO `{cls.spider_table_record_name}` ( is_done,start_time,uuid )
-            VALUES(0,now(),'{uuid}');
+            INSERT INTO `{cls.spider_table_record_name}` ( is_done,start_time,id )
+            VALUES(0,now(),'{max_id}');
         '''
         mysql_conn.execute(sql=sql)
 
     @classmethod
-    def update_task_record(cls, total: int, succeed: int, failed: int, uuid: str):
+    def update_task_record(cls, total: int, succeed: int, failed: int):
         """
         更新记录表
 
         :param total: 总量
         :param succeed: 成功量
         :param failed: 失败量
-        :param uuid: uuid
         :return:
         """
         from palp.conn import mysql_conn
+
+        max_id = cls.get_spider_table_record_max_id()
 
         sql = f'''
             UPDATE `{cls.spider_table_record_name}` 
@@ -279,25 +280,50 @@ class CycleSpider:
             succeed = {succeed}, 
             failed = {failed} 
             WHERE
-                uuid = '{uuid}';
+                id = '{max_id}';
         '''
         mysql_conn.execute(sql=sql)
 
     @classmethod
-    def update_task_record_end(cls, uuid: str):
+    def update_task_record_end(cls):
         """
         设置记录结束
 
-        :param uuid: uuid
         :return:
         """
         from palp.conn import mysql_conn
+
+        max_id = cls.get_spider_table_record_max_id()
 
         sql = f'''
             UPDATE `{cls.spider_table_record_name}` 
             SET is_done = 1,
             end_time = now() 
             WHERE
-                uuid = '{uuid}';
+                id = '{max_id}';
         '''
         mysql_conn.execute(sql=sql)
+
+    @classmethod
+    def get_spider_table_record_max_id(cls):
+        """
+        记录表最大 id
+
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        if cls.spider_table_record_max_id is None:
+            sql = f'''
+                SELECT
+                    max( id ) 
+                FROM
+                    `{cls.spider_table_record_name}`
+            '''
+
+            res = mysql_conn.execute(sql=sql, fetchone=True)
+
+            if res:
+                cls.spider_table_record_max_id = res[0]
+
+        return cls.spider_table_record_max_id

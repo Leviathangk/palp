@@ -32,12 +32,11 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
             return
 
         if settings.SPIDER_TYPE == 1:
-            spider.insert_task_record_start(uuid=spider.spider_uuid)
+            spider.insert_task_record_start()
         else:
             with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'CycleSpiderRecord'):
-                if not redis_conn.exists(settings.REDIS_KEY_UUID):
-                    redis_conn.set(settings.REDIS_KEY_UUID, spider.spider_uuid)
-                    spider.insert_task_record_start(uuid=spider.spider_uuid)
+                if self.check_max_id_is_done(spider=spider):
+                    spider.insert_task_record_start()
 
     def request_failed(self, spider, request):
         """
@@ -85,20 +84,40 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
                 total=record['all'],
                 succeed=record['succeed'],
                 failed=record['failed'],
-                uuid=spider.spider_uuid
             )
-            spider.update_task_record_end(uuid=spider.spider_uuid)
+            spider.update_task_record_end()
         else:
             if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
-                try:
-                    uuid = redis_conn.get(settings.REDIS_KEY_UUID).decode()
-                    record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
-                    spider.update_task_record(
-                        total=record['all'],
-                        succeed=record['succeed'],
-                        failed=record['failed'],
-                        uuid=uuid
-                    )
-                    spider.update_task_record_end(uuid=uuid)
-                finally:
-                    redis_conn.delete(settings.REDIS_KEY_UUID)  # 移除 uuid key
+                record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
+                spider.update_task_record(
+                    total=record['all'],
+                    succeed=record['succeed'],
+                    failed=record['failed'],
+                )
+                spider.update_task_record_end()
+
+    @staticmethod
+    def check_max_id_is_done(spider: CycleSpider) -> bool:
+        """
+        检查最大 id 的执行状态
+
+        :param spider: spider
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        if spider.spider_table_record_max_id is None:
+            sql = f'''
+                SELECT
+                    is_done
+                FROM
+                    `{spider.spider_table_record_name}`
+                WHERE
+                    id = {spider.get_spider_table_record_max_id()};
+            '''
+
+            res = mysql_conn.execute(sql=sql, fetchone=True)
+            if res:
+                return bool(res[-1])
+
+        return False
