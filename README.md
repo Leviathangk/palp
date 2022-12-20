@@ -178,23 +178,13 @@ if __name__ == '__main__':
 
 【示例】  
 启用记录中间件（都放在最后面）  
-该中间件是一个双继承的中间件，所以两个地方都要引入  
+该中间件是一个双继承的中间件（自动引入，不需要手动）  
 主要作用：
 
 - 自动修改失败、成功的任务状态
 - 自动在记录表中添加、修改任务执行情况
 
 注意：请求需要向下传递 task_id=task['id']，即任务表中的 id
-
-```
-REQUEST_MIDDLEWARE = {
-    1: "palp.middleware.CycleSpiderRecordMiddleware",
-}
-
-SPIDER_MIDDLEWARE = {
-    1: 'palp.middleware.CycleSpiderRecordMiddleware',
-}
-```
 
 爬虫继承 CycleSpider
 

@@ -31,10 +31,13 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         if not isinstance(spider, CycleSpider) and not issubclass(spider.__class__, Spider):
             return
 
-        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'CycleSpiderRecord'):
-            if not redis_conn.exists(settings.REDIS_KEY_UUID):
-                redis_conn.set(settings.REDIS_KEY_UUID, spider.spider_uuid)
-                spider.insert_task_record_start(uuid=spider.spider_uuid)
+        if settings.SPIDER_TYPE == 1:
+            spider.insert_task_record_start(uuid=spider.spider_uuid)
+        else:
+            with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'CycleSpiderRecord'):
+                if not redis_conn.exists(settings.REDIS_KEY_UUID):
+                    redis_conn.set(settings.REDIS_KEY_UUID, spider.spider_uuid)
+                    spider.insert_task_record_start(uuid=spider.spider_uuid)
 
     def request_failed(self, spider, request):
         """
@@ -87,13 +90,15 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
             spider.update_task_record_end(uuid=spider.spider_uuid)
         else:
             if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
-                uuid = redis_conn.get(settings.REDIS_KEY_UUID)
-                record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
-                spider.update_task_record(
-                    total=record['all'],
-                    succeed=record['succeed'],
-                    failed=record['failed'],
-                    uuid=uuid
-                )
-                spider.update_task_record_end(uuid=uuid)
-                redis_conn.delete(settings.REDIS_KEY_UUID)  # 移除 uuid key
+                try:
+                    uuid = redis_conn.get(settings.REDIS_KEY_UUID).decode()
+                    record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
+                    spider.update_task_record(
+                        total=record['all'],
+                        succeed=record['succeed'],
+                        failed=record['failed'],
+                        uuid=uuid
+                    )
+                    spider.update_task_record_end(uuid=uuid)
+                finally:
+                    redis_conn.delete(settings.REDIS_KEY_UUID)  # 移除 uuid key

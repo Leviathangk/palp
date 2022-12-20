@@ -32,9 +32,9 @@ class SpiderRecordDecorator:
 
         # 发送每个 spider 的爬取情况
         redis_conn.hset(settings.REDIS_KEY_RECORD, spider.spider_uuid, json.dumps({
-            'request_all': spider.spider_record['all'],
-            'request_failed': spider.spider_record['failed'],
-            'request_succeed': spider.spider_record['succeed'],
+            'all': spider.spider_record['all'],
+            'failed': spider.spider_record['failed'],
+            'succeed': spider.spider_record['succeed'],
             'stop_time': str(datetime.datetime.now())
         }, ensure_ascii=False))
 
@@ -51,15 +51,15 @@ class SpiderRecordDecorator:
             for spider_uuid, spider_detail in redis_conn.hgetall(settings.REDIS_KEY_RECORD).items():
                 spider_detail = json.loads(spider_detail.decode())
 
-                request_all += spider_detail['request_all']
-                request_failed += spider_detail['request_failed']
-                request_succeed += spider_detail['request_succeed']
+                request_all += spider_detail['all']
+                request_failed += spider_detail['failed']
+                request_succeed += spider_detail['succeed']
 
             # 发送最后的统计结果
             redis_conn.set(settings.REDIS_KEY_STOP, json.dumps({
-                'request_all': request_all,
-                'request_failed': request_failed,
-                'request_succeed': request_succeed,
+                'all': request_all,
+                'failed': request_failed,
+                'succeed': request_succeed,
                 'stop_time': str(datetime.datetime.now())
             }, ensure_ascii=False))
 

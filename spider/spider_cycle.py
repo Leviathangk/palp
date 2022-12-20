@@ -26,6 +26,7 @@
             DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
             DemoSpider(thread_count=1).start()
 """
+from palp import settings
 from typing import Union, List
 
 
@@ -35,6 +36,19 @@ class CycleSpider:
     """
     spider_table_task_name = None  # 任务表
     spider_table_record_name = None  # 记录表
+
+    # 自动导入中间件
+    request_middleware = settings.REQUEST_MIDDLEWARE
+    spider_middleware = settings.SPIDER_MIDDLEWARE
+
+    request_max_index = max(request_middleware.keys())
+    spider_max_index = max(spider_middleware.keys())
+    settings.REQUEST_MIDDLEWARE.update({
+        request_max_index + 1: 'palp.middleware.CycleSpiderRecordMiddleware'
+    })
+    settings.SPIDER_MIDDLEWARE.update({
+        spider_max_index + 1: 'palp.middleware.CycleSpiderRecordMiddleware'
+    })
 
     @classmethod
     def initialize_all_task_states(cls):
