@@ -205,8 +205,8 @@ LOG_LEVEL = "DEBUG"  # 日志过滤等级
 LOG_SHOW = True  # 是否打印日志
 LOG_SAVE = False  # 是否保存日志
 LOG_PATH = BASE_PATH.joinpath('log')  # 日志存放地址
-LOG_ROTATION = '5 MB'  # 日志切割方式，这里是 5m
-LOG_RETENTION = '5 days'  # 日志清理时间
+LOG_ROTATION = '500 MB'  # 日志切割方式（日志官网搜索 rotation）
+LOG_RETENTION = '5 days'  # 日志清理时间（日志官网搜索 retention）
 LOG_COMPRESSION = 'zip'  # 日志压缩方式（gz、bz2、xz、lzma、tar、tar.gz、tar.bz2、tar.xz、zip）
 
 # 导入 用户的 spider 设置
