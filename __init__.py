@@ -4,6 +4,7 @@ from palp.tool.alarm import send_dingtalk
 from palp.tool import start_spider
 from palp.item.item import Item
 from palp.item.item_strict import StrictItem
+from palp.item.item_lazy import LazyItem
 from palp.network.request import Request
 from palp.network.response import Response
 from palp.pipeline.pipeline import Pipeline

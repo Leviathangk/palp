@@ -3,7 +3,7 @@
 """
 from typing import Union, List
 from palp.item.item import Item
-from palp.spider.spider import SpiderBase
+from palp.spider.spider import Spider
 
 
 class PipelineBase:
@@ -11,7 +11,7 @@ class PipelineBase:
         pipeline 基类
     """
 
-    def pipeline_in(self, spider: SpiderBase, item: Item) -> None:
+    def pipeline_in(self, spider: Spider, item: Item) -> None:
         """
         入库之前的操作
 
@@ -20,7 +20,7 @@ class PipelineBase:
         :return:
         """
 
-    def pipeline_save(self, spider: SpiderBase, item: Union[Item, List[Item]]) -> None:
+    def pipeline_save(self, spider: Spider, item: Union[Item, List[Item]]) -> None:
         """
         入库
 
@@ -29,7 +29,7 @@ class PipelineBase:
         :return:
         """
 
-    def pipeline_error(self, spider: SpiderBase, item: Union[Item, List[Item]], exception: Exception) -> None:
+    def pipeline_error(self, spider: Spider, item: Union[Item, List[Item]], exception: Exception) -> None:
         """
         入库出错时的操作
 
@@ -39,7 +39,7 @@ class PipelineBase:
         :return:
         """
 
-    def pipeline_failed(self, spider: SpiderBase, item: Union[Item, List[Item]]) -> None:
+    def pipeline_failed(self, spider: Spider, item: Union[Item, List[Item]]) -> None:
         """
         超过最大重试次数时的操作
 
@@ -48,7 +48,7 @@ class PipelineBase:
         :return:
         """
 
-    def pipeline_close(self, spider: SpiderBase) -> None:
+    def pipeline_close(self, spider: Spider) -> None:
         """
         spider 结束时的操作，虽然是多线程，但是只会执行一次
 

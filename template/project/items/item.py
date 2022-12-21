@@ -4,7 +4,7 @@
 import palp
 
 
-class Item(palp.Item):
+class LazyItem(palp.LazyItem):
     """
         通用、懒人 item
     """

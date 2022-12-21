@@ -106,7 +106,7 @@ class SpiderController(Thread):
                 self.add_new_request(task, request, response)
             else:
                 self.run_requests(task)
-        elif isinstance(task, Item):
+        elif issubclass(task.__class__, Item):
             self.queue_item.put(task)
         else:
             logger.warning(f"捕获到非法 yield：{task}")

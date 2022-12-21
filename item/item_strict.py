@@ -5,11 +5,11 @@
         class ItemStrict(palp.ItemStrict):
             name = palp.Field()
 """
-from palp.item.item import ItemBase, Field
+from palp.item.item import Item, Field
 from palp.exception import NotStrictItemFieldException
 
 
-class StrictItemBase(ItemBase):
+class StrictItem(Item):
     """
         严格的 item，对 init 字段进行判断是否在运行的列表内
     """
@@ -36,9 +36,3 @@ class StrictItemBase(ItemBase):
                 raise NotStrictItemFieldException(f"字段 {field} 不在 {self.__class__.__name__} 允许字段列表中")
 
             self[field] = field_value
-
-
-class StrictItem(StrictItemBase):
-    """
-        对 init 字段进行判断的 item
-    """

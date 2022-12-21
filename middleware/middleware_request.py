@@ -4,7 +4,7 @@
 from typing import Union
 from palp.network.request import Request
 from palp.network.response import Response
-from palp.spider.spider import SpiderBase
+from palp.spider.spider import Spider
 
 
 class RequestMiddlewareBase:
@@ -12,7 +12,7 @@ class RequestMiddlewareBase:
         请求中间件基类
     """
 
-    def request_in(self, spider: SpiderBase, request: Request) -> None:
+    def request_in(self, spider: Spider, request: Request) -> None:
         """
         请求进入时的操作
 
@@ -21,7 +21,7 @@ class RequestMiddlewareBase:
         :return:
         """
 
-    def request_error(self, spider: SpiderBase, request: Request, exception: Exception) -> Union[Request, None]:
+    def request_error(self, spider: Spider, request: Request, exception: Exception) -> Union[Request, None]:
         """
         请求出错时的操作
 
@@ -31,7 +31,7 @@ class RequestMiddlewareBase:
         :return: [Request, None]
         """
 
-    def request_failed(self, spider: SpiderBase, request: Request) -> None:
+    def request_failed(self, spider: Spider, request: Request) -> None:
         """
         超过最大重试次数时的操作
 
@@ -40,7 +40,7 @@ class RequestMiddlewareBase:
         :return:
         """
 
-    def request_close(self, spider: SpiderBase, request: Request, response: Response) -> Union[Request, None]:
+    def request_close(self, spider: Spider, request: Request, response: Response) -> Union[Request, None]:
         """
         请求结束时的操作
 

@@ -5,10 +5,6 @@
 
     注意：
         通过 isinstance 还是不能判断出是 dict，所以部分场景需要 to_dict
-
-    案例：
-        class Item(palp.Item):
-            pass    # 此处啥都不用写
 """
 import json
 from typing import MutableMapping
@@ -137,7 +133,3 @@ class Item(ItemBase):
     """
         通用 item
     """
-
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            self[key] = value
