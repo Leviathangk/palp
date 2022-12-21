@@ -19,8 +19,8 @@ class SpiderRecycleMiddleware(SpiderMiddleware):
         """
         # 关闭 redis
         try:
-            if conn.redis_conn:
-                conn.redis_conn.close()
+            if conn.redis_conn_lazy:
+                conn.redis_conn_lazy.close_all()
         except:
             pass
 

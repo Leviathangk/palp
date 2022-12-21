@@ -3,6 +3,7 @@
 
     关于 redis
         这里的连接是懒加载的方式，使用的时候才会被引用，从而被创建（否则不同数据库的爬虫的连接将会是同一个库）
+        redis_conn_lazy 是不指定连接 db 的 redis 使用方式：redis_conn_lazy.conn_to(0))
 
     关于 mongo
         mongo_conn.get_collection(db, col) 将会返回 Collection 对象（修改后的）
@@ -20,11 +21,14 @@
             reverse_table_model：逆向表模型
 """
 from palp import settings
-from quickdb import MongoConn, KafkaMsgProducer
-from quickdb import RedisConn, RedisClusterConn
+from quickdb import RedisClusterConn
+from quickdb import MongoConn, KafkaMsgProducer, RedisConnLazy
 from quickdb import MysqlSQLAlchemyEngine, PostgreSQLAlchemyEngine
 
 # redis 连接
+redis_conn = None
+redis_conn_lazy = None  # 不指定连接 db 的 redis
+
 if settings.REDIS_HOST:
     if settings.REDIS_CLUSTER_NODES:
         redis_conn = RedisClusterConn(
@@ -35,18 +39,19 @@ if settings.REDIS_HOST:
             conn_kwargs=settings.REDIS_CONFIG
         ).conn
     else:
-        redis_conn = RedisConn(
+        redis_conn_lazy = RedisConnLazy(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
             pwd=settings.REDIS_PWD,
-            db=settings.REDIS_DB,
             pool_kwargs=settings.REDIS_POOL_CONFIG,
             conn_kwargs=settings.REDIS_CONFIG
-        ).conn
-else:
-    redis_conn = None
+        )
+
+        redis_conn = redis_conn_lazy.conn_to(settings.REDIS_DB)
 
 # mysql 连接
+mysql_conn = None
+
 if settings.MYSQL_HOST:
     mysql_conn = MysqlSQLAlchemyEngine(
         host=settings.MYSQL_HOST,
@@ -56,10 +61,10 @@ if settings.MYSQL_HOST:
         pwd=settings.MYSQL_PWD,
         **settings.MYSQL_CONFIG
     )
-else:
-    mysql_conn = None
 
 # postgresql 连接
+pg_conn = None
+
 if settings.PG_HOST:
     pg_conn = PostgreSQLAlchemyEngine(
         host=settings.PG_HOST,
@@ -69,10 +74,10 @@ if settings.PG_HOST:
         pwd=settings.PG_PWD,
         **settings.PG_CONFIG
     )
-else:
-    pg_conn = None
 
 # mongo 连接
+mongo_conn = None
+
 if settings.MONGO_HOST:
     mongo_conn = MongoConn(
         host=settings.MONGO_HOST,
@@ -81,11 +86,9 @@ if settings.MONGO_HOST:
         pwd=settings.MONGO_PWD,
         **settings.MONGO_CONFIG
     )
-else:
-    mongo_conn = None
 
 # kafka 连接
+kafka_conn = None
+
 if settings.KAFKA_SERVER:
     kafka_conn = KafkaMsgProducer(server=settings.KAFKA_SERVER, **settings.KAFKA_CONFIG)
-else:
-    kafka_conn = None
