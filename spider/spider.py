@@ -227,7 +227,11 @@ class SpiderBase(threading.Thread):
         """
         waiting_status = True
 
-        for p in self.spider_controller_list:
+        for p in self.spider_controller_list.copy():
+            if not p.is_alive():
+                self.spider_controller_list.remove(p)  # 避免死线程导致程序无法退出
+                continue
+
             if not p.waiting:
                 waiting_status = False
                 break
