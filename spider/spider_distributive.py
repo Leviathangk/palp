@@ -73,7 +73,7 @@ class DistributiveSpider(Spider):
     def start_check():
         """
         启动检查，防止上次意外结束，导致 master 死机 key 未删除，无法正常启动
-        这里设定时间 30s 即出意外后，超过 30s 启动才会移除 master key
+        这里设定时间 10s 即出意外后，超过 10s 启动才会移除 master key
 
         :return:
         """
@@ -88,8 +88,8 @@ class DistributiveSpider(Spider):
             if not heart_beat and time.time() - master_detail['time'] > 5:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
-            # 有心跳的情况下，master 超过 20s 没有跳动，就是有问题
-            elif time.time() - json.loads(heart_beat.decode())['time'] > 20:
+            # 有心跳的情况下，master 超过 10s 没有跳动，就是有问题
+            elif time.time() - json.loads(heart_beat.decode())['time'] > 10:
                 redis_conn.delete(settings.REDIS_KEY_MASTER)
 
     @RunByThreadDecorator(daemon=True)
