@@ -131,5 +131,5 @@ class ItemBase(MutableMapping):
 
 class Item(ItemBase):
     """
-        通用 item
+        item
     """
