@@ -109,7 +109,7 @@ class SpiderBase(threading.Thread):
         super().__init__()
         # 加载快捷的设置
         if thread_count:
-            setattr(settings, 'REQUEST_THREAD_COUNT', thread_count)
+            setattr(settings, 'REQUEST_THREADS', thread_count)
         if request_filter:
             setattr(settings, 'REQUEST_FILTER', request_filter)
         if item_filter:
