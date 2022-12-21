@@ -181,7 +181,7 @@ class Response:
 
         :return:
         """
-        return urljoin(self._resp.url, url)
+        return urljoin(self.response.url, url)
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
