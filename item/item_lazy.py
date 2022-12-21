@@ -4,10 +4,10 @@
     示例：
         yield LazyItem(**{'x':'y'})
 """
-import palp
+from palp.item.item import Item
 
 
-class LazyItem(palp.Item):
+class LazyItem(Item):
     """
         通用、懒人 item
     """
