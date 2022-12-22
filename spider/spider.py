@@ -321,6 +321,16 @@ class SpiderBase(threading.Thread):
 
         return self.__class__.spider_name or self.__class__.__name__
 
+    def __setattr__(self, key, value):
+        """
+        设置属性
+
+        :param key:
+        :param value:
+        :return:
+        """
+        self.__dict__[key] = value
+
 
 class Spider(SpiderBase):
     """
