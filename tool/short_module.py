@@ -62,6 +62,10 @@ def sort_module(
     :param cls_mapping: 懒加载的一些设置
     :return:
     """
+    # copy 一份，避免修改
+    cls_dict = deepcopy(cls_dict)
+    palp_cls_dict = deepcopy(palp_cls_dict)
+
     # 设置最大、最小的序号
     min_index = 0
     max_index = 0
@@ -104,9 +108,9 @@ def sort_module(
             cls_dict[min_index - palp_cls_dict_min_modules_length + index] = palp_cls_dict_min_module
 
         # 获取需要排在最后面的模块，并建立索引
-        palp_cls_dict_min_modules = sort_module_helper(palp_cls_dict['max'])
-        for index, palp_cls_dict_min_module in enumerate(palp_cls_dict_min_modules):
-            cls_dict[max_index + index + 1] = palp_cls_dict_min_module
+        palp_cls_dict_max_modules = sort_module_helper(palp_cls_dict['max'])
+        for index, palp_cls_dict_max_module in enumerate(palp_cls_dict_max_modules):
+            cls_dict[max_index + index + 1] = palp_cls_dict_max_module
 
     # 模块排序、并创建成列表
     return sort_module_helper(cls_dict)

@@ -1,3 +1,10 @@
+"""
+    spider 基类
+
+    注意：要明白类的赋值操作、修改操作的概念
+    赋值操作：给类本身进行赋值
+    修改操作：类本身赋值后，是基于类本身修改，类本身未赋值，那么就会向父类进行查找，修改的就是父类
+"""
 import sys
 import time
 import types
@@ -330,6 +337,18 @@ class SpiderBase(threading.Thread):
         :return:
         """
         self.__dict__[key] = value
+
+    def __getattr__(self, key):
+        """
+        获取属性
+
+        :param key:
+        :return:
+        """
+        if key not in self.__dict__:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'")
+
+        return self.__dict__[key]
 
 
 class Spider(SpiderBase):

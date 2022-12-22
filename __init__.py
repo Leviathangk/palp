@@ -1,4 +1,4 @@
-from palp.spider import CycleSpider
+from palp.spider.spider_cycle import CycleSpider
 from palp.tool.alarm import send_email
 from palp.tool.alarm import send_dingtalk
 from palp.tool import start_spider
