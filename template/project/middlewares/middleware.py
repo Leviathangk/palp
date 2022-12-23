@@ -55,7 +55,7 @@ class RequestMiddleware(palp.RequestMiddleware):
         :param request:
         :return:
         """
-        if settings.REQUEST_PROXIES_TUNNEL_URL:
+        if settings.REQUEST_PROXIES_TUNNEL_URL and not request.proxies:
             request.proxies = {
                 'http': settings.REQUEST_PROXIES_TUNNEL_URL,
                 'https': settings.REQUEST_PROXIES_TUNNEL_URL,
