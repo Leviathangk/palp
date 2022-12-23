@@ -1,10 +1,9 @@
 """
-    redis 队列
-    使用了 pickle 并使用 zlib 压缩
+    redis request 队列
 """
-import zlib
-import pickle
+import json
 from palp import settings
+from palp.network.request import LoadRequest
 from palp.sequence.sequence import RedisSequence
 
 
@@ -32,7 +31,7 @@ class FIFORequestRedisSequence(RedisSequence):
         """
         from palp.conn import redis_conn
 
-        redis_conn.rpush(self.redis_key, zlib.compress(pickle.dumps(obj)))
+        redis_conn.rpush(self.redis_key, obj.to_json())
 
     def get(self, timeout=None):
         """
@@ -44,7 +43,7 @@ class FIFORequestRedisSequence(RedisSequence):
 
         result = redis_conn.blpop(self.redis_key, timeout=timeout)
         if result:
-            return pickle.loads(zlib.decompress(result[-1]))  # 这里不需要 decode 因为是对象
+            return LoadRequest.load_dict(**json.loads(result[-1].decode()))  # 这里不需要 decode 因为是对象
 
     def empty(self):
         """
@@ -71,7 +70,7 @@ class LIFORequestRedisSequence(FIFORequestRedisSequence):
 
         result = redis_conn.brpop(self.redis_key, timeout=timeout)
         if result:
-            return pickle.loads(zlib.decompress(result[-1]))
+            return LoadRequest.load_dict(**json.loads(result[-1].decode()))
 
 
 class PriorityRequestRedisSequence(FIFORequestRedisSequence):
@@ -89,12 +88,7 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
         """
         from palp.conn import redis_conn
 
-        if hasattr(obj, 'priority'):
-            priority = obj.priority
-        else:
-            priority = settings.DEFAULT_QUEUE_PRIORITY
-
-        redis_conn.zadd(self.redis_key, {zlib.compress(pickle.dumps(obj)): priority})
+        redis_conn.zadd(self.redis_key, {obj.to_json(): obj.priority})
 
     def get(self, timeout=None):
         """
@@ -106,7 +100,7 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
 
         result = redis_conn.bzpopmin(self.redis_key, timeout=timeout)
         if result:
-            return pickle.loads(zlib.decompress(result[1]))
+            return LoadRequest.load_dict(**json.loads(result[1].decode()))
 
     def empty(self):
         """

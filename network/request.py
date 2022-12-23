@@ -1,6 +1,7 @@
 """
     请求的处理
 """
+import json
 import time
 import random
 import urllib3
@@ -48,7 +49,10 @@ class Request:
         'callback',
         'cookie_jar',
         'priority',
-        'command'
+        'command',
+        'jump_spider',
+        'jump_spider_kwargs',
+        'jump_spider_callback',
     ]
 
     # 下载器
@@ -88,6 +92,9 @@ class Request:
             cookie_jar: RequestsCookieJar = None,
             priority: int = settings.DEFAULT_QUEUE_PRIORITY,
             command: dict = None,
+            jump_spider=None,
+            jump_spider_kwargs: dict = None,
+            jump_spider_callback: Callable = None,
             **kwargs
     ):
         """
@@ -110,6 +117,9 @@ class Request:
         :param command: 自定义操作命令，用于自定义 downloader 时使用
         :param downloader: 自定义的下载器（局部）
         :param downloader_parser: 自定义的下载器的解析器（局部）
+        :param jump_spider: 需要跳转到的 spider
+        :param jump_spider_kwargs: 跳转的 spider 的接收参数，spider 通过 self.xxx 访问
+        :param jump_spider_callback: 请求的回调函数，此时将会优先使用该参数接收回调
 
         Palp 参数（非用户设置）
         :param cookie_jar: cookie_jar，存储 cookie，这里使用的是 requests 模块的，其它请求的话可以自己提取
@@ -125,10 +135,13 @@ class Request:
         self.priority = priority
         self.downloader = downloader
         self.cookie_jar = cookie_jar
+        self.jump_spider = jump_spider
         self.keep_cookie = keep_cookie
         self.keep_session = keep_session
         self.filter_repeat = filter_repeat
         self.downloader_parser = downloader_parser
+        self.jump_spider_kwargs = jump_spider_kwargs
+        self.jump_spider_callback = jump_spider_callback
 
         # requests 请求参数
         self.url = url
@@ -240,11 +253,72 @@ class Request:
         request_dict = {}
 
         for key, value in self.__dict__.items():
-            if key.startswith('_') or not value:
+            # 无 callback 要添加
+            if key == 'callback' and value is None:
+                request_dict[key] = 'parse'
+
+            # _打头的名字 和 无值的忽略
+            elif key.startswith('_') or not value:
                 continue
-            request_dict[key] = value
+
+            # priority 默认值的情况直接忽略
+            elif key == 'priority' and value == settings.DEFAULT_QUEUE_PRIORITY:
+                continue
+
+            # jump_spider 转为模块
+            elif key == 'jump_spider':
+                request_dict[key] = {
+                    'module': value.__module__,  # 引用路径（未实例化的，所以不需要 __class__）
+                    'init': value.__name__,  # 模块名
+                }
+
+            # jump_spider_callback、callback 值非字符串的转为名字
+            elif (key == 'jump_spider_callback' or key == 'callback') and not isinstance(value, str):
+                request_dict[key] = value.__name__
+
+            # cookie_jar 转为字典
+            elif key == 'cookie_jar':
+                request_dict[key] = value.get_dict()
+
+            # downloader 为默认的，直接忽略
+            elif key == 'downloader' and value == self.__class__.DOWNLOADER:
+                continue
+
+            # downloader 转换为模块
+            elif key == 'downloader':
+                request_dict[key] = {
+                    'module': value.__module__,
+                    'init': value.__name__,
+                }
+
+            # downloader_parser 为默认的，直接忽略
+            elif key == 'downloader_parser' and value == self.__class__.DOWNLOADER_PARSER:
+                continue
+
+            # downloader_parser 转换为模块
+            elif key == 'downloader_parser':
+                request_dict[key] = {
+                    'module': value.__module__,
+                    'init': value.__name__,
+                }
+
+            # 其余直接赋值
+            else:
+                request_dict[key] = value
 
         return request_dict
+
+    def to_json(self, **kwargs) -> json:
+        """
+        转化为 json 字符串
+
+        :param kwargs: json 参数
+        :return:
+        """
+
+        kwargs.setdefault('ensure_ascii', False)
+
+        return json.dumps(self.to_dict(), **kwargs)
 
     @property
     def domain(self) -> str:
@@ -291,3 +365,53 @@ class Request:
 
     def __str__(self):
         return f"<Request {self.method}-{self.url}>"
+
+
+class LoadRequest:
+    """
+        从字典加载出 请求
+    """
+    CACHE = {}
+
+    @classmethod
+    def load_dict(cls, **kwargs) -> Request:
+        """
+        从字典导入，生成 Request
+
+        :param kwargs: request 参数
+        """
+        for key, value in kwargs.items():
+            # 导入 jump_spider
+            if key == 'jump_spider':
+                kwargs[key] = cls._load_module(value)
+
+            # 导入 cookie_jar
+            elif key == 'cookie_jar':
+                kwargs[key] = RequestsCookieJar()
+                kwargs[key].update(value)
+
+            # 导入 downloader
+            elif key == 'downloader':
+                kwargs[key] = cls._load_module(value)
+
+            # 导入 downloader_parser
+            elif key == 'downloader_parser':
+                kwargs[key] = cls._load_module(value)
+
+        return Request(**kwargs)
+
+    @classmethod
+    def _load_module(cls, value):
+        """
+        导入模块
+
+        :param value: 导入模块的路径
+        """
+        module_path = value['module'] + '.' + value['init']
+        if module_path not in cls.CACHE:
+            module = import_module(module_path, instantiate=False)[0]  # 导入
+            cls.CACHE[module_path] = module
+        else:
+            module = cls.CACHE[module_path]
+
+        return module
