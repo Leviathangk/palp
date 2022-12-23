@@ -167,7 +167,7 @@ class SpiderController(Thread):
                 for middleware in self.__class__.REQUEST_MIDDLEWARE:
                     new_request = middleware.request_error(self.spider, request, e)
                     if new_request is None:
-                        pass
+                        continue
                     elif isinstance(new_request, Request):
                         self.add_new_request(new_request=new_request, old_request=request, response=response)
                         raise DropRequestException(middleware.__name__, request)
@@ -184,7 +184,7 @@ class SpiderController(Thread):
         for middleware in self.__class__.REQUEST_MIDDLEWARE:
             new_request = middleware.request_close(self.spider, request, response)
             if new_request is None:
-                pass
+                continue
             elif isinstance(new_request, Request):
                 self.add_new_request(new_request=new_request, old_request=request, response=response)
                 raise DropRequestException(middleware.__name__, request)
