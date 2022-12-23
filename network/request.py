@@ -245,6 +245,10 @@ class Request:
             if key == 'callback' and value is None:
                 request_dict[key] = 'parse'
 
+            # callback 不是字符串要改为字符
+            elif key == 'callback' and not isinstance(value, str):
+                request_dict[key] = value.__name__
+
             # _打头的名字 和 无值的忽略
             elif key.startswith('_') or not value:
                 continue

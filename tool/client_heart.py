@@ -54,14 +54,16 @@ class ClientHeart:
                 failed_client = [i.decode() for i in redis_conn.smembers(settings.REDIS_KEY_HEARTBEAT_FAILED)]
 
                 # 上锁成功则判断客户端运行情况
+                now_time = time.time()
                 all_distribute_done = True  # 是否任务分发完毕（只有 master 会分发）
                 all_client_is_waiting = True  # 是否所有客户端都无任务处理
-                for client_name, detail in redis_conn.hgetall(settings.REDIS_KEY_HEARTBEAT).items():
+                heartbeat = redis_conn.hgetall(settings.REDIS_KEY_HEARTBEAT)
+                for client_name, detail in heartbeat.items():
                     client_name = client_name.decode()
                     detail = json.loads(detail.decode())
 
-                    # 校验 2 次失败则为客户端关闭
-                    if int(time.time()) - detail['time'] - self.beating_time > 1:
+                    # 校验 2 次失败则为客户端关闭，心跳时间和检查时间，误差不超过 2s
+                    if now_time - detail['time'] - self.beating_time > 2:
                         if client_name in failed_client:
                             logger.warning(f"该客户端异常关闭：{client_name}")
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
@@ -89,7 +91,7 @@ class ClientHeart:
                         logger.debug(f"心跳正常：{client_name}")
 
                 # 如果所有客户端都无任务进行，并且任务分发完毕，则结束
-                if all_client_is_waiting and all_distribute_done:
+                if heartbeat and all_client_is_waiting and all_distribute_done:
                     logger.debug("所有客户端都已挂起，即将停止")
                     self.stop_all_client()
                     break
