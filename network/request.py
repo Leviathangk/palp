@@ -64,10 +64,19 @@ class Request:
         :param kwargs:
         """
         if cls.DOWNLOADER is None:
-            cls.DOWNLOADER = import_module(settings.RESPONSE_DOWNLOADER, instantiate=False)[0]
-            cls.DOWNLOADER_PARSER = import_module(settings.RESPONSE_DOWNLOADER_PARSER, instantiate=False)[0]
+            cls.from_settings()
 
         return object.__new__(cls)
+
+    @classmethod
+    def from_settings(cls):
+        """
+        导入 downloader、downloader_parser
+
+        :return:
+        """
+        cls.DOWNLOADER = import_module(settings.RESPONSE_DOWNLOADER, instantiate=False)[0]
+        cls.DOWNLOADER_PARSER = import_module(settings.RESPONSE_DOWNLOADER_PARSER, instantiate=False)[0]
 
     def __init__(
             self,

@@ -7,10 +7,10 @@
 """
 import sys
 import time
+import uuid
 import types
 import inspect
 import threading
-import uuid
 from pathlib import Path
 from palp import settings
 from loguru import logger
