@@ -43,7 +43,7 @@ class FIFORequestRedisSequence(RedisSequence):
 
         result = redis_conn.blpop(self.redis_key, timeout=timeout)
         if result:
-            return LoadRequest.load_dict(**json.loads(result[-1].decode()))  # 这里不需要 decode 因为是对象
+            return LoadRequest.load_from_json(result[-1].decode())
 
     def empty(self):
         """
@@ -70,8 +70,7 @@ class LIFORequestRedisSequence(FIFORequestRedisSequence):
 
         result = redis_conn.brpop(self.redis_key, timeout=timeout)
         if result:
-            return LoadRequest.load_dict(**json.loads(result[-1].decode()))
-
+            return LoadRequest.load_from_json(result[-1].decode())
 
 class PriorityRequestRedisSequence(FIFORequestRedisSequence):
     """
@@ -100,7 +99,7 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
 
         result = redis_conn.bzpopmin(self.redis_key, timeout=timeout)
         if result:
-            return LoadRequest.load_dict(**json.loads(result[1].decode()))
+            return LoadRequest.load_from_json(result[1].decode())
 
     def empty(self):
         """

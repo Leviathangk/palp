@@ -50,9 +50,6 @@ class Request:
         'cookie_jar',
         'priority',
         'command',
-        'jump_spider',
-        'jump_spider_kwargs',
-        'jump_spider_callback',
     ]
 
     # 下载器
@@ -92,9 +89,6 @@ class Request:
             cookie_jar: RequestsCookieJar = None,
             priority: int = settings.DEFAULT_QUEUE_PRIORITY,
             command: dict = None,
-            jump_spider=None,
-            jump_spider_kwargs: dict = None,
-            jump_spider_callback: Callable = None,
             **kwargs
     ):
         """
@@ -117,9 +111,6 @@ class Request:
         :param command: 自定义操作命令，用于自定义 downloader 时使用
         :param downloader: 自定义的下载器（局部）
         :param downloader_parser: 自定义的下载器的解析器（局部）
-        :param jump_spider: 需要跳转到的 spider
-        :param jump_spider_kwargs: 跳转的 spider 的接收参数，spider 通过 self.xxx 访问
-        :param jump_spider_callback: 请求的回调函数，此时将会优先使用该参数接收回调
 
         Palp 参数（非用户设置）
         :param cookie_jar: cookie_jar，存储 cookie，这里使用的是 requests 模块的，其它请求的话可以自己提取
@@ -135,13 +126,10 @@ class Request:
         self.priority = priority
         self.downloader = downloader
         self.cookie_jar = cookie_jar
-        self.jump_spider = jump_spider
         self.keep_cookie = keep_cookie
         self.keep_session = keep_session
         self.filter_repeat = filter_repeat
         self.downloader_parser = downloader_parser
-        self.jump_spider_kwargs = jump_spider_kwargs
-        self.jump_spider_callback = jump_spider_callback
 
         # requests 请求参数
         self.url = url
@@ -265,17 +253,6 @@ class Request:
             elif key == 'priority' and value == settings.DEFAULT_QUEUE_PRIORITY:
                 continue
 
-            # jump_spider 转为模块
-            elif key == 'jump_spider':
-                request_dict[key] = {
-                    'module': value.__module__,  # 引用路径（未实例化的，所以不需要 __class__）
-                    'init': value.__name__,  # 模块名
-                }
-
-            # jump_spider_callback、callback 值非字符串的转为名字
-            elif (key == 'jump_spider_callback' or key == 'callback') and not isinstance(value, str):
-                request_dict[key] = value.__name__
-
             # cookie_jar 转为字典
             elif key == 'cookie_jar':
                 request_dict[key] = value.get_dict()
@@ -374,19 +351,15 @@ class LoadRequest:
     CACHE = {}
 
     @classmethod
-    def load_dict(cls, **kwargs) -> Request:
+    def load_from_dict(cls, **kwargs) -> Request:
         """
-        从字典导入，生成 Request
+        从字典导入
 
         :param kwargs: request 参数
         """
         for key, value in kwargs.items():
-            # 导入 jump_spider
-            if key == 'jump_spider':
-                kwargs[key] = cls._load_module(value)
-
             # 导入 cookie_jar
-            elif key == 'cookie_jar':
+            if key == 'cookie_jar':
                 kwargs[key] = RequestsCookieJar()
                 kwargs[key].update(value)
 
@@ -399,6 +372,16 @@ class LoadRequest:
                 kwargs[key] = cls._load_module(value)
 
         return Request(**kwargs)
+
+    @classmethod
+    def load_from_json(cls, data: str) -> Request:
+        """
+        从 json 字符串导入
+
+        :return:
+        """
+
+        return cls.load_from_dict(**json.loads(data))
 
     @classmethod
     def _load_module(cls, value):

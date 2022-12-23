@@ -107,9 +107,7 @@ class DistributiveSpider(Spider):
                 if not request:
                     break
 
-                request = json.loads(request[0].decode())
-
-                self.queue.put(LoadRequest.load_dict(**request))
+                self.queue.put(LoadRequest.load_from_json(request[0].decode()))
 
     @RunByThreadDecorator(daemon=True)
     def start_distribute_failed_item(self) -> None:

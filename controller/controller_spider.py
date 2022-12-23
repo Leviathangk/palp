@@ -77,10 +77,7 @@ class SpiderController(Thread):
 
                 # 将 requests callback 还原
                 elif isinstance(task, Request):
-                    if task.callback:
-                        task.callback = getattr(self.spider, task.callback)
-                    if task.jump_spider_callback:
-                        task.jump_spider_callback = getattr(self.spider, task.jump_spider_callback)
+                    task.callback = getattr(self.spider, task.callback)
 
                 self.waiting = False
                 self.parse_task(task=task)
@@ -128,7 +125,7 @@ class SpiderController(Thread):
             new_request.url = response.urljoin(new_request.url)
 
         # callback 转化为字符串
-        if new_request.callback:
+        if new_request.callback and not isinstance(new_request.callback, str):
             new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
 
         # 添加请求必须参数
