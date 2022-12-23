@@ -162,7 +162,7 @@ class SpiderBase(threading.Thread):
             if len(self.distribute_thread_list) == 0:
                 break
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     def wait_spider_controller_done(self) -> None:
         """
@@ -178,7 +178,7 @@ class SpiderBase(threading.Thread):
             elif self.all_spider_controller_is_done():
                 break
 
-            time.sleep(0.5)  # 不加延迟将会导致性能问题
+            time.sleep(0.1)  # 不加延迟将会导致性能问题
 
     def wait_item_controller_done(self) -> None:
         """
@@ -194,7 +194,7 @@ class SpiderBase(threading.Thread):
             if len(self.item_controller_list) == 0:
                 break
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     def stop_all_spider_controller(self) -> None:
         """
@@ -209,7 +209,7 @@ class SpiderBase(threading.Thread):
             if self.all_spider_controller_is_done():
                 break
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     def all_distribute_thread_is_done(self) -> bool:
         """

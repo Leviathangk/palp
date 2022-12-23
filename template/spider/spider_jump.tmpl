@@ -1,0 +1,32 @@
+"""
+Create on ${DATE}
+----------
+@summary:
+----------
+@author:
+"""
+import palp
+
+
+class DemoJumpSpider(palp.JumpSpider):
+    """
+        用于跳转的 spider 一般用于实现某个循环，如验证码
+    """
+
+    def start_requests(self) -> None:
+        """
+        起始函数
+
+        :return:
+        """
+        yield palp.RequestGet('http://www.baidu.com/')
+
+    def parse(self, request, response) -> None:
+        """
+        解析函数
+
+        :param request:
+        :param response:
+        :return:
+        """
+        yield self.request  # 处理完之后将真正的目标请求 yield
