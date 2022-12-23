@@ -9,7 +9,7 @@ from palp import settings
 from quickdb import RedisLock
 from abc import abstractmethod
 from palp.spider.spider import Spider
-from palp.network.request import Request
+from palp.network.request import LoadRequest
 from palp.tool.client_heart import ClientHeart
 from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
@@ -101,7 +101,6 @@ class DistributiveSpider(Spider):
         """
         from palp.conn import redis_conn
 
-        modules = {}
         if settings.REQUEST_RETRY_FAILED and redis_conn.exists(settings.REDIS_KEY_QUEUE_BAD_REQUEST):
             while True:
                 request = redis_conn.spop(settings.REDIS_KEY_QUEUE_BAD_REQUEST, count=1)
@@ -110,47 +109,7 @@ class DistributiveSpider(Spider):
 
                 request = json.loads(request[0].decode())
 
-                # 起始函数无 callback 默认添加
-                if request['callback'] is None:
-                    request['callback'] = 'parse'
-                elif isinstance(request['callback'], str) and hasattr(self, request['callback']):
-                    pass
-                else:
-                    logger.warning(f"callback 不是 {self.name} 含有的函数：{request}")
-                    continue
-
-                # 添加 downloader
-                if 'downloader' in request:
-                    downloader = request['downloader']
-                    key = downloader['module'] + '.' + downloader['init']
-                    if key not in modules:
-                        cls = importlib.import_module(downloader['module']).__getattribute__(downloader['init'])  # 导入
-                        modules[key] = cls
-                    else:
-                        cls = modules[key]
-
-                    request['downloader'] = cls
-
-                # downloader_parser
-                if 'downloader_parser' in request:
-                    downloader_parser = request['downloader_parser']
-                    key = downloader_parser['module'] + '.' + downloader_parser['init']
-                    if key not in modules:
-                        cls = importlib.import_module(downloader_parser['module']).__getattribute__(
-                            downloader_parser['init'])  # 导入
-                        modules[key] = cls
-                    else:
-                        cls = modules[key]
-
-                    request['downloader_parser'] = cls
-
-                # 重构请求
-                request = Request(**request)
-
-                # 为每一个起始函数添加一个 cookie_jar
-                request.cookie_jar = RequestsCookieJar()
-
-                self.queue.put(request)
+                self.queue.put(LoadRequest.load_dict(**request))
 
     @RunByThreadDecorator(daemon=True)
     def start_distribute_failed_item(self) -> None:
