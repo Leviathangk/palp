@@ -128,6 +128,7 @@ PALP_SPIDER_MIDDLEWARE = {
     },
     'max': {
         1: 'palp.middleware.middleware_spider_recycle.SpiderRecycleMiddleware',  # 资源回收
+        2: 'palp.middleware.middleware_spider_end.SpiderEndMiddleware'  # 结束语
     }
 }
 
