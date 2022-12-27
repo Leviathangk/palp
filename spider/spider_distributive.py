@@ -161,15 +161,16 @@ class DistributiveSpider(Spider):
             # 删除之前的锁
             keys = redis_conn.keys(settings.REDIS_KEY_LOCK + '*')
             if keys:
-                keys_list = []
+                remove_list = []
 
-                for key in keys_list:
+                for key in keys:
                     key = key.decode()
                     if key.endswith('Master'):
                         continue
-                    keys_list.append(key)
+                    remove_list.append(key)
 
-                redis_conn.delete(*keys_list)
+                if remove_list:
+                    redis_conn.delete(*remove_list)
 
             # 删除停止标志、记录
             redis_conn.delete(settings.REDIS_KEY_STOP, settings.REDIS_KEY_RECORD)
