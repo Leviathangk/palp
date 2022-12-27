@@ -104,7 +104,12 @@ class Response:
 
     @property
     def encoding(self):
-        return chardet.detect(self.content)["encoding"]
+        """
+        解码格式
+
+        :return:
+        """
+        return chardet.detect(self.content)["encoding"] or 'utf-8'
 
     @property
     def selector(self) -> Selector:
