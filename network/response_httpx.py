@@ -1,8 +1,6 @@
 """
     适用于 httpx 的响应解析器
 """
-import chardet
-
 from palp.network.response import Response
 
 
