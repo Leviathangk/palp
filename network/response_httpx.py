@@ -14,7 +14,7 @@ class HttpxResponse(Response):
 
     @property
     def text(self) -> str:
-        return self.content.decode(self.encoding) if self.content is not None else self.content
+        return self.content.decode(self.encoding) if self.content is not None else ''
 
     @property
     def content(self) -> bytes:
