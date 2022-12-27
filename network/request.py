@@ -60,11 +60,13 @@ class Request:
         """
         导入下载器
 
+        注意：Request 写了很多方法，但是 LoadRequest 是基于 Request 这个父类判断的，所以这里不使用 cls.xxx
+
         :param args:
         :param kwargs:
         """
-        if cls.DOWNLOADER is None:
-            cls.from_settings()
+        if Request.DOWNLOADER is None:
+            Request.from_settings()
 
         return object.__new__(cls)
 
@@ -370,6 +372,12 @@ class LoadRequest:
 
         :param kwargs: request 参数
         """
+        # 避免多次导入
+        if Request.DOWNLOADER and settings.RESPONSE_DOWNLOADER not in cls.CACHE:
+            cls.CACHE[settings.RESPONSE_DOWNLOADER] = Request.DOWNLOADER
+            cls.CACHE[settings.RESPONSE_DOWNLOADER_PARSER] = Request.DOWNLOADER_PARSER
+
+        # 处理请求导入
         for key, value in kwargs.items():
             # 导入 cookie_jar
             if key == 'cookie_jar':
