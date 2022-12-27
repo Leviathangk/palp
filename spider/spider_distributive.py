@@ -158,6 +158,19 @@ class DistributiveSpider(Spider):
                 'time': time.time(),
             }, ensure_ascii=False))
 
+            # 删除之前的锁
+            keys = redis_conn.keys(settings.REDIS_KEY_LOCK + '*')
+            if keys:
+                keys_list = []
+
+                for key in keys_list:
+                    key = key.decode()
+                    if key.endswith('Master'):
+                        continue
+                    keys_list.append(key)
+
+                redis_conn.delete(*keys_list)
+
             # 删除停止标志、记录
             redis_conn.delete(settings.REDIS_KEY_STOP, settings.REDIS_KEY_RECORD)
 
