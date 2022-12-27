@@ -75,8 +75,8 @@ class Request:
 
         :return:
         """
-        cls.DOWNLOADER = import_module(settings.RESPONSE_DOWNLOADER, instantiate=False)[0]
-        cls.DOWNLOADER_PARSER = import_module(settings.RESPONSE_DOWNLOADER_PARSER, instantiate=False)[0]
+        Request.DOWNLOADER = import_module(settings.RESPONSE_DOWNLOADER, instantiate=False)[0]
+        Request.DOWNLOADER_PARSER = import_module(settings.RESPONSE_DOWNLOADER_PARSER, instantiate=False)[0]
 
     def __init__(
             self,

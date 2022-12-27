@@ -1,7 +1,6 @@
 """
     redis request 队列
 """
-import json
 from palp import settings
 from palp.network.request import LoadRequest
 from palp.sequence.sequence import RedisSequence
