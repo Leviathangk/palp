@@ -57,8 +57,8 @@ class RequestMiddleware(palp.RequestMiddleware):
         """
         if settings.REQUEST_PROXIES_TUNNEL_URL and not request.proxies:
             request.proxies = {
-                'http': settings.REQUEST_PROXIES_TUNNEL_URL,
-                'https': settings.REQUEST_PROXIES_TUNNEL_URL,
+                'http': 'http://' + settings.REQUEST_PROXIES_TUNNEL_URL,
+                'https': 'https://' + settings.REQUEST_PROXIES_TUNNEL_URL,
             }
 
     def request_error(self, spider, request, exception: Exception) -> Union[Request, None]:
