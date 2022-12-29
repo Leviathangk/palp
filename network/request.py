@@ -8,8 +8,6 @@ import urllib3
 from palp import settings
 from typing import Callable
 from urllib.parse import urlparse
-
-from palp.network.meta import Meta
 from palp.network.response import Response
 from palp.tool.user_agent import random_ua
 from requests.cookies import RequestsCookieJar
@@ -94,7 +92,7 @@ class Request:
             timeout=None,
             proxies=None,
             json=None,
-            meta: Meta = None,
+            meta: dict = None,
             downloader=None,
             downloader_parser=None,
             filter_repeat: bool = False,
@@ -126,7 +124,7 @@ class Request:
         :param command: 自定义操作命令，用于自定义 downloader 时使用
         :param downloader: 自定义的下载器（局部）
         :param downloader_parser: 自定义的下载器的解析器（局部）
-        :param meta: 自动向下传递参数，临时的直接 xxx=yyy，自动的 meta=yyy
+        :param meta: 自动向下传递参数，临时的直接 xxx=yyy，自动的 meta={'xxx':'yyy'}
 
         Palp 参数（非用户设置）
         :param cookie_jar: cookie_jar，存储 cookie，这里使用的是 requests 模块的，其它请求的话可以自己提取
@@ -212,7 +210,7 @@ class Request:
 
         # 设置默认
         if self.meta is None:
-            self.meta = Meta()
+            self.meta = {}
         if self.downloader is None:
             self.downloader = self.__class__.DOWNLOADER
         if self.downloader_parser is None:
@@ -271,10 +269,6 @@ class Request:
             # _打头的名字 和 无值的忽略
             elif key.startswith('_') or not value:
                 continue
-
-            # meta 转为字典
-            elif key == 'meta':
-                request_dict[key] = value.to_dict()
 
             # priority 默认值的情况直接忽略
             elif key == 'priority' and value == settings.DEFAULT_QUEUE_PRIORITY:
@@ -391,13 +385,8 @@ class LoadRequest:
 
         # 处理请求导入
         for key, value in kwargs.items():
-            # 导入 meta
-            if key == 'meta':
-                kwargs[key] = Meta()
-                kwargs[key].update(value)
-
             # 导入 cookie_jar
-            elif key == 'cookie_jar':
+            if key == 'cookie_jar':
                 kwargs[key] = RequestsCookieJar()
                 kwargs[key].update(value)
 
