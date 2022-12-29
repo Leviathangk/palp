@@ -120,6 +120,9 @@ class SpiderController(Thread):
         :param response:
         :return:
         """
+        # 自动衔接 meta
+        new_request.meta = old_request.meta
+
         # 自动拼接 url
         if not new_request.url.startswith('http') and response:
             new_request.url = response.urljoin(new_request.url)

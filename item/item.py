@@ -23,7 +23,7 @@ class ItemBase(MutableMapping):
 
         :return:
         """
-        return dict(self)
+        return self.__dict__
 
     def to_json(self, **kwargs) -> str:
         """
