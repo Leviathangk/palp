@@ -231,9 +231,9 @@ class Request:
 
         if not self.headers:
             self.headers.update({'User-Agent': ua})
-        elif self.headers.get('User-Agent'):
+        elif not self.headers.get('User-Agent'):
             self.headers.update({'User-Agent': ua})
-        elif self.headers.get('user-agent'):
+        elif not self.headers.get('user-agent'):
             self.headers.update({'user-agent': ua})
 
     def to_dict(self) -> dict:
