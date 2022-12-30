@@ -20,7 +20,6 @@ from gsender import EmailSender
 from palp.network.request import Request
 from palp.network.response import Response
 from requests.cookies import RequestsCookieJar
-from palp.exception import NotGeneratorFunctionError
 from palp.controller import SpiderController, ItemController
 from palp.tool.short_module import sort_module, import_module
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
@@ -138,7 +137,6 @@ class SpiderBase(threading.Thread):
 
         @result: yield Request()
         """
-        pass
 
     def parse(self, request: Request, response: Response) -> None:
         """
@@ -146,7 +144,6 @@ class SpiderBase(threading.Thread):
 
         @result:
         """
-        pass
 
     def wait_distribute_thread_done(self) -> None:
         """
@@ -271,26 +268,26 @@ class SpiderBase(threading.Thread):
 
         :return:
         """
-        # 校验是否是生成器函数
-        if not inspect.isgeneratorfunction(self.start_requests):
-            raise NotGeneratorFunctionError("start_requests 必须 yield Request!")
+        # 检查是否是 yield 函数，不是不报错，避免只是执行失败的
+        if inspect.isgeneratorfunction(self.start_requests):
+            # 检查起始函数发出请求
+            for request in self.start_requests():
+                if not isinstance(request, Request):
+                    raise ValueError("start_requests 仅支持 yield Request")
 
-        # 检查起始函数发出请求
-        for request in self.start_requests():
-            if not isinstance(request, Request):
-                raise ValueError("start_requests 仅支持 yield Request")
+                # 起始函数无 callback 默认添加
+                if request.callback is None:
+                    request.callback = self.parse
 
-            # 起始函数无 callback 默认添加
-            if request.callback is None:
-                request.callback = self.parse
+                # 先改成名字，不然后续无法序列化
+                request.callback = request.callback.__name__
 
-            # 先改成名字，不然后续无法序列化
-            request.callback = request.callback.__name__
+                # 为每一个起始函数添加一个 cookie_jar
+                request.cookie_jar = RequestsCookieJar()
 
-            # 为每一个起始函数添加一个 cookie_jar
-            request.cookie_jar = RequestsCookieJar()
-
-            self.queue.put(request)
+                self.queue.put(request)
+        else:
+            logger.warning("self.start_requests 函数不是生成器函数，将不会执行！")
 
     def start_controller(self) -> None:
         """

@@ -39,6 +39,9 @@ if settings.REDIS_HOST:
             conn_kwargs=settings.REDIS_CONFIG
         ).conn
     else:
+        # 更新一下最大连接数
+        settings.REDIS_POOL_CONFIG.setdefault('max_connections', settings.REDIS_MAX_CONNECTIONS)
+
         redis_conn_lazy = RedisConnLazy(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,

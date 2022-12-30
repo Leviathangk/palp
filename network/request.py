@@ -108,7 +108,7 @@ class Request:
             priority: int = settings.DEFAULT_QUEUE_PRIORITY,
             command: dict = None,
             jump_spider=None,
-            jump_spider_kwargs=None,
+            jump_spider_kwargs: dict = None,
             jump_spider_middleware=None,
             **kwargs
     ):

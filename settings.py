@@ -42,7 +42,7 @@ REDIS_HOST = None
 REDIS_PORT = None
 REDIS_PWD = None
 REDIS_CLUSTER_NODES = None  # 如果有集群的情况下，优先集群
-REDIS_MAX_CONNECTIONS = 5  # redis 最大连接数
+REDIS_MAX_CONNECTIONS = 50  # redis 最大连接数（线程数太大，会连接失败，需要调整）
 REDIS_CONFIG = {}  # redis 连接自定义配置项
 REDIS_POOL_CONFIG = {}  # redis pool 连接自定义配置项
 

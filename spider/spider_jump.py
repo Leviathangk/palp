@@ -10,13 +10,14 @@
         jump spider 最后会执行 jump_out 合并 cookie、meta，可以自定义
 """
 import inspect
+from palp import settings
 from abc import abstractmethod
 from typing import Union, List, Callable
 from palp.network.request import Request
 from palp.network.response import Response
 from requests.cookies import RequestsCookieJar
+from palp.tool.short_module import import_module
 from palp.exception import NotGeneratorFunctionError
-from palp.sequence.sequence_memory import PriorityMemorySequence
 from palp.controller.controller_spider_jump import JumpController
 
 
@@ -34,7 +35,7 @@ class JumpSpider:
         :param request_middleware: 请求中间件
         :param kwargs: 需要被 self.xxx 访问到的参数
         """
-        self.queue = PriorityMemorySequence()  # 请求队列
+        self.queue = import_module(settings.REQUEST_QUEUE[1][settings.REQUEST_QUEUE_MODE])[0]  # 请求队列
         self.request = request
         self.request_middleware = request_middleware
 
@@ -126,6 +127,8 @@ class JumpSpider:
         self.request.cookie_jar.update(request.cookie_jar)
         if self.request.meta:
             self.request.meta.update(request.meta)
+        else:
+            self.request.meta = request.meta
 
     def __setattr__(self, key, value):
         """
