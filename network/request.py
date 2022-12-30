@@ -5,7 +5,6 @@ import json
 import time
 import random
 import urllib3
-from copy import deepcopy
 from palp import settings
 from typing import Callable
 from urllib.parse import urlparse
@@ -364,15 +363,6 @@ class Request:
 
     def __str__(self):
         return f"<Request {self.method}-{self.url}>"
-
-    def __deepcopy__(self):
-        """
-        可能使用的 深拷贝
-
-        :param memodict:
-        :return:
-        """
-        return LoadRequest.load_from_dict(**deepcopy(self.to_dict()))
 
 
 class LoadRequest:
