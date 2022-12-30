@@ -3,6 +3,8 @@
 """
 import json
 import time
+import pickle
+import base64
 import random
 import urllib3
 from palp import settings
@@ -271,16 +273,20 @@ class Request:
 
         for key, value in self.__dict__.items():
             # 无 callback 要添加
-            if key == 'callback' and value is None:
-                request_dict[key] = 'parse'
+            # if key == 'callback' and value is None:
+            #     request_dict[key] = 'parse'
+
+            # _打头的名字 和 无值的忽略
+            if key.startswith('_') or not value:
+                continue
 
             # callback 不是字符串要改为字符
             elif key == 'callback' and not isinstance(value, str):
                 request_dict[key] = value.__name__
 
-            # _打头的名字 和 无值的忽略
-            elif key.startswith('_') or not value:
-                continue
+            # 序列化 jump
+            elif key.startswith('jump'):
+                request_dict[key] = base64.b64encode(pickle.dumps(value)).decode()
 
             # priority 默认值的情况直接忽略
             elif key == 'priority' and value == settings.DEFAULT_QUEUE_PRIORITY:
@@ -401,6 +407,10 @@ class LoadRequest:
             if key == 'cookie_jar':
                 kwargs[key] = RequestsCookieJar()
                 kwargs[key].update(value)
+
+            # 导入 jump
+            if key.startswith('jump'):
+                kwargs[key] = pickle.loads(base64.b64decode(value))
 
             # 导入 downloader
             elif key == 'downloader':

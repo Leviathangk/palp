@@ -1,7 +1,6 @@
 """
     request 失败回收中间件
 """
-import json
 from palp import settings
 from palp.middleware.middleware_request import RequestMiddleware
 
@@ -23,7 +22,7 @@ class RequestRecycleMiddleware(RequestMiddleware):
         """
         from palp.conn import redis_conn
 
-        if redis_conn is None:
+        if redis_conn is None and settings.SPIDER_TYPE == 1:
             return
 
         redis_conn.sadd(settings.REDIS_KEY_QUEUE_BAD_REQUEST, request.to_json())
