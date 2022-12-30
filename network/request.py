@@ -50,7 +50,10 @@ class Request:
         'cookie_jar',
         'priority',
         'command',
-        'meta'
+        'meta',
+        'jump_spider',
+        'jump_spider_kwargs',
+        'jump_spider_middleware',
     ]
 
     # 下载器
@@ -102,6 +105,9 @@ class Request:
             cookie_jar: RequestsCookieJar = None,
             priority: int = settings.DEFAULT_QUEUE_PRIORITY,
             command: dict = None,
+            jump_spider=None,
+            jump_spider_kwargs=None,
+            jump_spider_middleware=None,
             **kwargs
     ):
         """
@@ -125,6 +131,9 @@ class Request:
         :param downloader: 自定义的下载器（局部）
         :param downloader_parser: 自定义的下载器的解析器（局部）
         :param meta: 自动向下传递参数，临时的直接 xxx=yyy，自动的 meta={'xxx':'yyy'}
+        :param jump_spider: 跳转的 spider
+        :param jump_spider_kwargs: 跳转的 spider 需要 self.xxx 的参数
+        :param jump_spider_middleware: 跳转的 spider 需要的请求中间件
 
         Palp 参数（非用户设置）
         :param cookie_jar: cookie_jar，存储 cookie，这里使用的是 requests 模块的，其它请求的话可以自己提取
@@ -141,10 +150,13 @@ class Request:
         self.priority = priority
         self.downloader = downloader
         self.cookie_jar = cookie_jar
+        self.jump_spider = jump_spider
         self.keep_cookie = keep_cookie
         self.keep_session = keep_session
         self.filter_repeat = filter_repeat
         self.downloader_parser = downloader_parser
+        self.jump_spider_kwargs = jump_spider_kwargs
+        self.jump_spider_middleware = jump_spider_middleware
 
         # requests 请求参数
         self.url = url
