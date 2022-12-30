@@ -76,7 +76,7 @@ class SpiderController(Thread):
                     continue
 
                 # 将 requests callback 还原
-                elif isinstance(task, Request) and task.callback:
+                elif isinstance(task, Request) and task.callback and isinstance(task.callback, str):
                     task.callback = getattr(self.spider, task.callback)
 
                 self.waiting = False
