@@ -82,7 +82,7 @@ class SpiderController(Thread):
                 self.waiting = False
                 self.parse_task(task=task)
             except DropRequestException as e:
-                logger.warning(f"丢弃请求：{' '.join(list(e.args))}")
+                logger.warning(f"丢弃请求：{e.args}")
             except Exception as e:
                 if settings.SPIDER_STOP_ON_ERROR:
                     raise
@@ -170,7 +170,7 @@ class SpiderController(Thread):
                         continue
                     elif isinstance(new_request, Request):
                         self.add_new_request(new_request=new_request, old_request=request, response=response)
-                        raise DropRequestException(middleware.__name__, request)
+                        raise DropRequestException(middleware.__class__.__name__, request)
                     else:
                         logger.warning("request_error 仅支持 Request 返回值！")
 
@@ -187,7 +187,7 @@ class SpiderController(Thread):
                 continue
             elif isinstance(new_request, Request):
                 self.add_new_request(new_request=new_request, old_request=request, response=response)
-                raise DropRequestException(middleware.__name__, request)
+                raise DropRequestException(middleware.__class__.__name__, request)
             else:
                 logger.warning("request_close 仅支持 Request 返回值！")
 
