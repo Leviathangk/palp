@@ -104,6 +104,8 @@ class SpiderController(Thread):
         if isinstance(task, Request):
             if request:
                 self.add_new_request(task, request, response)
+            elif task.jump_spider:
+                self.run_jump_spider(task)
             else:
                 self.run_requests(task)
         elif issubclass(task.__class__, Item):
@@ -198,3 +200,35 @@ class SpiderController(Thread):
                     self.parse_task(task=task, request=request, response=response)
             else:
                 request.callback(request, response)
+
+    def run_jump_spider(self, request: Request):
+        """
+        处理 jump spider
+
+        :param request:
+        :return:
+        """
+        try:
+            # 提取参数
+            jump_spider = request.jump_spider
+            jump_spider_kwargs = request.jump_spider_kwargs or {}
+            jump_request_middleware = request.jump_request_middleware or []
+
+            # 执行 jump_spider
+            jump_spider(
+                request=request,
+                jump_request_middleware=jump_request_middleware,
+                **jump_spider_kwargs
+            ).run()
+
+            # 执行成功则参数置空，并发起需要的请求
+            request.jump_spider = None
+            request.jump_spider_kwargs = None
+            request.jump_request_middleware = None
+            self.queue.put(request)
+        except DropRequestException as e:
+            raise DropRequestException(self.spider.name, request, *e.args)
+        except:
+            # 失败直接放入失败中间件，不会重试
+            for middleware in self.__class__.REQUEST_MIDDLEWARE:
+                middleware.request_failed(self.spider, request)

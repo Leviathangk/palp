@@ -29,7 +29,7 @@ def generator():
             spider_name = args_spider[0]
             spider_type = int(args_spider[1])
 
-        if spider_type not in [1, 2, 3]:
+        if spider_type not in [1, 2, 3, 4]:
             raise ValueError('spider_type 不在允许范围内！')
         CreateSpider(spider_name, spider_type).create()
 
@@ -55,7 +55,8 @@ def helper():
     cmds = {
         '1': '创建 spider 时，创建普通 spider',
         '2': '创建 spider 时，创建分布式 spider',
-        '3': '创建 spider 时，创建周期 spider'
+        '3': '创建 spider 时，创建周期 spider',
+        '4': '创建 spider 时，创建跳转 spider（辅助其余 spider）'
     }
     for cmdname, cmdclass in sorted(cmds.items()):
         print('\t%s\t\t%s' % (cmdname, cmdclass))
@@ -73,6 +74,8 @@ def main():
 
     command = args.pop(1)
     if command == 'create':
+        generator()
+    elif command == '-c':
         generator()
     else:
         helper()

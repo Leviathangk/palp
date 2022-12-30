@@ -23,6 +23,8 @@ class CreateSpider:
             self.path_template_spider = self.path_template.joinpath('spider_distributive.tmpl')
         elif self.spider_type == 3:
             self.path_template_spider = self.path_template.joinpath('spider_cycle.tmpl')
+        elif self.spider_type == 4:
+            self.path_template_spider = self.path_template.joinpath('spider_jump.tmpl')
         else:
             self.path_template_spider = self.path_template.joinpath('spider_local.tmpl')
 
@@ -37,7 +39,8 @@ class CreateSpider:
         spider_dir = self.find_path(path=self.path)
         if not spider_dir:
             spider_dir = self.path
-        if spider_dir.joinpath(self.spider_name.lower() + '.py').exists():
+
+        if self.spider_type != 4 and spider_dir.joinpath(self.spider_name.lower() + '.py').exists():
             raise SpiderHasExistsError(f'{self.spider_name.lower()} 已存在！')
 
         with open(self.path_template_spider, 'r', encoding='utf-8') as f:
