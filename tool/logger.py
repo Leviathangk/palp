@@ -5,6 +5,8 @@ import loguru
 
 
 def debug(*args, sep=' '):
+    args = [str(i) for i in args]
+
     if len(args) == 1:
         loguru.logger.debug(args[0])
     else:
@@ -12,6 +14,8 @@ def debug(*args, sep=' '):
 
 
 def info(*args, sep=' '):
+    args = [str(i) for i in args]
+
     if len(args) == 1:
         loguru.logger.info(args[0])
     else:
@@ -19,6 +23,8 @@ def info(*args, sep=' '):
 
 
 def warning(*args, sep=' '):
+    args = [str(i) for i in args]
+
     if len(args) == 1:
         loguru.logger.warning(args[0])
     else:
@@ -26,6 +32,8 @@ def warning(*args, sep=' '):
 
 
 def error(*args, sep=' '):
+    args = [str(i) for i in args]
+
     if len(args) == 1:
         loguru.logger.error(args[0])
     else:
