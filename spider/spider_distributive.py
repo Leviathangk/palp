@@ -85,8 +85,9 @@ class DistributiveSpider(Spider):
             heart_beat = redis_conn.hget(settings.REDIS_KEY_HEARTBEAT, master_detail['name'])
 
             # 没有心跳的情况下，master 创建时间不能与现在时间相差 5s 不然就有问题
-            if not heart_beat and time.time() - master_detail['time'] > 5:
-                redis_conn.delete(settings.REDIS_KEY_MASTER)
+            if not heart_beat:
+                if time.time() - master_detail['time'] > 5:
+                    redis_conn.delete(settings.REDIS_KEY_MASTER)
 
             # 有心跳的情况下，master 超过 10s 没有跳动，就是有问题
             elif time.time() - json.loads(heart_beat.decode())['time'] > 10:
