@@ -16,4 +16,3 @@ from palp.middleware.middleware_spider import SpiderMiddleware
 from palp.middleware.middleware_request import RequestMiddleware
 from palp.exception import DropItemException, DropRequestException
 from palp.item.item import Field
-from palp.tool import logger
