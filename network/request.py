@@ -3,7 +3,7 @@
 """
 import json
 import time
-import pickle
+import dill
 import base64
 import random
 import urllib3
@@ -297,7 +297,7 @@ class Request:
 
             # 序列化对象
             elif key in pickle_attr:
-                request_dict[key] = base64.b64encode(pickle.dumps(value)).decode()
+                request_dict[key] = base64.b64encode(dill.dumps(value)).decode()
 
             # 其余直接赋值
             else:
@@ -378,7 +378,7 @@ class LoadRequest:
         """
         for key, value in kwargs.items():
             if key in pickle_attr:
-                kwargs[key] = pickle.loads(base64.b64decode(value))
+                kwargs[key] = dill.loads(base64.b64decode(value))
 
         return Request(**kwargs)
 
