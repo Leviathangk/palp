@@ -19,6 +19,12 @@ from urllib3.exceptions import InsecureRequestWarning
 # 禁用不安全警告
 urllib3.disable_warnings(InsecureRequestWarning)
 
+# 需要 pickle 的属性
+pickle_attr = [
+    'meta', 'downloader', 'downloader_parser', 'cookie_jar', 'command', 'jump_spider',
+    'jump_spider_kwargs', 'jump_spider_middleware'
+]
+
 
 class Request:
     # requests 模块所需的
@@ -90,13 +96,13 @@ class Request:
             self,
             url: str,
             method: str = None,
-            params=None,
-            data=None,
-            headers=None,
-            cookies=None,
-            timeout=None,
-            proxies=None,
-            json=None,
+            params: dict = None,
+            data: dict = None,
+            headers: dict = None,
+            cookies: dict = None,
+            timeout: float = None,
+            proxies: dict = None,
+            json: dict = None,
             meta: dict = None,
             downloader=None,
             downloader_parser=None,
@@ -271,52 +277,27 @@ class Request:
         """
         request_dict = {}
 
-        for key, value in self.__dict__.items():
-            # 无 callback 要添加
-            # if key == 'callback' and value is None:
-            #     request_dict[key] = 'parse'
+        # 先取出 callback
+        if self.callback and not isinstance(self.callback, str):
+            request_dict['callback'] = self.callback.__name__
 
+        # 提取其它参数
+        for key, value in self.__dict__.items():
             # _打头的名字 和 无值的忽略
             if key.startswith('_') or not value:
                 continue
-
-            # callback 不是字符串要改为字符
-            elif key == 'callback' and not isinstance(value, str):
-                request_dict[key] = value.__name__
-
-            # 序列化 jump
-            elif key.startswith('jump'):
-                request_dict[key] = base64.b64encode(pickle.dumps(value)).decode()
-
-            # priority 默认值的情况直接忽略
-            elif key == 'priority' and value == settings.DEFAULT_QUEUE_PRIORITY:
-                continue
-
-            # cookie_jar 转为字典
-            elif key == 'cookie_jar':
-                request_dict[key] = value.get_dict()
 
             # downloader 为默认的，直接忽略
             elif key == 'downloader' and value == self.__class__.DOWNLOADER:
                 continue
 
-            # downloader 转换为模块
-            elif key == 'downloader':
-                request_dict[key] = {
-                    'module': value.__module__,
-                    'init': value.__name__,
-                }
-
             # downloader_parser 为默认的，直接忽略
             elif key == 'downloader_parser' and value == self.__class__.DOWNLOADER_PARSER:
                 continue
 
-            # downloader_parser 转换为模块
-            elif key == 'downloader_parser':
-                request_dict[key] = {
-                    'module': value.__module__,
-                    'init': value.__name__,
-                }
+            # 序列化对象
+            elif key in pickle_attr:
+                request_dict[key] = base64.b64encode(pickle.dumps(value)).decode()
 
             # 其余直接赋值
             else:
@@ -387,7 +368,6 @@ class LoadRequest:
     """
         从字典加载出 请求
     """
-    CACHE = {}
 
     @classmethod
     def load_from_dict(cls, **kwargs) -> Request:
@@ -396,29 +376,9 @@ class LoadRequest:
 
         :param kwargs: request 参数
         """
-        # 避免多次导入
-        if Request.DOWNLOADER and settings.RESPONSE_DOWNLOADER not in cls.CACHE:
-            cls.CACHE[settings.RESPONSE_DOWNLOADER] = Request.DOWNLOADER
-            cls.CACHE[settings.RESPONSE_DOWNLOADER_PARSER] = Request.DOWNLOADER_PARSER
-
-        # 处理请求导入
         for key, value in kwargs.items():
-            # 导入 cookie_jar
-            if key == 'cookie_jar':
-                kwargs[key] = RequestsCookieJar()
-                kwargs[key].update(value)
-
-            # 导入 jump
-            if key.startswith('jump'):
+            if key in pickle_attr:
                 kwargs[key] = pickle.loads(base64.b64decode(value))
-
-            # 导入 downloader
-            elif key == 'downloader':
-                kwargs[key] = cls._load_module(value)
-
-            # 导入 downloader_parser
-            elif key == 'downloader_parser':
-                kwargs[key] = cls._load_module(value)
 
         return Request(**kwargs)
 
@@ -431,19 +391,3 @@ class LoadRequest:
         """
 
         return cls.load_from_dict(**json.loads(data))
-
-    @classmethod
-    def _load_module(cls, value):
-        """
-        导入模块
-
-        :param value: 导入模块的路径
-        """
-        module_path = value['module'] + '.' + value['init']
-        if module_path not in cls.CACHE:
-            module = import_module(module_path, instantiate=False)[0]  # 导入
-            cls.CACHE[module_path] = module
-        else:
-            module = cls.CACHE[module_path]
-
-        return module
