@@ -1,5 +1,7 @@
 """
     修改 loguru 的 logger
+
+    推荐还是使用 loguru 的logger，这里只是免于拼接，但是不能输出日志的位置
 """
 import loguru
 

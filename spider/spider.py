@@ -284,7 +284,7 @@ class SpiderBase(threading.Thread):
 
                 self.queue.put(request)
         else:
-            logger.warning("self.start_requests 函数不是生成器函数，将不会执行！")
+            logger.warning("start_requests 函数不是生成器函数，将不会执行该函数！")
 
     def start_controller(self) -> None:
         """
