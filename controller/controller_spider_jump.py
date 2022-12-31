@@ -141,10 +141,12 @@ class JumpController:
                 logger.warning("request_close 仅支持 Request 返回值！")
 
         # 继续监控下次 yield
-        if request.callback is not None:
-            if inspect.isgeneratorfunction(request.callback):  # 很好用的库，判断是否是 yield 函数
-                for task in request.callback(request, response):
+        if request.callback and isinstance(request.callback, str) and hasattr(self.spider, request.callback):
+            callback = getattr(self.spider, request.callback)
+
+            if inspect.isgeneratorfunction(callback):  # 很好用的库，判断是否是 yield 函数
+                for task in callback(request, response):
                     if isinstance(task, Request):
                         self.add_new_request(new_request=task, old_request=request, response=response)
             else:
-                request.callback(request, response)
+                callback(request, response)

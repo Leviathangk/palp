@@ -133,7 +133,7 @@ class Request:
         :param filter_repeat: 是否过滤请求，settings.FILTER_REQUEST 启用生效，默认 False
         :param keep_session: 是否保持 session，默认 False
         :param keep_cookie: 不使用 session 时保持 cookie，默认 False
-        :param callback: 回调函数
+        :param callback: 回调函数，设置的时候会被转为字符串，只有使用时手动从 spider 提取
         :param priority: 启用优先级队列时的优先级，分数越大，优先级约低，默认 settings.DEFAULT_QUEUE_PRIORITY
         :param command: 自定义操作命令，用于自定义 downloader 时使用
         :param downloader: 自定义的下载器（局部）
@@ -277,10 +277,6 @@ class Request:
         """
         request_dict = {}
 
-        # 先取出 callback
-        if self.callback and not isinstance(self.callback, str):
-            request_dict['callback'] = self.callback.__name__
-
         # 提取其它参数
         for key, value in self.__dict__.items():
             # _打头的名字 和 无值的忽略
@@ -346,6 +342,10 @@ class Request:
         @param value:
         @return:
         """
+        # 判断 callback 保证不论怎么样都是字符串
+        if key == 'callback' and value and not isinstance(value, str):
+            value = value.__name__
+
         self.__dict__[key] = value
 
         if key in self.__class__.__REQUEST_ATTRS__:

@@ -2,6 +2,7 @@
     spider 流程控制器：处理整个爬虫的处理过程流转
 """
 import inspect
+import traceback
 from loguru import logger
 from palp import settings
 from threading import Thread
@@ -75,10 +76,6 @@ class SpiderController(Thread):
                     self.waiting = True
                     continue
 
-                # 将 requests callback 还原
-                elif isinstance(task, Request) and task.callback and isinstance(task.callback, str):
-                    task.callback = getattr(self.spider, task.callback)
-
                 self.waiting = False
                 self.parse_task(task=task)
             except DropRequestException as e:
@@ -128,10 +125,6 @@ class SpiderController(Thread):
         # 自动拼接 url
         if not new_request.url.startswith('http') and response:
             new_request.url = response.urljoin(new_request.url)
-
-        # callback 转化为字符串
-        if new_request.callback and not isinstance(new_request.callback, str):
-            new_request.callback = new_request.callback.__name__  # 转成字符串，不然无法序列化
 
         # 添加请求必须参数
         new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
@@ -194,12 +187,14 @@ class SpiderController(Thread):
                 logger.warning("request_close 仅支持 Request 返回值！")
 
         # 继续监控下次 yield
-        if request.callback is not None:
-            if inspect.isgeneratorfunction(request.callback):  # 很好用的库，判断是否是 yield 函数
-                for task in request.callback(request, response):
+        if request.callback and isinstance(request.callback, str) and hasattr(self.spider, request.callback):
+            callback = getattr(self.spider,request.callback)
+
+            if inspect.isgeneratorfunction(callback):  # 很好用的库，判断是否是 yield 函数
+                for task in callback(request, response):
                     self.parse_task(task=task, request=request, response=response)
             else:
-                request.callback(request, response)
+                callback(request, response)
 
     def run_jump_spider(self, request: Request):
         """
@@ -228,7 +223,9 @@ class SpiderController(Thread):
             self.queue.put(request)
         except DropRequestException as e:
             raise DropRequestException(self.spider.name, request, *e.args)
-        except:
+        except Exception as e:
+            traceback.print_exc()
+
             # 失败直接放入失败中间件，不会重试
             for middleware in self.__class__.REQUEST_MIDDLEWARE:
                 middleware.request_failed(self.spider, request)

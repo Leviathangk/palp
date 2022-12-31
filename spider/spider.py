@@ -279,9 +279,6 @@ class SpiderBase(threading.Thread):
                 if request.callback is None:
                     request.callback = self.parse
 
-                # 先改成名字，不然后续无法序列化
-                request.callback = request.callback.__name__
-
                 # 为每一个起始函数添加一个 cookie_jar
                 request.cookie_jar = RequestsCookieJar()
 
