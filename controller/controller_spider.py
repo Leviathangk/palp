@@ -212,7 +212,7 @@ class SpiderController(Thread):
             # 执行 jump_spider
             jump_spider(
                 request=request,
-                jump_request_middleware=jump_request_middleware,
+                request_middleware=jump_request_middleware,
                 **jump_spider_kwargs
             ).run()
 
