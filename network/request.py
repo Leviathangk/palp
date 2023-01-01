@@ -345,6 +345,9 @@ class Request:
         # 判断 callback 保证不论怎么样都是字符串
         if key == 'callback' and value and not isinstance(value, str):
             value = value.__name__
+        # 保证 meta 是个字典
+        elif key == 'meta' and value is None:
+            value = {}
 
         self.__dict__[key] = value
 

@@ -18,7 +18,7 @@ class HttpxResponse(Response):
 
     @property
     def content(self) -> bytes:
-        return self.response.content
+        return self.response.content or b''
 
     def json(self, **kwargs) -> dict:
         return self.response.json(**kwargs)
