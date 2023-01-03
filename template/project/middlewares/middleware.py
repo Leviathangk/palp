@@ -94,3 +94,13 @@ class RequestMiddleware(palp.RequestMiddleware):
         :return: [Request, None]
         """
         return
+
+    def request_record(self, spider, record: dict) -> None:
+        """
+        请求结果记录（在 spider 结束时调用）
+
+        :param spider:
+        :param record:
+        :return:
+        """
+        logger.info("{} 执行完毕，请求量统计：{}", spider.spider_name, record)
