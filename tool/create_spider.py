@@ -48,7 +48,11 @@ class CreateSpider:
         with open(self.path_template_spider, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        content = content.replace('${SPIDER_NAME}', self.spider_name.title())
+        if self.spider_type == 4:
+            spider_name = self.spider_name.replace('_jump', '')
+            content = content.replace('${SPIDER_NAME}', spider_name.title())
+        else:
+            content = content.replace('${SPIDER_NAME}', self.spider_name.title())
         content = content.replace('${SPIDER_NAME_LOWER}', self.spider_name.lower())
         content = content.replace('${DATE}', str(datetime.datetime.now()))
 
