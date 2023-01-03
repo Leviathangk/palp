@@ -73,39 +73,25 @@ class CycleSpiderRecordMiddleware(RequestMiddleware, SpiderMiddleware):
         if hasattr(request, 'task_id'):
             spider.set_task_state_done(task_id=request.task_id)
 
-    def spider_close(self, spider) -> None:
+    def request_record(self, spider, record: dict) -> None:
         """
-        写入记录表
+        记录爬取结果
 
         :param spider:
+        :param record:
         :return:
         """
-        from palp.conn import redis_conn
-
         if not isinstance(spider, CycleSpider):
             return
         if not issubclass(spider.__class__, Spider):
             return
 
-        if settings.SPIDER_TYPE == 1:
-            record = spider.spider_record
-            spider.update_task_record(
-                total=record['all'],
-                succeed=record['succeed'],
-                failed=record['failed'],
-            )
-            spider.update_task_record_end()
-        else:
-            if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
-                try:
-                    record = json.loads(redis_conn.get(settings.REDIS_KEY_STOP).decode())
-                    spider.update_task_record(
-                        total=record['all'],
-                        succeed=record['succeed'],
-                        failed=record['failed'],
-                    )
-                finally:
-                    spider.update_task_record_end()
+        spider.update_task_record(
+            total=record['all'],
+            succeed=record['succeed'],
+            failed=record['failed'],
+        )
+        spider.update_task_record_end()
 
     @classmethod
     def check_max_id_is_done(cls, spider: CycleSpider) -> bool:
