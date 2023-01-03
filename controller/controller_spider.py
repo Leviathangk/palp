@@ -221,6 +221,7 @@ class SpiderController(Thread):
 
             # 执行 jump_spider
             jump_spider(
+                main_spider=self.spider,
                 request=request,
                 request_middleware=jump_request_middleware,
                 **jump_spider_kwargs
