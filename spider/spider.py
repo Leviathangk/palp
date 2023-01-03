@@ -19,7 +19,6 @@ from typing import Union, List
 from gsender import EmailSender
 from palp.network.request import Request
 from palp.network.response import Response
-from requests.cookies import RequestsCookieJar
 from palp.controller import SpiderController, ItemController
 from palp.tool.short_module import sort_module, import_module
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
@@ -278,9 +277,6 @@ class SpiderBase(threading.Thread):
                 # 起始函数无 callback 默认添加
                 if request.callback is None:
                     request.callback = self.parse
-
-                # 为每一个起始函数添加一个 cookie_jar
-                request.cookie_jar = RequestsCookieJar()
 
                 self.queue.put(request)
         else:

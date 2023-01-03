@@ -4,14 +4,12 @@
 import json
 import time
 import importlib
-from loguru import logger
 from palp import settings
 from quickdb import RedisLock
 from abc import abstractmethod
 from palp.spider.spider import Spider
 from palp.network.request import LoadRequest
 from palp.tool.client_heart import ClientHeart
-from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator

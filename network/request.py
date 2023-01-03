@@ -229,14 +229,10 @@ class Request:
             self.method = 'GET'
 
         # 设置默认
-        if self.meta is None:
-            self.meta = {}
         if self.downloader is None:
             self.downloader = self.__class__.DOWNLOADER
         if self.downloader_parser is None:
             self.downloader_parser = self.__class__.DOWNLOADER_PARSER
-        if self.cookie_jar is None:
-            self.cookie_jar = RequestsCookieJar()
         if self.command is None:
             self.command = {}
         if self.headers is None:
@@ -348,6 +344,9 @@ class Request:
         # 保证 meta 是个字典
         elif key == 'meta' and value is None:
             value = {}
+        # 保证获取到 jar
+        elif key == 'cookie_jar' and value is None:
+            value = RequestsCookieJar()
 
         self.__dict__[key] = value
 
