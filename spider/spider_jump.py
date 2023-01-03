@@ -65,7 +65,6 @@ class JumpSpider:
 
         :return:
         """
-        pass
 
     def start_distribute(self) -> None:
         """

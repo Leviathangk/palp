@@ -22,7 +22,7 @@ class RequestRecycleMiddleware(RequestMiddleware):
         """
         from palp.conn import redis_conn
 
-        if redis_conn is None and settings.SPIDER_TYPE == 1:
+        if redis_conn is None or settings.SPIDER_TYPE == 1:
             return
 
         redis_conn.sadd(settings.REDIS_KEY_QUEUE_BAD_REQUEST, request.to_json())

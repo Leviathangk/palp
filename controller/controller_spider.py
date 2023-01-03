@@ -232,8 +232,6 @@ class SpiderController(Thread):
             request.jump_spider_kwargs = None
             request.jump_request_middleware = None
             self.queue.put(request)
-        except DropRequestException as e:
-            raise DropRequestException(self.spider.name, request, *e.args)
         except Exception as e:
             traceback.print_exc()
 
