@@ -14,8 +14,8 @@ import datetime
 from typing import Union
 from palp import settings
 from palp.network.request import Request
-from palp.decorator.decorator_lock import FuncLockDecorator
 from palp.middleware.middleware_request import RequestMiddleware
+from palp.decorator.decorator_lock import FuncLockSharedDecorator
 
 
 class RequestRecordMiddleware(RequestMiddleware):
@@ -23,21 +23,21 @@ class RequestRecordMiddleware(RequestMiddleware):
         请求记录中间件
     """
 
-    @FuncLockDecorator()
+    @FuncLockSharedDecorator(timeout=1)
     def request_in(self, spider, request) -> None:
         """
             记录进入的请求
         """
         spider.spider_record['all'] += 1
 
-    @FuncLockDecorator()
+    @FuncLockSharedDecorator(timeout=1)
     def request_failed(self, spider, request) -> None:
         """
             记录失败的请求
         """
         spider.spider_record['failed'] += 1
 
-    @FuncLockDecorator()
+    @FuncLockSharedDecorator(timeout=1)
     def request_close(self, spider, request, response) -> Union[Request, None]:
         """
             记录成功的请求

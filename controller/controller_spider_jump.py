@@ -10,6 +10,7 @@ from palp.network.response import Response
 from palp.sequence.sequence import Sequence
 from palp.exception import DropRequestException
 from palp.middleware import RequestRecordMiddleware
+from palp.decorator.decorator_lock import FuncLockSharedDecorator
 
 
 class JumpController:
@@ -67,9 +68,7 @@ class JumpController:
                 except DropRequestException as e:
                     logger.warning(f"丢弃请求：{e.args}")
         finally:
-            self.spider.main_spider.spider_record['all'] += self.spider.spider_record['all']
-            self.spider.main_spider.spider_record['failed'] += self.spider.spider_record['failed']
-            self.spider.main_spider.spider_record['succeed'] += self.spider.spider_record['succeed']
+            self.change_record()
 
             if request:
                 self.spider.jump_out(request)
@@ -160,3 +159,14 @@ class JumpController:
                         self.add_new_request(new_request=task, old_request=request, response=response)
             else:
                 callback(request, response)
+
+    @FuncLockSharedDecorator(timeout=1)
+    def change_record(self):
+        """
+        修改记录
+
+        :return:
+        """
+        self.spider.main_spider.spider_record['all'] += self.spider.spider_record['all']
+        self.spider.main_spider.spider_record['failed'] += self.spider.spider_record['failed']
+        self.spider.main_spider.spider_record['succeed'] += self.spider.spider_record['succeed']
