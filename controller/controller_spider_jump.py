@@ -14,7 +14,7 @@ from palp.middleware import RequestRecordMiddleware
 
 class JumpController:
     REQUEST_MIDDLEWARE = {
-        'palp.middleware.RequestRecordMiddleware': RequestRecordMiddleware()  # 记录请求
+        'RequestRecordMiddleware': RequestRecordMiddleware()  # 记录请求
     }
 
     def __init__(self, q: Sequence, request_middleware: Union[List[Callable], Callable], spider):
@@ -32,6 +32,8 @@ class JumpController:
 
         # 实例化
         for i, m in enumerate(request_middleware):
+            if m.__name__ == 'RequestRecordMiddleware':
+                continue
             if m not in self.__class__.REQUEST_MIDDLEWARE:
                 request_middleware[i] = m()
                 self.__class__.REQUEST_MIDDLEWARE[m] = request_middleware[i]
@@ -40,7 +42,7 @@ class JumpController:
 
         self.queue = q
         self.spider = spider
-        self.request_middleware = request_middleware
+        self.request_middleware = request_middleware + [JumpController.REQUEST_MIDDLEWARE['RequestRecordMiddleware']]
 
     def run(self):
         """
@@ -50,22 +52,27 @@ class JumpController:
         """
         request = None
 
-        while True:
-            task = self.queue.get(timeout=0.5)
+        try:
+            while True:
+                task = self.queue.get(timeout=0.5)
 
-            try:
-                if task is None:
-                    break
-                elif not isinstance(task, Request):
-                    continue
+                try:
+                    if task is None:
+                        break
+                    elif not isinstance(task, Request):
+                        continue
 
-                request = task
-                self.run_requests(request=task)
-            except DropRequestException as e:
-                logger.warning(f"丢弃请求：{e.args}")
+                    request = task
+                    self.run_requests(request=task)
+                except DropRequestException as e:
+                    logger.warning(f"丢弃请求：{e.args}")
+        finally:
+            self.spider.main_spider.spider_record['all'] += self.spider.spider_record['all']
+            self.spider.main_spider.spider_record['failed'] += self.spider.spider_record['failed']
+            self.spider.main_spider.spider_record['succeed'] += self.spider.spider_record['succeed']
 
-        if request:
-            self.spider.jump_out(request)
+            if request:
+                self.spider.jump_out(request)
 
     def add_new_request(self, new_request: Request, old_request: Request, response: Response):
         """

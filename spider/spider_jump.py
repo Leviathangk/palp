@@ -27,16 +27,18 @@ class JumpSpider:
         注意：不走 spider 中间件，不处理 item
     """
 
-    def __init__(self, request: Request, request_middleware: Union[List[Callable], Callable] = None, **kwargs):
+    def __init__(self,main_spider, request: Request, request_middleware: Union[List[Callable], Callable] = None, **kwargs):
         """
 
         :param request: jump 之后需要执行的请求
         :param request_middleware: 请求中间件
         :param kwargs: 需要被 self.xxx 访问到的参数
         """
-        self.queue = import_module(settings.REQUEST_QUEUE[1][settings.REQUEST_QUEUE_MODE])[0]  # 请求队列
+        self.main_spider = main_spider
         self.request = request
         self.request_middleware = request_middleware
+        self.spider_record = {'all': 0, 'failed': 0, 'succeed': 0}
+        self.queue = import_module(settings.REQUEST_QUEUE[1][settings.REQUEST_QUEUE_MODE])[0]  # 请求队列
 
         # 导入一下自定义设置
         for key, value in kwargs.items():
