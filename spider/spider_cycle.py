@@ -301,6 +301,26 @@ class CycleSpider:
         mysql_conn.execute(sql=sql)
 
     @classmethod
+    def delete_task(cls, task_id: int):
+        """
+        删除任务
+
+        :param task_id: 任务 id
+        :return:
+        """
+        from palp.conn import mysql_conn
+
+        # 组合 sql
+        sql = f'''
+            DELETE
+            FROM
+              `{cls.spider_table_task_name}`
+            WHERE
+              id = {task_id};
+        '''
+        mysql_conn.execute(sql=sql)
+
+    @classmethod
     def get_spider_table_record_max_id(cls):
         """
         记录表最大 id
