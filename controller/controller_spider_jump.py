@@ -9,10 +9,13 @@ from palp.network.request import Request
 from palp.network.response import Response
 from palp.sequence.sequence import Sequence
 from palp.exception import DropRequestException
+from palp.middleware import RequestRecordMiddleware
 
 
 class JumpController:
-    REQUEST_MIDDLEWARE = {}
+    REQUEST_MIDDLEWARE = {
+        'palp.middleware.RequestRecordMiddleware': RequestRecordMiddleware()  # 记录请求
+    }
 
     def __init__(self, q: Sequence, request_middleware: Union[List[Callable], Callable], spider):
         """
