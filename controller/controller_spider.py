@@ -121,7 +121,8 @@ class SpiderController(Thread):
         :return:
         """
         # 自动衔接 meta
-        new_request.meta = old_request.meta
+        if old_request.meta:
+            new_request.meta.update(old_request.meta)
 
         # 自动拼接 url
         if not new_request.url.startswith('http') and response:
