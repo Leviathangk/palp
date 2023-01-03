@@ -12,6 +12,9 @@ import types
 import inspect
 import threading
 from pathlib import Path
+
+import dill
+
 from palp import settings
 from loguru import logger
 from abc import abstractmethod

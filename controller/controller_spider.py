@@ -3,6 +3,8 @@
 """
 import inspect
 import traceback
+
+import dill
 from loguru import logger
 from palp import settings
 from threading import Thread
@@ -142,6 +144,15 @@ class SpiderController(Thread):
         :param request:
         :return:
         """
+        from palp import conn
+
+        # 判断是否要借 cookie
+        if settings.REQUEST_BROORW_COOKIE and settings.SPIDER_TYPE != 1 and conn.redis_conn and not request.cookie_jar:
+            if request.keep_cookie:
+                cookie_jar = conn.redis_conn.lpop(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE)
+                if cookie_jar:
+                    request.cookie_jar = dill.loads(cookie_jar)
+
         # 请求发起前的处理
         for middleware in self.__class__.REQUEST_MIDDLEWARE:
             middleware.request_in(self.spider, request)
@@ -188,7 +199,7 @@ class SpiderController(Thread):
 
         # 继续监控下次 yield
         if request.callback and isinstance(request.callback, str) and hasattr(self.spider, request.callback):
-            callback = getattr(self.spider,request.callback)
+            callback = getattr(self.spider, request.callback)
 
             if inspect.isgeneratorfunction(callback):  # 很好用的库，判断是否是 yield 函数
                 for task in callback(request, response):

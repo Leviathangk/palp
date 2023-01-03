@@ -3,14 +3,15 @@
 """
 import json
 import time
+import dill
 import importlib
 from palp import settings
 from quickdb import RedisLock
 from abc import abstractmethod
 from palp.spider.spider import Spider
-from palp.network.request import LoadRequest
 from palp.tool.client_heart import ClientHeart
 from palp.tool.short_module import import_module
+from palp.network.request import LoadRequest, Request
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
 from palp.decorator.decorator_spider_record import SpiderRecordDecorator
@@ -171,6 +172,10 @@ class DistributiveSpider(Spider):
                 if remove_list:
                     redis_conn.delete(*remove_list)
 
+            # 删除 cookie 池
+            if settings.REQUEST_BROORW_COOKIE_DELETE_WHEN_START:
+                redis_conn.delete(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE)
+
             # 删除停止标志、记录
             redis_conn.delete(settings.REDIS_KEY_STOP, settings.REDIS_KEY_RECORD)
 
@@ -183,6 +188,19 @@ class DistributiveSpider(Spider):
 
             # 分发任务
             self.start_distribute()
+
+    @staticmethod
+    def recycle_request(request: Request):
+        """
+        开启 REQUEST_BROORW_COOKIE 时，用来主动回收 cookie，并在任务无 cookie 时，自动添加
+
+        :param request:
+        :return:
+        """
+        from palp import conn
+
+        if settings.REQUEST_BROORW_COOKIE and settings.SPIDER_TYPE != 1 and conn.redis_conn and request.cookie_jar:
+            conn.redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE, dill.dumps(request.cookie_jar))
 
     @SpiderMiddlewareDecorator()
     @SpiderRecordDecorator()
