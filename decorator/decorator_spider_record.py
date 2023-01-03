@@ -11,7 +11,9 @@
 """
 import json
 import datetime
+import traceback
 from palp import settings
+from palp.controller import SpiderController
 
 
 class SpiderRecordDecorator:
@@ -19,15 +21,19 @@ class SpiderRecordDecorator:
         爬虫执行结果汇总记录装饰器
     """
 
-    @staticmethod
-    def record(spider):
+    @classmethod
+    def run_record(cls, spider):
         """
-            进行记录
+        记录请求量
+
+        :param spider:
+        :return:
         """
         from palp.conn import redis_conn
 
         # 非分布式不上传 redis
         if settings.SPIDER_TYPE == 1:
+            cls.send_record(spider=spider, record=spider.spider_record)
             return
 
         # 发送每个 spider 的爬取情况
@@ -55,13 +61,26 @@ class SpiderRecordDecorator:
                 request_failed += spider_detail['failed']
                 request_succeed += spider_detail['succeed']
 
-            # 发送最后的统计结果
-            redis_conn.set(settings.REDIS_KEY_STOP, json.dumps({
+            # 给请求中间件发送统计结果
+            cls.send_record(spider=spider, record={
                 'all': request_all,
                 'failed': request_failed,
                 'succeed': request_succeed,
-                'stop_time': str(datetime.datetime.now())
-            }, ensure_ascii=False))
+            })
+
+    @staticmethod
+    def send_record(spider, record: dict):
+        """
+        调用请求中间件的 request_record 函数发送记录
+
+        record 目前有 3 个字段：all、failed、succeed
+        :return:
+        """
+        for middleware in SpiderController.REQUEST_MIDDLEWARE:
+            try:
+                middleware.request_record(spider, record)
+            except:
+                traceback.print_exc()
 
     def __call__(self, func):
         def _wrapper(*args, **kwargs):
@@ -73,6 +92,6 @@ class SpiderRecordDecorator:
                 spider = args[0]
 
                 # 统计数据
-                self.record(spider=spider)
+                self.run_record(spider=spider)
 
         return _wrapper

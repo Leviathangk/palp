@@ -50,6 +50,15 @@ class RequestMiddlewareBase:
         :return: [Request, None]
         """
 
+    def request_record(self, spider: Spider, record: dict) -> None:
+        """
+        发送请求记录，在 spider 执行完毕时，将会调用
+
+        :param spider:
+        :param record:
+        :return:
+        """
+
 
 class RequestMiddleware(RequestMiddlewareBase):
     """
@@ -92,4 +101,13 @@ class RequestMiddleware(RequestMiddlewareBase):
         :param request: 该参数可返回（用于放弃当前请求，并发起新请求）
         :param response:
         :return: [Request, None]
+        """
+
+    def request_record(self, spider, record: dict) -> None:
+        """
+        发送请求记录，在 spider 执行完毕时，将会调用
+
+        :param spider:
+        :param record:
+        :return:
         """

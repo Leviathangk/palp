@@ -1,10 +1,9 @@
 """
     spider 流程控制器：处理整个爬虫的处理过程流转
 """
+import dill
 import inspect
 import traceback
-
-import dill
 from loguru import logger
 from palp import settings
 from threading import Thread
@@ -26,8 +25,8 @@ class SpiderController(Thread):
         :param args:
         :param kwargs:
         """
-        if not cls.REQUEST_MIDDLEWARE:
-            cls.from_settings()
+        if not SpiderController.REQUEST_MIDDLEWARE:
+            SpiderController.from_settings()
 
         return object.__new__(cls)
 
@@ -40,8 +39,8 @@ class SpiderController(Thread):
         """
         super().__init__()
         self.queue = q
-        self.queue_item = q_item
         self.spider = spider
+        self.queue_item = q_item
 
         self.waiting = False  # 执行状态，如果拿到空任务就是在等待
         self.stop = False  # 是否暂停
@@ -62,7 +61,7 @@ class SpiderController(Thread):
             }
         )
 
-        cls.REQUEST_MIDDLEWARE = import_module(modules)
+        SpiderController.REQUEST_MIDDLEWARE = import_module(modules)
 
     def run(self):
         """

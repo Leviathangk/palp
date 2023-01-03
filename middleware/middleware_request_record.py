@@ -9,7 +9,10 @@
     注意：
         通过引入 spider 自身的 spider_record 获取、修改对应信息
 """
+import json
+import datetime
 from typing import Union
+from palp import settings
 from palp.network.request import Request
 from palp.decorator.decorator_lock import FuncLockDecorator
 from palp.middleware.middleware_request import RequestMiddleware
@@ -42,3 +45,25 @@ class RequestRecordMiddleware(RequestMiddleware):
         spider.spider_record['succeed'] += 1
 
         return
+
+    def request_record(self, spider, record: dict) -> None:
+        """
+        发送总结果记录
+
+        :param spider:
+        :param record:
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        if not redis_conn or settings.SPIDER_TYPE == 1:
+            return
+
+        record = {
+            'all': record['all'],
+            'failed': record['failed'],
+            'succeed': record['succeed'],
+            'stop_time': str(datetime.datetime.now())
+        }
+
+        redis_conn.set(settings.REDIS_KEY_STOP, json.dumps(record, ensure_ascii=False))
