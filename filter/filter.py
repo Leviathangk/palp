@@ -20,7 +20,6 @@ class FilterBase:
         :param kwargs:
         :return:
         """
-        pass
 
     @abstractmethod
     def judge(self, f: Any, fingerprint: str) -> bool:
@@ -31,7 +30,6 @@ class FilterBase:
         :param fingerprint: 指纹
         :return:
         """
-        pass
 
     @staticmethod
     def fingerprint(obj: Union[Request, Item]) -> str:
