@@ -52,7 +52,7 @@ def load_spider() -> dict:
     spider_modules = {}
     if spider_dir:
         for spider_file in spider_dir.iterdir():
-            if spider_file.name.startswith('_'):
+            if spider_file.name.startswith('_') or not spider_file.name.endswith('.py'):
                 continue
 
             # Demo.spiders 时
