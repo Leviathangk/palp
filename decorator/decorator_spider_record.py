@@ -13,6 +13,7 @@ import json
 import datetime
 import traceback
 from palp import settings
+from quickdb import RedisLock
 from palp.controller import SpiderController
 
 
@@ -44,11 +45,18 @@ class SpiderRecordDecorator:
             'stop_time': str(datetime.datetime.now())
         }, ensure_ascii=False))
 
-        # 删除当前 spider 心跳字段
-        redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, spider.spider_uuid)
+        # 保证 send_record 只执行一次
+        is_end = False
+        with RedisLock(conn=redis_conn, lock_name=settings.REDIS_KEY_LOCK + 'Record'):
+            # 删除当前 spider 心跳字段
+            redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, spider.spider_uuid)
 
-        # 如果是最后一个心跳，则进行统计记录
-        if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
+            # 如果是最后一个心跳，则进行统计记录
+            if not redis_conn.exists(settings.REDIS_KEY_HEARTBEAT):
+                is_end = True
+
+        # 统计所有机器的结果
+        if is_end:
             request_all = 0
             request_failed = 0
             request_succeed = 0
