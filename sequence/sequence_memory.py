@@ -5,7 +5,6 @@
         python 队列中的 PriorityQueue 需要对比的类实现 __lt__ 方法（小于）不然可能会报错
 """
 import queue
-
 from palp import settings
 from palp.sequence.sequence import Sequence
 
@@ -47,6 +46,13 @@ class FIFOMemorySequence(Sequence):
         """
         return self.queue.empty()
 
+    def qsize(self):
+        """
+        返回队列大小
+
+        :return:
+        """
+        return self.queue.qsize()
 
 class LIFOMemorySequence(FIFOMemorySequence):
     """

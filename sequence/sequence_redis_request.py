@@ -54,6 +54,16 @@ class FIFORequestRedisSequence(RedisSequence):
 
         return redis_conn.llen(self.redis_key) == 0
 
+    def qsize(self):
+        """
+        返回队列大小
+
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        return redis_conn.llen(self.redis_key)
+
 
 class LIFORequestRedisSequence(FIFORequestRedisSequence):
     """
@@ -70,6 +80,7 @@ class LIFORequestRedisSequence(FIFORequestRedisSequence):
         result = redis_conn.brpop(self.redis_key, timeout=timeout)
         if result:
             return LoadRequest.load_from_json(result[-1].decode())
+
 
 class PriorityRequestRedisSequence(FIFORequestRedisSequence):
     """
@@ -109,3 +120,13 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
         from palp.conn import redis_conn
 
         return redis_conn.zcard(self.redis_key) == 0
+
+    def qsize(self):
+        """
+        返回队列大小
+
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        return redis_conn.zcard(self.redis_key)

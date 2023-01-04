@@ -19,7 +19,6 @@ class SequenceBase:
         :param obj
         :return:
         """
-        pass
 
     @abstractmethod
     def get(self, timeout: float = None) -> None:
@@ -28,7 +27,6 @@ class SequenceBase:
 
         :return:
         """
-        pass
 
     @abstractmethod
     def empty(self) -> bool:
@@ -37,10 +35,17 @@ class SequenceBase:
 
         :return:
         """
-        pass
+
+    @abstractmethod
+    def qsize(self) -> int:
+        """
+        返回队列大小
+
+        :return:
+        """
 
 
-class Sequence:
+class Sequence(SequenceBase):
     """
         用于外部引用：队列的基类
     """
@@ -53,7 +58,6 @@ class Sequence:
         :param obj
         :return:
         """
-        pass
 
     def get(self, timeout=None):
         """
@@ -61,7 +65,6 @@ class Sequence:
 
         :return:
         """
-        pass
 
     def empty(self):
         """
@@ -69,13 +72,20 @@ class Sequence:
 
         :return:
         """
-        pass
+
+    def qsize(self):
+        """
+        返回队列大小
+
+        :return:
+        """
 
 
 class RedisSequence(Sequence):
     """
         Redis 队列的基类
     """
+
     def __new__(cls, *args, **kwargs):
         """
         给创建的每一个类都添加一个 redis_key 属性
@@ -95,4 +105,3 @@ class RedisSequence(Sequence):
 
         :return:
         """
-        pass

@@ -55,3 +55,13 @@ class FIFOItemRedisSequence(RedisSequence):
         from palp.conn import redis_conn
 
         return redis_conn.llen(self.redis_key) == 0
+
+    def qsize(self):
+        """
+        返回队列大小
+
+        :return:
+        """
+        from palp.conn import redis_conn
+
+        return redis_conn.llen(self.redis_key)
