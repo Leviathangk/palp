@@ -116,8 +116,6 @@ class JumpController:
             try:
                 response = request.send()
                 break
-            except DropRequestException as e:
-                raise DropRequestException(self.spider.name, request, *e.args)
             except Exception as e:
                 failed_times += 1
 

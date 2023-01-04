@@ -164,8 +164,6 @@ class SpiderController(Thread):
             try:
                 response = request.send()
                 break
-            except DropRequestException as e:
-                raise DropRequestException(self.spider.name, request, *e.args)
             except Exception as e:
                 failed_times += 1
 
@@ -176,7 +174,7 @@ class SpiderController(Thread):
                         continue
                     elif isinstance(new_request, Request):
                         self.add_new_request(new_request=new_request, old_request=request, response=response)
-                        raise DropRequestException(middleware.__class__.__name__, request)
+                        raise DropRequestException(middleware.__class__.__name__, str(request))
                     else:
                         logger.warning("request_error 仅支持 Request 返回值！")
 
@@ -193,7 +191,7 @@ class SpiderController(Thread):
                 continue
             elif isinstance(new_request, Request):
                 self.add_new_request(new_request=new_request, old_request=request, response=response)
-                raise DropRequestException(middleware.__class__.__name__, request)
+                raise DropRequestException(middleware.__class__.__name__, str(request))
             else:
                 logger.warning("request_close 仅支持 Request 返回值！")
 
