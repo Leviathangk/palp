@@ -121,10 +121,7 @@ class JumpSpider:
         :return:
         """
         self.request.cookie_jar.update(request.cookie_jar)
-        if self.request.meta:
-            self.request.meta.update(request.meta)
-        else:
-            self.request.meta = request.meta
+        self.request.meta.update(request.meta)
 
     def __setattr__(self, key, value):
         """
