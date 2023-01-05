@@ -20,7 +20,7 @@ SPIDER_STOP_ON_ERROR = True  # spider 在报错时停止（spider、pipeline、m
 # PG_HOST = '127.0.0.1'
 # PG_PORT = 5432
 # PG_DB = 'postgres'
-# PG_USER = 'root'
+# PG_USER = 'postgres'
 # PG_PWD = None
 # PG_CONFIG = {}  # 字典形式
 
