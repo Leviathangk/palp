@@ -54,12 +54,12 @@ class SpiderBase(threading.Thread):
         """
         # 修改日志
         if settings.LOG_SAVE:
-            log_path = Path(settings.LOG_PATH).joinpath(cls.__name__)
+            log_path = Path(settings.LOG_PATH).joinpath(cls.spider_name)
             log_path.mkdir(parents=True, exist_ok=True)
 
             logger.remove()
             logger.add(
-                sink=log_path.joinpath(f'{cls.__name__}.log'),
+                sink=log_path.joinpath(f'{cls.spider_name}.log'),
                 enqueue=True,
                 backtrace=True,
                 diagnose=True,
