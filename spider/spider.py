@@ -12,9 +12,6 @@ import types
 import inspect
 import threading
 from pathlib import Path
-
-import dill
-
 from palp import settings
 from loguru import logger
 from abc import abstractmethod
@@ -54,12 +51,13 @@ class SpiderBase(threading.Thread):
         """
         # 修改日志
         if settings.LOG_SAVE:
-            log_path = Path(settings.LOG_PATH).joinpath(cls.spider_name)
+            log_name = cls.spider_name or cls.__name__
+            log_path = Path(settings.LOG_PATH).joinpath(log_name)
             log_path.mkdir(parents=True, exist_ok=True)
 
             logger.remove()
             logger.add(
-                sink=log_path.joinpath(f'{cls.spider_name}.log'),
+                sink=log_path.joinpath(f'{log_name}.log'),
                 enqueue=True,
                 backtrace=True,
                 diagnose=True,
