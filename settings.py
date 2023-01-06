@@ -51,7 +51,7 @@ REDIS_KEY_MASTER = '{redis_key}:master'  # redis master（分布式时）(str)
 REDIS_KEY_LOCK = '{redis_key}:lock'  # redis 锁(str)
 REDIS_KEY_STOP = '{redis_key}:stop'  # 停止所有机器运行（分布式时）(str)
 REDIS_KEY_QUEUE_REQUEST = '{redis_key}:request'  # request 队列（list、zset）
-REDIS_KEY_QUEUE_REQUEST_COOKIE = '{redis_key}:requestCookie'  # list request cookie 队列（开启 REQUEST_BROORW_COOKIE）
+REDIS_KEY_QUEUE_REQUEST_BORROW = '{redis_key}:requestBorrow'  # list request 传递参数队列（开启 REQUEST_BORROW）
 REDIS_KEY_QUEUE_BAD_REQUEST = '{redis_key}:requestFailed'  # request 失败队列（set）
 REDIS_KEY_QUEUE_FILTER_REQUEST = '{redis_key}:filter:request'  # request 过滤队列（set、bloom）
 REDIS_KEY_QUEUE_ITEM = '{redis_key}:item'  # item 队列（list）
@@ -62,8 +62,8 @@ REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的�
 REDIS_KEY_RECORD = '{redis_key}:record'  # 记录请求 key (hash)
 
 '''请求相关'''
-REQUEST_BROORW_COOKIE = False  # 分发大量任务时，不希望每次都获取 cookie，在无 cookie 时借用执行完毕的任务的 cookie (分布式时有效)
-REQUEST_BROORW_COOKIE_DELETE_WHEN_START = True  # 启动时删除所有 cookie
+REQUEST_BORROW = False  # 分发大量任务时，需要在请求中传递的参数 (分布式时有效)
+REQUEST_BORROW_DELETE_WHEN_START = True  # 启动时删除所有 BORROW
 REQUEST_THREADS = 16  # 线程数量
 REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求

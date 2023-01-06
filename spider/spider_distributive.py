@@ -173,8 +173,8 @@ class DistributiveSpider(Spider):
                     redis_conn.delete(*remove_list)
 
             # 删除 cookie 池
-            if settings.REQUEST_BROORW_COOKIE_DELETE_WHEN_START:
-                redis_conn.delete(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE)
+            if settings.REQUEST_BORROW_DELETE_WHEN_START:
+                redis_conn.delete(settings.REDIS_KEY_QUEUE_REQUEST_BORROW)
 
             # 删除停止标志、记录
             redis_conn.delete(settings.REDIS_KEY_STOP, settings.REDIS_KEY_RECORD)
@@ -190,17 +190,47 @@ class DistributiveSpider(Spider):
             self.start_distribute()
 
     @staticmethod
-    def recycle_request(request: Request):
+    def borrow_request(request: Request):
         """
-        开启 REQUEST_BROORW_COOKIE 时，用来主动回收 cookie，并在任务无 cookie 时，自动添加
+        开启 REQUEST_BORROW 时，用来主动使用资源
 
-        :param request:
+        :param request: 新的请求，决定何时调用
         :return:
         """
         from palp import conn
 
-        if settings.REQUEST_BROORW_COOKIE and settings.SPIDER_TYPE != 1 and conn.redis_conn and request.cookie_jar:
-            conn.redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE, dill.dumps(request.cookie_jar))
+        if settings.REQUEST_BORROW and conn.redis_conn:
+
+            # 空 cookie_jar 即视为新的请求，添加 cookie_jar
+            if not request.cookie_jar and request.keep_cookie:
+                recycle_data = conn.redis_conn.lpop(settings.REDIS_KEY_QUEUE_REQUEST_BORROW)
+                if recycle_data:
+                    recycle_data = dill.loads(recycle_data)
+                    if 'cookie_jar' in recycle_data:
+                        request.cookie_jar = recycle_data['cookie_jar']
+
+    @staticmethod
+    def recycle_request(request: Request):
+        """
+        开启 REQUEST_BORROW 时，用来主动回收资源，一般在程序执行最后一个函数后调用
+
+        尽量是 request 含有的 key
+
+        :param request: 旧的请求。回收指定资源
+        :return:
+        """
+        from palp import conn
+
+        if settings.REQUEST_BORROW and conn.redis_conn:
+            recycle_data = {}
+
+            # 回收 cookie
+            if request.cookie_jar:
+                recycle_data.update({'cookie_jar': request.cookie_jar})
+
+            # 发送回收的资源
+            if recycle_data:
+                conn.redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST_BORROW, dill.dumps(recycle_data))
 
     @SpiderMiddlewareDecorator()
     @SpiderRecordDecorator()

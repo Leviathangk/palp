@@ -144,14 +144,9 @@ class SpiderController(Thread):
         :param request:
         :return:
         """
-        from palp import conn
-
-        # 判断是否要借 cookie
-        if settings.REQUEST_BROORW_COOKIE and settings.SPIDER_TYPE != 1 and conn.redis_conn and not request.cookie_jar:
-            if request.keep_cookie:
-                cookie_jar = conn.redis_conn.lpop(settings.REDIS_KEY_QUEUE_REQUEST_COOKIE)
-                if cookie_jar:
-                    request.cookie_jar = dill.loads(cookie_jar)
+        # 判断是否要借 资源
+        if settings.REQUEST_BORROW and settings.SPIDER_TYPE != 1:
+            self.spider.borrow_request(request=request)
 
         # 请求发起前的处理
         for middleware in self.__class__.REQUEST_MIDDLEWARE:
