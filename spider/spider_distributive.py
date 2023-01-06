@@ -252,10 +252,8 @@ class DistributiveSpider(Spider):
 
         # master 机器处理的事情
         if self.spider_master:
-            # 删除 master 的标志
-            redis_conn.delete(settings.REDIS_KEY_MASTER)
-            # 删除 heart 标志
-            redis_conn.delete(settings.REDIS_KEY_HEARTBEAT, settings.REDIS_KEY_HEARTBEAT_FAILED)
+            # 删除 master、heart_failed 的标志
+            redis_conn.delete(settings.REDIS_KEY_MASTER, settings.REDIS_KEY_HEARTBEAT_FAILED)
             # 判断是否移除 filter
             if not settings.PERSISTENCE_REQUEST_FILTER:
                 redis_conn.delete(settings.REDIS_KEY_QUEUE_FILTER_REQUEST)
