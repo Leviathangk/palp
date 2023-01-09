@@ -58,17 +58,19 @@ class CycleSpider:
 
         sql = f'''
             UPDATE `{cls.spider_table_task_name}` 
-            SET state = 0;
+            SET state = 0
+            WHERE state != 0;
         '''
 
         mysql_conn.execute(sql)
 
     @classmethod
-    def get_tasks(cls, state: int) -> dict:
+    def get_tasks(cls, state: int, count: int = 1000) -> dict:
         """
         寻找任务
 
         :param state: 数据库内的状态
+        :param count: 限制单次获取大小
         :return: 数据库字典
         """
         from palp.conn import mysql_conn
@@ -79,7 +81,8 @@ class CycleSpider:
             FROM
                 `{cls.spider_table_task_name}`
             WHERE
-                state = {state};
+                state = {state}
+            LIMIT {count} ;
         '''
 
         tasks = mysql_conn.execute(sql=sql, fetchall=True, back_dict=True)
@@ -89,19 +92,25 @@ class CycleSpider:
                 yield task
 
     @classmethod
-    def get_tasks_state0(cls) -> dict:
+    def get_tasks_state0(cls, count: int = 1000) -> dict:
         """
-            寻找未做的任务（state 为 0 的）
+        寻找未做的任务（state 为 0 的）
+
+        :param count: 限制单次获取大小
+        :return: 数据库字典
         """
-        for task in cls.get_tasks(0):
+        for task in cls.get_tasks(state=0, count=count):
             yield task
 
     @classmethod
-    def get_tasks_state2(cls) -> dict:
+    def get_tasks_state2(cls, count: int = 1000) -> dict:
         """
-            获取之前失败的任务（state 为 2 的）
+        获取之前失败的任务（state 为 2 的）
+
+        :param count: 限制单次获取大小
+        :return: 数据库字典
         """
-        for task in cls.get_tasks(2):
+        for task in cls.get_tasks(state=2, count=count):
             yield task
 
     @classmethod

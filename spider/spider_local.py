@@ -29,7 +29,6 @@ class LocalSpider(Spider):
 
         :return:
         """
-        pass
 
     @SpiderMiddlewareDecorator()
     @SpiderRecordDecorator()
