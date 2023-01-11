@@ -102,11 +102,11 @@ SPIDER_MIDDLEWARE = {
 # DEFAULT_QUEUE_PRIORITY = 300  # 默认的优先级队列的优先级
 
 '''其它'''
-# 预警：Email（from palp import send_email）
+# 预警：Email（ palp.send_email ）
 # EMAIL_USER = None  # Email 账号
 # EMAIL_PWD = None  # Email 授权码
 
-# 预警：DingTalk（from palp import send_dingtalk）
+# 预警：DingTalk（ palp.send_dingtalk().xxx ）
 # DING_TALK_SECRET = None  # 加签
 # DING_TALK_ACCESS_TOKEN = None  # webhook 链接内的 access_token
 

@@ -55,7 +55,7 @@ class RequestMiddlewareBase:
         发送请求记录，在 spider 执行完毕时，将会调用
 
         :param spider:
-        :param record:
+        :param record: {'all': 0, 'failed': 0, 'succeed': 0} 样式的字典
         :return:
         """
 
@@ -108,6 +108,6 @@ class RequestMiddleware(RequestMiddlewareBase):
         发送请求记录，在 spider 执行完毕时，将会调用
 
         :param spider:
-        :param record:
+        :param record: {'all': 0, 'failed': 0, 'succeed': 0} 样式的字典
         :return:
         """

@@ -37,7 +37,6 @@
             DemoSpider.insert_tasks(['https://www.baidu.com', 'https://www.jd.com'])   # 快捷插入任务
             DemoSpider(thread_count=1).start()
 """
-from palp import settings
 from typing import Union, List
 
 
