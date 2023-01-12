@@ -100,11 +100,14 @@ class CheckerBase:
         try:
             while True:
                 if cls._need_stop():
+                    cls._has_stop = True
                     logger.warning('当前爬虫已暂停')
 
                     time.sleep(cls.check_time)
                 else:
-                    logger.warning('当前爬虫已恢复')
+                    if cls._has_stop:
+                        logger.warning('当前爬虫已恢复')
+                    cls._has_stop = False
                     break
         finally:
             cls._lock.release()
