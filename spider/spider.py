@@ -19,8 +19,9 @@ from typing import Union, List
 from gsender import EmailSender
 from palp.network.request import Request
 from palp.network.response import Response
-from palp.controller import SpiderController, ItemController
+from palp.controller.controller_item import ItemController
 from palp.tool.short_module import sort_module, import_module
+from palp.controller.controller_spider import SpiderController
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
 
 
