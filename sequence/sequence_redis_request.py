@@ -20,7 +20,7 @@ class FIFORequestRedisSequence(RedisSequence):
         """
         return settings.REDIS_KEY_QUEUE_REQUEST
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, timeout=None, **kwargs):
         """
         添加任务
 
@@ -32,7 +32,7 @@ class FIFORequestRedisSequence(RedisSequence):
 
         redis_conn.rpush(self.redis_key, obj.to_json())
 
-    def get(self, timeout=None):
+    def get(self, timeout=None, **kwargs):
         """
         获取任务（这里是返回的对象）
 
@@ -70,7 +70,7 @@ class LIFORequestRedisSequence(FIFORequestRedisSequence):
         后进先出队列
     """
 
-    def get(self, timeout=None):
+    def get(self, timeout=None, **kwargs):
         """
         获取任务
         :return:
@@ -87,7 +87,7 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
         优先级队列
     """
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, timeout=None, **kwargs):
         """
         添加任务
 
@@ -99,7 +99,7 @@ class PriorityRequestRedisSequence(FIFORequestRedisSequence):
 
         redis_conn.zadd(self.redis_key, {obj.to_json(): obj.priority})
 
-    def get(self, timeout=None):
+    def get(self, timeout=None, **kwargs):
         """
         获取任务（这里是返回的对象）
 

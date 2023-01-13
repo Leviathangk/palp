@@ -46,8 +46,8 @@ SPIDER_STOP_ON_ERROR = True  # spider 在报错时停止（spider、pipeline、m
 # REDIS_POOL_CONFIG = {}  # redis pool 连接自定义配置项
 
 '''请求相关'''
-# REQUEST_BORROW = False  # 分发大量任务时，复用请求的一些参数 (分布式时有效，可自定义，默认复用 cookie 同时开启 keep_cookie)
-# REQUEST_BORROW_DELETE_WHEN_START = True  # 启动时删除所有 borrow
+# REQUEST_BORROW = False  # 分发大量任务时，需要在请求中传递的参数（默认回收 cookie 复用）
+# REQUEST_BORROW_DELETE_WHEN_START = True  # 启动时删除所有 BORROW（非分布式是在内存里，该选项忽略）
 # REQUEST_THREADS = 16  # 线程数量
 # REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 # REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求

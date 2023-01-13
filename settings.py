@@ -62,8 +62,8 @@ REDIS_KEY_HEARTBEAT_FAILED = '{redis_key}:heartbeat_failed'  # 校验失败的�
 REDIS_KEY_RECORD = '{redis_key}:record'  # 记录请求 key (hash)
 
 '''请求相关'''
-REQUEST_BORROW = False  # 分发大量任务时，需要在请求中传递的参数 (分布式时有效)
-REQUEST_BORROW_DELETE_WHEN_START = True  # 启动时删除所有 BORROW
+REQUEST_BORROW = False  # 分发大量任务时，需要在请求中传递的参数（默认回收 cookie 复用）
+REQUEST_BORROW_DELETE_WHEN_START = True  # 启动时删除所有 BORROW（非分布式是在内存里，该选项忽略）
 REQUEST_THREADS = 16  # 线程数量
 REQUEST_FAILED_SAVE = False  # 分布式时保存失败的请求（重试之后仍然失败的）
 REQUEST_RETRY_FAILED = False  # 分布式时启动重试失败请求

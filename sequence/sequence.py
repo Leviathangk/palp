@@ -11,7 +11,7 @@ class SequenceBase:
     """
 
     @abstractmethod
-    def put(self, obj: Any, timeout: float = None) -> None:
+    def put(self, obj: Any, timeout: float = None, **kwargs) -> None:
         """
         添加任务
 
@@ -21,10 +21,11 @@ class SequenceBase:
         """
 
     @abstractmethod
-    def get(self, timeout: float = None) -> None:
+    def get(self, timeout: float = None, **kwargs) -> None:
         """
         获取任务
 
+        :param timeout:
         :return:
         """
 
@@ -50,19 +51,22 @@ class Sequence(SequenceBase):
         用于外部引用：队列的基类
     """
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, block=True, timeout=None):
         """
         添加任务
 
         :param timeout:
+        :param block:
         :param obj
         :return:
         """
 
-    def get(self, timeout=None):
+    def get(self, block=True, timeout=None):
         """
         获取任务
 
+        :param timeout:
+        :param block: 为 False 时就是 get_nowait()
         :return:
         """
 

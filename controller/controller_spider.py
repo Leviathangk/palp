@@ -145,7 +145,7 @@ class SpiderController(Thread):
         :return:
         """
         # 判断是否要借 资源
-        if settings.REQUEST_BORROW and settings.SPIDER_TYPE != 1:
+        if settings.REQUEST_BORROW:
             self.spider.borrow_request(request=request)
 
         # 请求发起前的处理

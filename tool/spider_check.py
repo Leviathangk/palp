@@ -19,11 +19,12 @@
 
                 Checker.check_and_wait()    # 当连续错误达到 failed_limit 在之后执行
                 Checker.check_and_stop()    # 当连续错误达到 failed_limit 在之后执行（一旦中断无法挽回，只能重启）
+
+    注意：
+        分布式时暂时是多个，不能只有一个检查
 """
 import time
 import threading
-import traceback
-
 from loguru import logger
 from abc import abstractmethod
 from palp.spider.spider import Spider

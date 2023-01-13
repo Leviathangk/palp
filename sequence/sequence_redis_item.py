@@ -22,7 +22,7 @@ class FIFOItemRedisSequence(RedisSequence):
         """
         return settings.REDIS_KEY_QUEUE_ITEM
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, timeout=None, **kwargs):
         """
         添加任务
 
@@ -34,7 +34,7 @@ class FIFOItemRedisSequence(RedisSequence):
 
         redis_conn.rpush(self.redis_key, zlib.compress(pickle.dumps(obj)))
 
-    def get(self, timeout=None):
+    def get(self, timeout=None, **kwargs):
         """
         获取任务（这里是返回的对象）
 

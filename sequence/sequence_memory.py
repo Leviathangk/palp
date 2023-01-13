@@ -17,23 +17,27 @@ class FIFOMemorySequence(Sequence):
     def __init__(self, q: queue.Queue = None):
         self.queue = q or queue.Queue()
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, block=True, timeout=None):
         """
         添加任务
 
         :param timeout:
+        :param block: 为 false 就是 nowait
         :param obj: 数据
         :return:
         """
-        self.queue.put(obj, timeout=timeout)
+        self.queue.put(obj, block=block, timeout=timeout)
 
-    def get(self, timeout=None):
+    def get(self, block=True, timeout=None):
         """
         获取任务
+
+        :param block: 为 false 就是 nowait
+        :param timeout:
         :return:
         """
         try:
-            item = self.queue.get(timeout=timeout)
+            item = self.queue.get(block=block, timeout=timeout)
             return item
         except queue.Empty:
             return
@@ -54,6 +58,7 @@ class FIFOMemorySequence(Sequence):
         """
         return self.queue.qsize()
 
+
 class LIFOMemorySequence(FIFOMemorySequence):
     """
         后进先出队列
@@ -71,10 +76,11 @@ class PriorityMemorySequence(FIFOMemorySequence):
     def __init__(self):
         super().__init__(q=queue.PriorityQueue())
 
-    def put(self, obj, timeout=None):
+    def put(self, obj, block=True, timeout=None):
         """
         添加任务
 
+        :param block: 为 false 就是 nowait
         :param timeout:
         :param obj: 数据
         :return:
@@ -84,16 +90,18 @@ class PriorityMemorySequence(FIFOMemorySequence):
         else:
             priority = settings.DEFAULT_QUEUE_PRIORITY
 
-        self.queue.put([priority, obj], timeout=timeout)
+        self.queue.put([priority, obj], block=block, timeout=timeout)
 
-    def get(self, timeout=None):
+    def get(self, block=True, timeout=None):
         """
         获取任务
 
+        :param block: 为 false 就是 nowait
+        :param timeout:
         :return:
         """
         try:
-            item = self.queue.get(timeout=timeout)
+            item = self.queue.get(block=block, timeout=timeout)
             return item[-1]
         except queue.Empty:
             return
