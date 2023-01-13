@@ -27,7 +27,8 @@ class JumpSpider:
         注意：不走 spider 中间件，不处理 item
     """
 
-    def __init__(self,main_spider, request: Request, request_middleware: Union[List[Callable], Callable] = None, **kwargs):
+    def __init__(self, main_spider, request: Request, request_middleware: Union[List[Callable], Callable] = None,
+                 **kwargs):
         """
 
         :param request: jump 之后需要执行的请求
