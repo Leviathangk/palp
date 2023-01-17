@@ -6,7 +6,7 @@ from abc import abstractmethod
 from palp.spider.spider import Spider
 from palp.network.request import Request
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
-from palp.decorator.decorator_spider_record import SpiderRecordDecorator
+from palp.decorator.decorator_spider_once import SpiderOnceDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 from palp.sequence.sequence_memory import PriorityMemorySequence, FIFOMemorySequence
 
@@ -66,7 +66,7 @@ class LocalSpider(Spider):
             self.queue_borrow.put(recycle_data)
 
     @SpiderMiddlewareDecorator()
-    @SpiderRecordDecorator()
+    @SpiderOnceDecorator()
     @SpiderWaitDecorator()
     def run(self) -> None:
         self.start_controller()  # 任务处理

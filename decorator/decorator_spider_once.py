@@ -1,13 +1,14 @@
 """
-    爬虫执行结果汇总记录装饰器
+    单次执行装饰器：执行 request_record、spider_end（分布式时只执行一次）
 
-    本身记录的过程是在中间件 RequestRecordMiddleware 中记录，并更新到 spider_record 变量上
-    注意：
-        这里侧重的爬虫执行结束之后的结果汇总
+    执行结果记录：
+        本身记录的过程是在中间件 RequestRecordMiddleware 中记录，并更新到 spider_record 变量上
+        注意：
+            这里侧重的爬虫执行结束之后的结果汇总
 
-    爬虫执行完毕后这要做的事
-        本地爬虫：无
-        分布式爬虫：发送到 redis 最终多端合并
+        爬虫执行完毕后这要做的事
+            本地爬虫：无
+            分布式爬虫：发送到 redis 最终多端合并
 """
 import json
 import datetime
@@ -17,13 +18,13 @@ from quickdb import RedisLock
 from palp.controller import SpiderController
 
 
-class SpiderRecordDecorator:
+class SpiderOnceDecorator:
     """
-        爬虫执行结果汇总记录装饰器
+        爬虫单次执行 request_record、spider_end
     """
 
     @classmethod
-    def run_record(cls, spider):
+    def run_once(cls, spider):
         """
         记录请求量
 
@@ -34,7 +35,8 @@ class SpiderRecordDecorator:
 
         # 非分布式不上传 redis
         if settings.SPIDER_TYPE == 1:
-            cls.send_record(spider=spider, record=spider.spider_record)
+            cls.run_request_record(spider=spider, record=spider.spider_record)
+            cls.run_spider_end(spider=spider)
             return
 
         # 发送每个 spider 的爬取情况
@@ -70,14 +72,17 @@ class SpiderRecordDecorator:
                 request_succeed += spider_detail['succeed']
 
             # 给请求中间件发送统计结果
-            cls.send_record(spider=spider, record={
+            cls.run_request_record(spider=spider, record={
                 'all': request_all,
                 'failed': request_failed,
                 'succeed': request_succeed,
             })
 
+            # 执行 spider_end
+            cls.run_spider_end(spider=spider)
+
     @staticmethod
-    def send_record(spider, record: dict):
+    def run_request_record(spider, record: dict):
         """
         调用请求中间件的 request_record 函数发送记录
 
@@ -87,6 +92,20 @@ class SpiderRecordDecorator:
         for middleware in SpiderController.REQUEST_MIDDLEWARE:
             try:
                 middleware.request_record(spider, record)
+            except:
+                traceback.print_exc()
+
+    @staticmethod
+    def run_spider_end(spider):
+        """
+        执行 spider_end
+
+        :param spider:
+        :return:
+        """
+        for middleware in spider.__class__.SPIDER_MIDDLEWARE:
+            try:
+                middleware.spider_end(spider)
             except:
                 traceback.print_exc()
 
@@ -100,6 +119,6 @@ class SpiderRecordDecorator:
                 spider = args[0]
 
                 # 统计数据
-                self.run_record(spider=spider)
+                self.run_once(spider=spider)
 
         return _wrapper

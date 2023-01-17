@@ -14,7 +14,7 @@ from palp.tool.short_module import import_module
 from palp.network.request import LoadRequest, Request
 from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
-from palp.decorator.decorator_spider_record import SpiderRecordDecorator
+from palp.decorator.decorator_spider_once import SpiderOnceDecorator
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
@@ -233,7 +233,7 @@ class DistributiveSpider(Spider):
                 conn.redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST_BORROW, dill.dumps(recycle_data))
 
     @SpiderMiddlewareDecorator()
-    @SpiderRecordDecorator()
+    @SpiderOnceDecorator()
     @SpiderWaitDecorator()
     def run(self) -> None:
         """

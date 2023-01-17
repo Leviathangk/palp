@@ -34,6 +34,14 @@ class SpiderBaseMiddleware:
         :return:
         """
 
+    def spider_end(self, spider: Spider) -> None:
+        """
+        spider 结束的操作（分布式时多个机器也只会执行一次）
+
+        :param spider:
+        :return:
+        """
+
 
 class SpiderMiddleware(SpiderBaseMiddleware):
     """
@@ -60,6 +68,14 @@ class SpiderMiddleware(SpiderBaseMiddleware):
     def spider_close(self, spider) -> None:
         """
         spider 结束的操作
+
+        :param spider:
+        :return:
+        """
+
+    def spider_end(self, spider) -> None:
+        """
+        spider 结束的操作（分布式时多个机器也只会执行一次）
 
         :param spider:
         :return:

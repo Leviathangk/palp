@@ -41,6 +41,14 @@ class SpiderMiddleware(palp.SpiderMiddleware):
         :return:
         """
 
+    def spider_end(self, spider) -> None:
+        """
+        spider 结束的操作（分布式时多个机器也只会执行一次）
+
+        :param spider:
+        :return:
+        """
+
 
 class RequestMiddleware(palp.RequestMiddleware):
     """
@@ -97,7 +105,7 @@ class RequestMiddleware(palp.RequestMiddleware):
 
     def request_record(self, spider, record: dict) -> None:
         """
-        请求结果记录（在 spider 结束时调用）
+        请求结果记录（spider 结束调用，分布式时多个机器也只会执行一次）
 
         :param spider:
         :param record: {'all': 0, 'failed': 0, 'succeed': 0} 样式的字典

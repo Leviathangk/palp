@@ -52,7 +52,7 @@ class RequestMiddlewareBase:
 
     def request_record(self, spider: Spider, record: dict) -> None:
         """
-        发送请求记录，在 spider 执行完毕时，将会调用
+        发送请求记录，在 spider 执行完毕时，将会调用（分布式时多个机器也只会执行一次）
 
         :param spider:
         :param record: {'all': 0, 'failed': 0, 'succeed': 0} 样式的字典
@@ -105,7 +105,7 @@ class RequestMiddleware(RequestMiddlewareBase):
 
     def request_record(self, spider, record: dict) -> None:
         """
-        发送请求记录，在 spider 执行完毕时，将会调用
+        发送请求记录，在 spider 执行完毕时，将会调用（分布式时多个机器也只会执行一次）
 
         :param spider:
         :param record: {'all': 0, 'failed': 0, 'succeed': 0} 样式的字典
