@@ -62,8 +62,8 @@ class ClientHeart:
                     client_name = client_name.decode()
                     detail = json.loads(detail.decode())
 
-                    # 校验 2 次失败则为客户端关闭，心跳时间和检查时间，误差不超过 2s
-                    if now_time - detail['time'] - self.beating_time > 2:
+                    # 校验 2 次失败则为客户端关闭（当前时间-心跳时间-心跳频率 > 心跳频率）
+                    if now_time - detail['time'] - self.beating_time > self.beating_time:
                         if client_name in failed_client:
                             logger.warning(f"该客户端异常关闭：{client_name}")
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
@@ -98,7 +98,7 @@ class ClientHeart:
 
                 time.sleep(self.check_time)
 
-            time.sleep(1)  # 避免访问频繁
+            time.sleep(0.5)  # 避免访问频繁
 
     def beating(self):
         """
