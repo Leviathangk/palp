@@ -21,6 +21,5 @@ class RequestCheckMiddleware(RequestMiddleware):
         # 域名检查，非指定域名则抛出
         domains = spider.__class__.spider_domains
         if isinstance(domains, list) and len(domains) != 0:
-            domain = urlparse(request.url).netloc
-            if domain not in domains:
+            if request.domain not in domains:
                 raise DropRequestException()
