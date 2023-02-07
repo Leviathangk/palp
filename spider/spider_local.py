@@ -23,7 +23,6 @@ class LocalSpider(Spider):
 
         queue_module = settings.REQUEST_QUEUE[settings.SPIDER_TYPE][settings.REQUEST_QUEUE_MODE]
         self.queue = import_module(queue_module)[0]  # 请求队列
-        self.queue = PriorityMemorySequence()  # 请求队列
         self.queue_item = FIFOMemorySequence()  # item 队列
         self.queue_borrow = FIFOMemorySequence()  # 信息传递队列
 
