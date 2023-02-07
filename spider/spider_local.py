@@ -5,6 +5,7 @@ from palp import settings
 from abc import abstractmethod
 from palp.spider.spider import Spider
 from palp.network.request import Request
+from palp.tool.short_module import import_module
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
 from palp.decorator.decorator_spider_once import SpiderOnceDecorator
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
@@ -20,6 +21,8 @@ class LocalSpider(Spider):
         super().__init__(thread_count, request_filter, item_filter)
         setattr(settings, 'SPIDER_TYPE', 1)
 
+        queue_module = settings.REQUEST_QUEUE[settings.SPIDER_TYPE][settings.REQUEST_QUEUE_MODE]
+        self.queue = import_module(queue_module)[0]  # 请求队列
         self.queue = PriorityMemorySequence()  # 请求队列
         self.queue_item = FIFOMemorySequence()  # item 队列
         self.queue_borrow = FIFOMemorySequence()  # 信息传递队列
