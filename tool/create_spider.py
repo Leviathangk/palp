@@ -50,9 +50,9 @@ class CreateSpider:
 
         if self.spider_type == 4:
             spider_name = self.spider_name.replace('_jump', '')
-            content = content.replace('${SPIDER_NAME}', spider_name.title())
+            content = content.replace('${SPIDER_NAME}', spider_name.replace('_', "").title())
         else:
-            content = content.replace('${SPIDER_NAME}', self.spider_name.title())
+            content = content.replace('${SPIDER_NAME}', self.spider_name.replace('_', "").title())
         content = content.replace('${SPIDER_NAME_LOWER}', self.spider_name.lower())
         content = content.replace('${DATE}', str(datetime.datetime.now()))
 
