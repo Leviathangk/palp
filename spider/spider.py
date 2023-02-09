@@ -185,11 +185,7 @@ class SpiderBase(threading.Thread):
         :return:
         """
         while True:
-            for item_controller in self.item_controller_list.copy():
-                if not item_controller.is_alive():
-                    self.item_controller_list.remove(item_controller)
-
-            if len(self.item_controller_list) == 0:
+            if self.all_item_controller_done():
                 break
 
             time.sleep(0.1)
@@ -208,6 +204,21 @@ class SpiderBase(threading.Thread):
                 break
 
             time.sleep(0.1)
+
+    def all_item_controller_done(self) -> bool:
+        """
+        item 是否消费结束
+
+        :return:
+        """
+        done_status = True
+
+        for item_controller in self.item_controller_list:
+            if item_controller.is_alive():
+                done_status = False
+                break
+
+        return done_status
 
     def all_distribute_thread_is_done(self) -> bool:
         """
