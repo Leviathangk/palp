@@ -158,7 +158,8 @@ class SpiderBase(threading.Thread):
                 if not distribute_thread.is_alive():
                     self.distribute_thread_list.remove(distribute_thread)
 
-            if len(self.distribute_thread_list) == 0:
+            # 任务分发完毕或者处理线程都死掉就退出
+            if len(self.distribute_thread_list) == 0 or self.all_spider_controller_is_done():
                 break
 
             time.sleep(0.1)
@@ -175,6 +176,7 @@ class SpiderBase(threading.Thread):
                 self.stop_all_spider_controller()
                 break
             elif self.all_spider_controller_is_done():
+                logger.warning("所有线程都已挂掉，即将停止")
                 break
 
             time.sleep(0.1)  # 不加延迟将会导致性能问题
