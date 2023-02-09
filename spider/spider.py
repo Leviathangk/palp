@@ -20,6 +20,7 @@ from gsender import EmailSender
 from palp.network.request import Request
 from palp.network.response import Response
 from palp.controller.controller_item import ItemController
+from palp.sequence.sequence import Sequence
 from palp.tool.short_module import sort_module, import_module
 from palp.controller.controller_spider import SpiderController
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
@@ -122,8 +123,8 @@ class SpiderBase(threading.Thread):
         if item_filter:
             setattr(settings, 'ITEM_FILTER', item_filter)
 
-        self.queue = None  # 请求队列
-        self.queue_item = None  # item 队列
+        self.queue: Sequence = None  # 请求队列
+        self.queue_item: Sequence = None  # item 队列
         self.spider_done = False  # 爬虫是否运行结束
         self.item_controller_list = []  # 存储所有的解析器
         self.spider_controller_list = []  # 存储所有的解析器
