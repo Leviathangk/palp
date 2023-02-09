@@ -66,7 +66,6 @@ class DistributiveSpider(Spider):
 
         :return:
         """
-        pass
 
     @staticmethod
     def start_check():
