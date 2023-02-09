@@ -57,6 +57,7 @@ class ClientHeart:
                 now_time = time.time()
                 all_distribute_done = True  # 是否任务分发完毕（只有 master 会分发）
                 all_client_is_waiting = True  # 是否所有客户端都无任务处理
+                all_controller_is_done = 0  # 是否所有客户端处理线程全部死掉
 
                 heartbeat = redis_conn.hgetall(settings.REDIS_KEY_HEARTBEAT)
                 for client_name, detail in heartbeat.items():
@@ -89,13 +90,16 @@ class ClientHeart:
                             all_client_is_waiting = False
                         if detail['distribute_done'] is False:
                             all_distribute_done = False
+                        if detail['controller_done'] is True:
+                            all_controller_is_done += 1
                         logger.debug(f"心跳正常：{client_name}")
 
-                # 如果所有客户端都无任务进行、任务分发完毕、item 队列为空，则结束
-                if heartbeat and all_client_is_waiting and all_distribute_done and self.spider.queue_item.empty():
-                    logger.debug("所有客户端都已挂起，即将停止")
-                    self.stop_all_client()
-                    break
+                # 在有心跳且 item 消耗完毕的情况下，如果所有客户端的处理线程都死完 或者 任务分发、处理都结束，则停止
+                if heartbeat and self.spider.queue_item.empty():
+                    if len(heartbeat) == all_controller_is_done or (all_client_is_waiting and all_distribute_done):
+                        logger.debug("所有客户端都已挂起，即将停止")
+                        self.stop_all_client()
+                        break
 
                 time.sleep(self.check_time)
 
@@ -115,6 +119,7 @@ class ClientHeart:
                 "time": int(time.time()),
                 "waiting": self.spider.all_spider_controller_is_waiting(),  # 任务处理完毕
                 'distribute_done': self.spider.all_distribute_thread_is_done(),  # 任务分发完毕
+                'controller_done': self.spider.all_spider_controller_is_done(),  # 处理线程是否都死掉
             }
 
             # 设置 redis 心跳
