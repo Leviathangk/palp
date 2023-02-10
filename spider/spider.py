@@ -171,12 +171,12 @@ class SpiderBase(threading.Thread):
         :return:
         """
         while True:
-            if self.all_spider_controller_is_waiting():
+            if self.all_spider_controller_is_done():
+                logger.warning("所有线程都已挂掉，即将停止")
+                break
+            elif self.all_spider_controller_is_waiting():
                 logger.debug("所有线程都已挂起，即将停止")
                 self.stop_all_spider_controller()
-                break
-            elif self.all_spider_controller_is_done():
-                logger.warning("所有线程都已挂掉，即将停止")
                 break
 
             time.sleep(0.1)  # 不加延迟将会导致性能问题
