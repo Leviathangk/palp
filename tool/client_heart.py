@@ -21,7 +21,7 @@ class ClientHeart:
         """
         self.spider = spider
         self.beating_time = 4  # 心跳频率
-        self.check_time = self.beating_time - 1  # 心跳检查频率
+        self.check_time = self.beating_time - 2  # 心跳检查频率
 
     def start(self):
         beating = threading.Thread(target=self.beating, daemon=True)
@@ -67,11 +67,11 @@ class ClientHeart:
                     # 校验 2 次失败则为客户端关闭（当前时间-心跳时间-心跳频率 > 心跳频率）
                     if now_time - detail['time'] - self.beating_time > self.beating_time:
                         if client_name in failed_client:
-                            logger.warning(f"该客户端异常关闭：{client_name}")
+                            logger.warning(f"该客户端异常关闭：{client_name} -> {detail}")
                             redis_conn.srem(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
                             redis_conn.hdel(settings.REDIS_KEY_HEARTBEAT, client_name)
                         else:
-                            logger.warning(f"该客户端可能异常关闭：{client_name}")
+                            logger.warning(f"该客户端可能异常关闭：{client_name} -> {detail}")
                             redis_conn.sadd(settings.REDIS_KEY_HEARTBEAT_FAILED, client_name)
 
                             # 检查是否是 master 死机，是的话自己成为 master
