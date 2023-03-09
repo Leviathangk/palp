@@ -16,6 +16,7 @@ from palp.sequence.sequence_redis_item import FIFOItemRedisSequence
 from palp.decorator.decorator_spider_wait import SpiderWaitDecorator
 from palp.decorator.decorator_spider_once import SpiderOnceDecorator
 from palp.decorator.decorator_run_func_by_thread import RunByThreadDecorator
+from palp.sequence.sequence_redis_borrow import FIFORequestBorrowRedisSequence
 from palp.decorator.decorator_spider_middleware import SpiderMiddlewareDecorator
 
 
@@ -58,6 +59,7 @@ class DistributiveSpider(Spider):
         queue_module = settings.REQUEST_QUEUE[settings.SPIDER_TYPE][settings.REQUEST_QUEUE_MODE]
         self.queue = import_module(queue_module)[0]  # 请求队列
         self.queue_item = FIFOItemRedisSequence()  # item 队列
+        self.queue_borrow = FIFORequestBorrowRedisSequence()  # 信息传递队列
 
     @abstractmethod
     def start_requests(self) -> None:
@@ -188,8 +190,7 @@ class DistributiveSpider(Spider):
             # 分发任务
             self.start_distribute()
 
-    @staticmethod
-    def borrow_request(request: Request):
+    def borrow_request(self, request: Request):
         """
         开启 REQUEST_BORROW 时，用来主动使用资源
 
@@ -202,14 +203,12 @@ class DistributiveSpider(Spider):
 
             # 空 cookie_jar 即视为新的请求，添加 cookie_jar
             if not request.cookie_jar and request.keep_cookie:
-                recycle_data = conn.redis_conn.lpop(settings.REDIS_KEY_QUEUE_REQUEST_BORROW)
+                recycle_data = self.queue_borrow.get()
                 if recycle_data:
-                    recycle_data = dill.loads(recycle_data)
                     if 'cookie_jar' in recycle_data:
                         request.cookie_jar = recycle_data['cookie_jar']
 
-    @staticmethod
-    def recycle_request(request: Request):
+    def recycle_request(self, request: Request):
         """
         开启 REQUEST_BORROW 时，用来主动回收资源，一般在程序执行最后一个函数后调用
 
@@ -229,7 +228,7 @@ class DistributiveSpider(Spider):
 
             # 发送回收的资源
             if recycle_data:
-                conn.redis_conn.rpush(settings.REDIS_KEY_QUEUE_REQUEST_BORROW, dill.dumps(recycle_data))
+                self.queue_borrow.put(recycle_data)
 
     @SpiderMiddlewareDecorator()
     @SpiderOnceDecorator()

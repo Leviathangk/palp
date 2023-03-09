@@ -189,6 +189,7 @@ class SpiderBase(threading.Thread):
         """
         while True:
             if self.all_item_controller_done():
+                logger.debug("所有 item 都已处理完毕，即将停止")
                 break
 
             time.sleep(0.1)
