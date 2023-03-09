@@ -44,7 +44,7 @@ class FIFORequestBorrowRedisSequence(RedisSequence):
 
         result = redis_conn.lpop(self.redis_key)  # 这里就不能阻塞了
         if result:
-            return pickle.loads(zlib.decompress(result[-1]))
+            return pickle.loads(zlib.decompress(result))
 
     def empty(self):
         """
