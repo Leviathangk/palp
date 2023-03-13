@@ -15,6 +15,7 @@ from palp.tool.user_agent import random_ua
 from requests.cookies import RequestsCookieJar
 from palp.tool.short_module import import_module
 from urllib3.exceptions import InsecureRequestWarning
+from palp.network.response_requests import RequestsResponse
 
 # 禁用不安全警告
 urllib3.disable_warnings(InsecureRequestWarning)
@@ -210,7 +211,16 @@ class Request:
 
         response_parser = self.downloader_parser(response)  # 解析器解析响应
         if response_parser.cookies:
-            self.cookie_jar.update(response_parser.cookies)  # 将响应的 cookie 更新到 cookieJar
+            # 使用 requests 时，会根据域名重新构造 cookieJar 并合并
+            if issubclass(self.downloader_parser, RequestsResponse):
+                # 两个 jar 合并
+                cookie_jar = response_parser.response.cookies.__dict__['_cookies']
+                for domain in cookie_jar.keys():
+                    for cookie_name_dict in cookie_jar[domain].values():
+                        for cookie_value in cookie_name_dict.values():
+                            self.cookie_jar.set_cookie(cookie_value)  # 将响应的 cookieJar 更新到 现有cookieJar
+            else:
+                self.cookie_jar.update(response_parser.cookies)  # 将响应的 cookie 更新到 cookieJar
 
         return response_parser
 
