@@ -226,6 +226,11 @@ class SpiderController(Thread):
             request.jump_spider = None
             request.jump_spider_kwargs = None
             request.jump_request_middleware = None
+
+            # 修改优先级，深层的函数应该优先处理，避免积压不前（深度爬取）
+            if settings.REQUEST_QUEUE_MODE == 3:
+                request.priority -= 1
+
             self.queue.put(request)
         except Exception as e:
             traceback.print_exc()
