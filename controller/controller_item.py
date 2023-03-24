@@ -77,7 +77,7 @@ class ItemController(Thread):
                         self.pipeline_save()
 
                 except DropItemException as e:
-                    logger.debug(f"丢弃 item：{e}")
+                    logger.warning(f"丢弃 item：{e}")
                 except Exception as e:
                     if settings.SPIDER_STOP_ON_ERROR:
                         raise
