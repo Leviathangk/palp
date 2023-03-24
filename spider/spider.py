@@ -67,6 +67,7 @@ class SpiderBase(threading.Thread):
                 compression=settings.LOG_COMPRESSION,
                 level=settings.LOG_LEVEL,
                 retention=settings.LOG_RETENTION,
+                encoding="utf-8",
             )
 
             # 让日志同时能够输出
