@@ -76,8 +76,8 @@ class ItemController(Thread):
                     if self.item_buffer_max_size == 0 or self.buffer_size >= self.item_buffer_max_size:
                         self.pipeline_save()
 
-                except DropItemException:
-                    logger.debug(f"丢弃 item：{self.item_buffer}")
+                except DropItemException as e:
+                    logger.debug(f"丢弃 item：{e}")
                 except Exception as e:
                     if settings.SPIDER_STOP_ON_ERROR:
                         raise

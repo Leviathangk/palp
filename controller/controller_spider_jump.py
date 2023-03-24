@@ -66,7 +66,7 @@ class JumpController:
                     request = task
                     self.run_requests(request=task)
                 except DropRequestException as e:
-                    logger.warning(f"丢弃请求：{e.args}")
+                    logger.warning(f"丢弃请求：{e}")
         finally:
             self.change_record()
 
@@ -90,8 +90,9 @@ class JumpController:
         if not new_request.url.startswith('http') and response:
             new_request.url = response.urljoin(new_request.url)
 
-        # 添加请求必须参数
-        new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
+        # 添加请求必须参数：新 cookieJar 会覆盖老 cookieJar
+        if not new_request.cookie_jar:
+            new_request.cookie_jar = old_request.cookie_jar  # 续上上一个的 cookie_jar
 
         # 修改优先级，深层的函数应该优先处理，避免积压不前（深度爬取）
         if settings.REQUEST_QUEUE_MODE == 3:

@@ -3,7 +3,6 @@
 """
 import json
 import time
-import dill
 import importlib
 from palp import settings
 from quickdb import RedisLock
