@@ -24,7 +24,7 @@ class CreateProject:
         """
         self.check_name()
 
-        parent_path = self.path.joinpath(self.project_name.title())
+        parent_path = self.path.joinpath(self.project_name.replace('_', '').title())
 
         if parent_path.exists():
             raise FileExistsError(f'{parent_path} 已存在！')
