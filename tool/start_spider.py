@@ -67,11 +67,9 @@ def load_spider() -> dict:
 
             # 获取 spider 的信息
             for key, value in spider_module.__dict__.items():
-                if key.startswith('_'):
-                    continue
-                elif value.__dict__.get('__module__') == spider_path:
+                if hasattr(value, 'spider_name') and hasattr(value, 'start_requests'):
                     # 重复报错
-                    spider_name = value.__dict__.get('spider_name')
+                    spider_name = value.spider_name
                     if spider_name in spider_modules:
                         raise SpiderHasExistsError(f'{spider_name} 存在多个！')
                     spider_modules[spider_name] = value
