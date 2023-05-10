@@ -2,6 +2,7 @@
     以进程方式启动指定数量个爬虫实例
 """
 import importlib
+import sys
 from pathlib import Path
 from loguru import logger
 from multiprocessing import Process
@@ -39,7 +40,7 @@ def load_spider() -> dict:
 
     :return:
     """
-    path = Path('.').absolute()
+    path = Path(sys.argv[0]).parent.absolute()
 
     # 获取到 spider 的目录
     spider_dir = None
