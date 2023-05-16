@@ -67,8 +67,9 @@ def load_spider() -> dict:
             spider_module = importlib.import_module(spider_path)
 
             # 获取 spider 的信息
-            for key, value in spider_module.__dict__.items():
-                if hasattr(value, 'spider_name') and hasattr(value, 'start_requests'):
+            for value in spider_module.__dict__.values():
+                # 判断是未实例化的类，且父类有 Spider
+                if issubclass(type(value), type) and issubclass(value, Spider):
                     # 重复报错
                     spider_name = value.spider_name
                     if spider_name in spider_modules:
